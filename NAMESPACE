@@ -1,0 +1,26 @@
+exportPattern("^[[:alpha:]]+")
+
+S3method(predict, gsm)
+S3method(summary, gsm)
+S3method(print, gsm)
+S3method(print, summary.gsm)
+
+S3method(predict, sm)
+S3method(summary, sm)
+S3method(print, sm)
+S3method(print, summary.sm)
+
+S3method(plot, ss)
+S3method(predict, ss)
+S3method(summary, ss)
+S3method(print, ss)
+S3method(print, summary.ss)
+
+importFrom("grDevices", "col2rgb", "rgb")
+importFrom("graphics", "lines", "lines.default", "plot.default", 
+             "polygon")
+importFrom("stats", ".nknots.smspl", "dbinom", "dgamma", "dnorm", "dpois", 
+             "IQR", "as.formula", "cor", "dist", "model.frame", 
+             "model.matrix", "model.response", "na.pass", "optimize", "pf", 
+             "predict", "pt", "qnorm", "gaussian", "pchisq", "pnorm",
+             "quantile", "symnum", "var")
