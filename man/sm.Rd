@@ -115,6 +115,8 @@ Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. h
 
 Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. https://doi.org/10.1137/0912021
 
+Helwig, N. E. (in press). Multiple and generalized nonparametric regression. SAGE Research Methods Foundations: An Encyclopedia.
+
 %Helwig, N. E. (in prep). Spectrally sparse nonparametric regression via Elastic Net penalized smoothing splines.
 
 %Zou, H. and Hastie, T. (2005). Regularization and variable selection via the Elastic Net. \emph{Journal of the Royal Statistical Society, Series B., 67}, 301-320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
@@ -318,6 +320,7 @@ mean( ( fx - sm.gam$fit )^2 )
 ### additive model
 
 # generate data
+set.seed(1)
 n <- 100
 fun <- function(x){
   sin(pi*x[,1]) + sin(2*pi*x[,2]) + sin(3*pi*x[,3]) + sin(4*pi*x[,4])

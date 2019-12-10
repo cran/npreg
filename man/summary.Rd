@@ -73,6 +73,8 @@ In all cases, the inferential results are based on a (pseudo) F or chi-square st
   \item{call }{the original function call.}
 }
 \references{
+Helwig, N. E. (in press). Multiple and generalized nonparametric regression. SAGE Research Methods Foundations: An Encyclopedia.
+
 Nychka, D. (1988). Bayesian confience intervals for smoothing splines. \emph{Journal of the American Statistical Association, 83(404)}, 1134-1143. https://doi.org/10.2307/2290146 
 
 Wahba, G. (1983). Bayesian "confidence intervals" for the cross-validated smoothing spline. \emph{Journal of the Royal Statistical Society. Series B, 45(1)}, 133-150. https://doi.org/10.1111/j.2517-6161.1983.tb01239.x 

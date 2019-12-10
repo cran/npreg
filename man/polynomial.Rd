@@ -81,6 +81,8 @@ Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Ver
 
 Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. Frontiers in Applied Mathematics and Statistics, 3(15), 1-13. doi: https://doi.org/10.3389/fams.2017.00015
 
+Helwig, N. E. (in press). Multiple and generalized nonparametric regression. SAGE Research Methods Foundations: An Encyclopedia.
+
 Helwig, N. E., & Ma, P. (2015). Fast and stable multiple smoothing parameter selection in smoothing spline analysis of variance models with large samples. Journal of Computational and Graphical Statistics, 24(3), 715-732. doi: https://doi.org/10.1080/10618600.2014.926819
 }
 \author{

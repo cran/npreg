@@ -119,7 +119,7 @@ summary.gsm <-
     names(fstatistic) <- c("value", "numdf", "demdf")
     
     # return results
-    res <- list(residuals = object$resid, 
+    res <- list(residuals = dev.resid, 
                 dev.expl = dev.expl,
                 p.table = as.data.frame(p.table),
                 s.table = as.data.frame(s.table),

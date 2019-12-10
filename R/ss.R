@@ -6,7 +6,7 @@ ss <-
            control.spar = list(), tol = 1e-6 * IQR(x)){
     # smoothing spline in R
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-05-11
+    # Updated: 2019-12-09
     
     
     #########***#########   INITIAL CHECKS   #########***#########
@@ -185,8 +185,8 @@ ss <-
           nknots <- as.integer(nknotfun(nux)[1])
         }
         if(nknots > nux) stop("Too many knots! Need length(unique(x)) >= length(unique(knots))")
-        knots <- quantile(data$x, probs = seq(0, 1, length.out = nknots + 1L)[1:nknots])
-        #knots <- data$x[seq(1, nrow(data), length.out = nknots)]
+        #knots <- quantile(data$x, probs = seq(0, 1, length.out = nknots + 1L)[1:nknots])
+        knots <- data$x[seq(1, nrow(data), length.out = nknots)]
       } # end if(all.knots)
     } else {
       # use provided 'knots'
@@ -249,7 +249,7 @@ ss <-
     Tmat[nullindx,nullindx] <- diag(nsdim)
     Tmat[nullindx,-nullindx] <- (-1) * solve(crossprod(X.w[,nullindx])) %*% crossprod(X.w[,nullindx], R.w)
     Tmat[-nullindx,-nullindx] <- Qprj
-    Tmat[,nullindx] <- Tmat[,nullindx] %*% XsvdN$v %*% diag(1 / XsvdN$d)
+    Tmat[,nullindx] <- Tmat[,nullindx,drop=FALSE] %*% XsvdN$v %*% diag(1 / XsvdN$d, nrow = nsdim, ncol = nsdim)
     Tmat[,-nullindx] <- Tmat[,-nullindx] %*% XsvdC$v %*% diag(1 / XsvdC$d)
     
     # remove junk

@@ -54,6 +54,8 @@ Penalty: Matrix of dimension \code{c(r, r)} where \code{r = length(x)} is the nu
 Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag. doi: https://doi.org/10.1007/978-1-4614-5369-7
 
 Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. Frontiers in Applied Mathematics and Statistics, 3(15), 1-13. doi: https://doi.org/10.3389/fams.2017.00015
+
+Helwig, N. E. (in press). Multiple and generalized nonparametric regression. SAGE Research Methods Foundations: An Encyclopedia.
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

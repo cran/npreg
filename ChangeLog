@@ -1,0 +1,36 @@
+
+Changes from ver 1.0-0 to ver 1.0-1  (2019-12-09)
+
+1) Improvement to "gsm" function for binomial responses
+	* Now allows the response variable to be a factor
+	* First level is a failure, and others are successes
+
+2) Bug fix in "build_rkhs" for parametric effects of factors
+	* Previously provided incorrect namespace to model.matrix
+	* Now correctly forms model.matrix for parametric factors
+
+3) Bug fix in "sm" and "gsm" for tprk = FALSE and rank deficient knots
+	* Previously produced an error if 1 unique knot per predictor
+	* Now correctly computes solution in such cases
+
+4) Bug fix in "summary.gsm" for deviance residuals
+	* Previously was returning working residuals from fit object
+	* Now correctly outputs the deviance residuals from summary
+
+5) Bug fix in "ss" and "summary.ss" for models with m = 1/or and periodic = TRUE
+	* Previously resulted in an error during post-processing
+	* Now correctly post-processes the result with m = 1 and/or periodic = TRUE
+
+6) Improvement to knot selection method for "ss" when all.knots = FALSE
+	* Previously used quantiles of x (instead of observed x)
+	* Now uses the observed x values to ensure a "true" smoothing spline
+
+7) Bug fix in "sm" and "summary.sm" for models with null space dimension of one
+	* Previously resulted in an error during post-processing
+	* Now correctly post-processes the result with nsdf == 1
+
+8) Improvement to "plot.ss" for models with non-equidistant x values
+	* Previously fit and CI were plotted at observed x values
+	* Now fit and CI are plotted at equidistant x values
+
+9) Updates to references (added Helwig SAGE RMF entry)

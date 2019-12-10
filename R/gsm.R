@@ -5,7 +5,7 @@ gsm <-
            method = c("GCV", "OCV", "GACV", "ACV", "AIC", "BIC")){
     # generalized semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-08-20
+    # Updated: 2019-10-30
     
     
     #########***#########   CHECKS   #########***#########
@@ -57,11 +57,24 @@ gsm <-
     xnames <- xynames[2:(nxvar+1L)]
     tnames <- colnames(et)
     if(any(colSums(et>0L)>3L)){stop("Four-way (and higher-order) interactions are not supported.")}
-    yvar <- as.matrix(model.response(mf, "numeric")+0.0)   # response variable
-    if(ncol(yvar)>1){stop("Response must be unidimensional (vector).")}
     for(k in 1:nxvar){
       if(class(mf[,k+1])[1] == "character") mf[,k+1] <- factor(mf[,k+1])
     }
+    
+    # get response
+    yvar <- model.response(mf)
+    if(family$family == "binomial"){
+      if(any(class(yvar)[1] == c("factor", "ordered"))){
+        lev1 <- levels(yvar)[1]
+        yvar <- ifelse(yvar == lev1, 0, 1)
+      }
+      yvar <- as.matrix(yvar + 0.0)
+    } else if(family$family == "poisson"){
+      yvar <- as.matrix(as.integer(yvar))
+    } else {
+      yvar <- as.matrix(yvar + 0.0)
+    }
+    if(ncol(yvar) > 1){ stop("Response must be unidimensional (vector).") }
     
     
     #########***#########   GET TYPES   #########***#########

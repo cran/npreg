@@ -121,6 +121,8 @@ Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Est
 Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. https://doi.org/10.1007/978-1-4614-5369-7
 
 Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. https://doi.org/10.1137/0912021
+
+Helwig, N. E. (in press). Multiple and generalized nonparametric regression. SAGE Research Methods Foundations: An Encyclopedia.
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

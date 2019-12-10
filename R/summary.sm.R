@@ -2,7 +2,7 @@ summary.sm <-
   function(object, ...){
     # summary method for class "sm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-08-24
+    # Updated: 2019-09-24
     
     # get residuals
     resid <- object$data[,1] - object$fitted.values
@@ -31,7 +31,7 @@ summary.sm <-
     
     # parametric coefficients table
     p.coef <- object$coefficients[nullindx]
-    p.ster <- sqrt(rowSums(object$cov.sqrt[nullindx,]^2))
+    p.ster <- sqrt(rowSums(object$cov.sqrt[nullindx,,drop=FALSE]^2))
     p.tval <- p.coef / p.ster
     p.pval <- 2 * (1 - pt(abs(p.tval), df = erdf))
     p.table <- data.frame(p.coef, p.ster, p.tval, p.pval)

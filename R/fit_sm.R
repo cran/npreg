@@ -3,7 +3,7 @@ fit_sm <-
            control = list(), method = "GCV"){
     # fit semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-05-21
+    # Updated: 2019-10-28
     
     
     #########***#########   REPARAMETERIZATION   #########***#########
@@ -44,10 +44,11 @@ fit_sm <-
       R.w <- Qprj <- vector("list", length(depe$Q))
       for(k in 1:length(depe$Q)){
         indx <- seq(cknots[k] + 1, cknots[k+1])
+        ntemp <- length(indx)
         Qeig <- eigen(depe$Q[[k]], symmetric = TRUE)
-        Qrnk <- sum(Qeig$values > nknots * eps * Qeig$values[1])
+        Qrnk <- sum(Qeig$values > ntemp * eps * Qeig$values[1])
         if(Qrnk == 1L){
-          Qprj[[k]] <- matrix(Qeig$vectors[,1] / sqrt(Qeig$values[1]), nrow = nknots, ncol = 1)
+          Qprj[[k]] <- matrix(Qeig$vectors[,1] / sqrt(Qeig$values[1]), nrow = ntemp, ncol = 1)
         } else{
           Qprj[[k]] <- Qeig$vectors[,1:Qrnk] %*% diag(1 / sqrt(Qeig$values[1:Qrnk]))
         }
@@ -101,7 +102,7 @@ fit_sm <-
         col.offset <- col.offset + ncolk
       }
     }
-    Tmat[,nullindx] <- Tmat[,nullindx] %*% XsvdN$v %*% diag(1 / XsvdN$d)
+    Tmat[,nullindx] <- Tmat[,nullindx] %*% XsvdN$v %*% diag(1 / XsvdN$d, nrow = nsdim, ncol = nsdim)
     Tmat[,-nullindx] <- Tmat[,-nullindx] %*% XsvdC$v %*% diag(1 / XsvdC$d)
     
     # get coefficient names

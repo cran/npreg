@@ -45,6 +45,8 @@ https://stat.ethz.ch/R-manual/R-devel/library/stats/html/predict.smooth.spline.h
 Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. https://doi.org/10.1007/BF01404567
 
 Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. https://doi.org/10.1007/978-1-4614-5369-7
+
+Helwig, N. E. (in press). Multiple and generalized nonparametric regression. SAGE Research Methods Foundations: An Encyclopedia.
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

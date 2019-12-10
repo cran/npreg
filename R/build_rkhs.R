@@ -2,7 +2,7 @@ build_rkhs <-
   function(x, type, knots, xrng){
     # build reproducing kernel Hilbert space components
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: Apr 1, 2019
+    # last updated: 2019-10-30
     
     ### initializations
     nxvar <- length(x)
@@ -29,8 +29,8 @@ build_rkhs <-
         # parametric effect
         if(any(class(x[[j]]) == c("factor", "ordered"))){
           jform <- as.formula(paste("~", xnames[j]))
-          Xnull[[j]] <- model.matrix(jform, data = x[[j]])[,-1,drop=FALSE]
-          Qnull[[j]] <- model.matrix(jform, data = knots[[j]])[,-1,drop=FALSE]  
+          Xnull[[j]] <- model.matrix(jform, data = x)[,-1,drop=FALSE]
+          Qnull[[j]] <- model.matrix(jform, data = knots)[,-1,drop=FALSE]  
         } else {
           Xnull[[j]] <- as.matrix(x[[j]])
           Qnull[[j]] <- as.matrix(knots[[j]])

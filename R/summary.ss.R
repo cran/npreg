@@ -2,7 +2,7 @@ summary.ss <-
   function(object, ...){
     # summary method for class "ss"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-08-24
+    # Updated: 2019-12-08
     
     # get residuals
     if(is.null(object$data)){
@@ -15,19 +15,22 @@ summary.ss <-
     # adjusted R-squared
     object$r.squared <- adjRsq <- NA
     if(!is.null(object$data)) {
-      fit <-  predict(object, x = object$data$x)$y
-      object$r.squared <- cor(object$data$y, fit)^2
+      object$r.squared <- cor(object$data$y, fitted)^2
       adjRsq <- 1 - object$sigma^2 / var(object$data$y)
     }
     
     # some basic info
     nobs <- object$fit$n
-    nullindx <- 1:object$fit$m
+    if(object$fit$periodic){
+      nullindx <- 1L
+    } else {
+      nullindx <- 1:object$fit$m
+    }
     erdf <- nobs - object$df
     
     # parametric coefficients table
     p.coef <- object$fit$coef[nullindx]
-    p.ster <- sqrt(rowSums(object$fit$cov.sqrt[nullindx,]^2))
+    p.ster <- sqrt(rowSums(object$fit$cov.sqrt[nullindx,,drop=FALSE]^2))
     p.tval <- p.coef / p.ster
     p.pval <- 2 * (1 - pt(abs(p.tval), df = erdf))
     p.table <- data.frame(p.coef, p.ster, p.tval, p.pval)
