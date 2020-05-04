@@ -2,7 +2,12 @@ summary.gsm <-
   function(object, ...){
     # summary method for class "gsm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-08-24
+    # Updated: 2020-03-29
+    
+    # convert binomial (if response is a factor)
+    if(object$family$family == "binomial" && any(class(object$data[,1])[1] == c("factor", "ordered"))){
+      object$data[,1] <- ifelse(object$data[,1] == levels(object$data[,1])[1], 0, 1)
+    }
     
     # get deviance residuals
     nobs <- length(object$linear.predictors)
@@ -39,7 +44,7 @@ summary.gsm <-
     
     # parametric coefficients table
     p.coef <- object$coefficients[nullindx]
-    p.ster <- sqrt(rowSums(object$cov.sqrt[nullindx,]^2))
+    p.ster <- sqrt(rowSums(object$cov.sqrt[nullindx,,drop=FALSE]^2))
     p.tval <- p.coef / p.ster
     p.pval <- 2 * (1 - pnorm(abs(p.tval)))
     p.table <- data.frame(p.coef, p.ster, p.tval, p.pval)

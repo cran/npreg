@@ -1,13 +1,25 @@
 plotci <- 
   function(x, y, se, level = 0.95, crit.val = NULL, 
-           add = FALSE, col.ci = "gray80", alpha = 0.5, 
-           bars = FALSE, bw = 0.2, linkinv = NULL, ...){
+           add = FALSE, col.ci = NULL, alpha = NULL, 
+           bars = NULL, bw = 0.05, linkinv = NULL, ...){
+    # generic x-y plotting with confidence intervals
+    # Nathaniel E. Helwig (helwig@umn.edu)
+    # Updated: 2020-05-01
+  
+    ### INITIAL CHECKS
     
     # check x and y inputs
+    xfac <- FALSE
     if(missing(y)){
       if(is.list(x) | is.data.frame(x)){
         y <- as.numeric(x$y)
-        xx <- as.numeric(x$x)
+        if(any(class(x$x)[1] == c("factor", "ordered"))){
+          xfac <- TRUE
+          xlev <- levels(x$x)
+          xx <- as.integer(x$x)
+        } else {
+          xx <- as.numeric(x$x)
+        }
         n <- length(xx)
         if(length(y) != n) stop("If 'x' is a list, the 'x' and 'y' elements must have length n.")
         if(!is.null(x$se)) {
@@ -28,7 +40,13 @@ plotci <-
       if(any(is.na(y)) | any(is.infinite(y)) | any(is.nan(y))) 
         stop("'x' and 'y' cannot contain missing (NA), infinite (Inf), or undefined (NaN) values")
     } else {
-      x <- as.numeric(x)
+      if(any(class(x)[1] == c("factor", "ordered"))) {
+        xfac <- TRUE
+        xlev <- levels(x)
+        x <- as.integer(x)
+      } else { 
+        x <- as.numeric(x)
+      }
       y <- as.numeric(y)
       n <- length(x)
       if(length(y) != n) stop("'x' and 'y' must have the same length")
@@ -53,6 +71,31 @@ plotci <-
       if(crit.val <= 0) stop("Input 'crit.val' must be a positive scalar.")
     }
     
+    # check col.ci input
+    if(is.null(col.ci)){
+      col.ci <- ifelse(xfac, "black", "gray")
+    }
+    
+    # check alpha input
+    if(is.null(alpha)){
+      alpha <- ifelse(xfac, 1, 0.5)
+    } else {
+      alpha <- as.numeric(alpha[1])
+      if(alpha <= 0 | alpha > 1) stop("Input 'alpha' must satisfy: 0 < alpha <= 1")
+    }
+    
+    # check bars
+    if(is.null(bars)){
+      bars <- ifelse(xfac, TRUE, FALSE)
+    } else {
+      bars <- as.logical(bars[1])
+      if(!any(bars == c(TRUE, FALSE))) stop("Input 'bars' must be TRUE or FALSE.")
+    }
+    
+    # check bw
+    bw <- as.numeric(bw)
+    if(bw <= 0) stop("Input 'bw' must be a positive value.")
+    
     # check linkinv input
     link <- FALSE
     if(!is.null(linkinv)){
@@ -63,11 +106,14 @@ plotci <-
     } 
     
     # sort data
-    sx <- sort(x, index = TRUE)
-    y <- y[sx$ix]
-    if(link) ylink <- ylink[sx$ix]
-    if(!missing.se) se <- se[sx$ix]
-    x <- x[sx$ix]
+    ix <- order(x)
+    y <- y[ix]
+    if(link) ylink <- ylink[ix]
+    if(!missing.se) se <- se[ix]
+    x <- x[ix]
+    
+    
+    ### COLLECT ... ARGUMENTS
     
     # get arguments
     args <- list(...)
@@ -77,10 +123,13 @@ plotci <-
     args$y <- if(link) ylink else y
     
     # missing type?
-    if(is.null(args$type)) args$type <- "l"
+    if(is.null(args$type)) args$type <- ifelse(xfac, "p", "l")
     
     # missing lwd?
     if(is.null(args$lwd)) args$lwd <- 2
+    
+    # missing pch?
+    if(is.null(args$pch)) args$pch <- 19
     
     # missing labels?
     if(is.null(args$xlab)) args$xlab <- "x"
@@ -88,16 +137,34 @@ plotci <-
     
     # missing y limits?
     if(is.null(args$ylim) && !missing.se) {
-      fitrng <- range(c(y - crit.val * se, y + crit.val * se))
+      if(link){
+        fitrng <- range(linkinv(c(y - crit.val * se, y + crit.val * se)))
+      } else {
+        fitrng <- range(c(y - crit.val * se, y + crit.val * se))
+      }
       rngdif <- fitrng[2] - fitrng[1]
       args$ylim <- c(fitrng[1] - 0.05 * rngdif, fitrng[2] + 0.05 * rngdif)
     }
+    
+    # specify axes = FALSE for factors
+    if(xfac) args$axes <- FALSE
+    
+    
+    ### PLOTTING
     
     # plot x vs y
     if(add){
       do.call(lines.default, args)
     } else {
       do.call(plot.default, args)
+      args$axes <- NULL
+    }
+    
+    # add axes for factors
+    if(xfac){
+      axis(1, at = x, labels = xlev, ...)
+      axis(2, ...)
+      box()
     }
     
     # add se
@@ -113,9 +180,9 @@ plotci <-
         for(i in 1:n){
           iargs <- args
           iargs$col <- col
+          iargs$type <- "l"
           iargs$x <- rep(iargs$x[i], 2)
-          iargs$y <- c(args$y[i] - crit.val * se[i],
-                       args$y[i] + crit.val * se[i])
+          iargs$y <- c(y[i] - crit.val * se[i], y[i] + crit.val * se[i])
           if(link) iargs$y <- linkinv(iargs$y)
           do.call(lines, iargs)
           if(bw > 0){

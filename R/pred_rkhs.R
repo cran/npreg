@@ -3,7 +3,7 @@ pred_rkhs <-
     # build reproducing kernel Hilbert space components
     # for predicting (i.e., w/o penalty components)
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: Apr 4, 2019
+    # Updated: 2020-04-02
     
     ### initializations
     nxvar <- length(x)
@@ -16,8 +16,8 @@ pred_rkhs <-
     sp.types <- c("sph.lin", "sph.cub", "sph.qui", "sph")
     
     ### initialize components
-    Xnull <- Xcont <- Qnull <- vector("list", nxvar)
-    names(Xnull) <- names(Xcont) <- names(Qnull) <- xnames
+    Xnull <- Xcont <- Qnull <- Qcont <- vector("list", nxvar)
+    names(Xnull) <- names(Xcont) <- names(Qnull) <- names(Qcont) <- xnames
     
     ### sweep through variables
     for(j in 1:nxvar){

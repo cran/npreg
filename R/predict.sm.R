@@ -7,7 +7,7 @@ predict.sm <-
            check.newdata = TRUE, ...){
     # predict method for class "sm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-05-11
+    # Updated: 2020-04-02
     
     
     #########***#########   CHECKS   #########***#########
@@ -173,9 +173,18 @@ predict.sm <-
     if(provided.newdata && any(is.na(nidx))) stop("Input 'newdata' is missing variables needed\n to form some of the requested 'terms'.")
     newdata <- newdata[nidx]
     
+    ### add response
+    if(provided.newdata){
+      nobsnew <- nrow(as.matrix(newdata[[1]]))
+    } else {
+      nobsnew <- nrow(object$data)
+    }
+    newdata$y <- rep(1, nobsnew)
+    
     ### formula and model frame
     form <- as.formula(paste("y  ~", paste(terms, collapse = " + ")))
-    mf <- model.frame(form, data = cbind(y = 1, newdata), na.action = na.action)
+    #mf <- model.frame(form, data = cbind(y = 1, newdata), na.action = na.action)
+    mf <- model.frame(form, data = newdata, na.action = na.action)
     
     
     #########***#########   MODEL MATRIX   #########***#########

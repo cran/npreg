@@ -9,8 +9,8 @@ Modification to the \code{\link{plot}} function that adds confidence intervals. 
 }
 \usage{
 plotci(x, y, se, level = 0.95, crit.val = NULL, 
-       add = FALSE, col.ci = "gray80", alpha = 0.5, 
-       bars = FALSE, bw = 0.2, linkinv = NULL, ...)
+       add = FALSE, col.ci = NULL, alpha = NULL, 
+       bars = NULL, bw = 0.05, linkinv = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -45,7 +45,7 @@ a switch controlling whether the intervals should be plotted as bars or polygons
 a positive scalar controlling the bar width. Ignored if \code{bars = FALSE}.  
 }
   \item{linkinv}{
-an inverse link function for the plotting. If provided, the function plots \code{x} versus \code{linkinv(y)} and the intervals are similary transformed. 
+an inverse link function for the plotting. If provided, the function plots \code{x} versus \code{linkinv(y)} and the intervals are similarly transformed. 
 }
   \item{...}{
 extra arguments passed to the \code{plot} or \code{lines} function.

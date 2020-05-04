@@ -73,7 +73,7 @@ In all cases, the inferential results are based on a (pseudo) F or chi-square st
   \item{call }{the original function call.}
 }
 \references{
-Helwig, N. E. (in press). Multiple and generalized nonparametric regression. SAGE Research Methods Foundations: An Encyclopedia.
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. https://doi.org/10.4135/9781526421036885885
 
 Nychka, D. (1988). Bayesian confience intervals for smoothing splines. \emph{Journal of the American Statistical Association, 83(404)}, 1134-1143. https://doi.org/10.2307/2290146 
 

@@ -115,7 +115,7 @@ Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. h
 
 Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. https://doi.org/10.1137/0912021
 
-Helwig, N. E. (in press). Multiple and generalized nonparametric regression. SAGE Research Methods Foundations: An Encyclopedia.
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. https://doi.org/10.4135/9781526421036885885
 
 %Helwig, N. E. (in prep). Spectrally sparse nonparametric regression via Elastic Net penalized smoothing splines.
 

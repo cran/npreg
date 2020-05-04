@@ -24,7 +24,7 @@ Description of the error distribution and link function to be used in the model.
 Optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame) containing the variables in the model. If not found in data, the variables are taken from \code{environment(formula)}, typically the environment from which \code{sm} is called.  
 }
   \item{weights}{
-Optional vector of weights to be used in the fitting process. If provided, weighted least squares is used. Defaults to all 1.
+Optional vector of weights to be used in the fitting process. If provided, weighted (penalized) likelihood estimation is used. Defaults to all 1.
 }
   \item{types}{
 Named list giving the type of smooth to use for each predictor. If \code{NULL}, the type is inferred from the data. See "Types of Smooths" section for details.
@@ -70,7 +70,7 @@ Letting \eqn{\eta_i = \eta(x_i)} with \eqn{x_i = (x_{i1}, \ldots, x_{ip})}, the 
 
 Let \eqn{\mu_i = E(y_i)} denote the mean of the \eqn{i}-th response. The unknown function is related to the mean \eqn{\mu_i} such as \deqn{g(\mu_i) = \eta_i} where \eqn{g()} is a known link function. Note that this implies that \eqn{\mu_i = g^{-1}(\eta_i)} given that the link function is assumed to be invertible. 
 
-The penalized least squares problem has the form
+The penalized likelihood estimation problem has the form
 \deqn{
 - \sum_{i = 1}^n [y_i \theta_i - b(\theta_i)] + n \lambda \gamma' Q \gamma
 }
@@ -122,7 +122,7 @@ Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. h
 
 Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. https://doi.org/10.1137/0912021
 
-Helwig, N. E. (in press). Multiple and generalized nonparametric regression. SAGE Research Methods Foundations: An Encyclopedia.
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. https://doi.org/10.4135/9781526421036885885
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

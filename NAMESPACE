@@ -17,8 +17,8 @@ S3method(print, ss)
 S3method(print, summary.ss)
 
 importFrom("grDevices", "col2rgb", "rgb")
-importFrom("graphics", "lines", "lines.default", "plot.default", 
-             "polygon")
+importFrom("graphics", "axis", "box", "lines", "lines.default", 
+             "plot.default", "polygon")
 importFrom("stats", ".nknots.smspl", "dbinom", "dgamma", "dnorm", "dpois", 
              "IQR", "as.formula", "cor", "dist", "model.frame", 
              "model.matrix", "model.response", "na.pass", "optimize", "pf", 
