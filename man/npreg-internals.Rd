@@ -37,6 +37,7 @@
 %\alias{tune.gcv.ssnet}
 \alias{tune.ocv.ss}
 \alias{tune.mle.ss}
+\alias{tune.theta}
 
 \alias{ordkern}
 \alias{linkern0}

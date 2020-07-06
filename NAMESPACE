@@ -20,7 +20,7 @@ importFrom("grDevices", "col2rgb", "rgb")
 importFrom("graphics", "axis", "box", "lines", "lines.default", 
              "plot.default", "polygon")
 importFrom("stats", ".nknots.smspl", "dbinom", "dgamma", "dnorm", "dpois", 
-             "IQR", "as.formula", "cor", "dist", "model.frame", 
-             "model.matrix", "model.response", "na.pass", "optimize", "pf", 
-             "predict", "pt", "qnorm", "gaussian", "pchisq", "pnorm",
-             "quantile", "symnum", "var")
+           "fitted", "gaussian", "IQR", "as.formula", "cor", "dist", 
+           "make.link", "model.frame", "model.matrix", "model.response", 
+           "na.pass", "nlm", "optimize", "pchisq", "pf", "pnorm", "poisson", 
+           "predict", "pt", "qnorm", "quantile",  "rgamma", "rpois", "symnum", "var")

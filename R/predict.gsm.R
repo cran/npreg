@@ -6,7 +6,7 @@ predict.gsm <-
            check.newdata = TRUE, ...){
     # predict method for class "gsm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-05-03
+    # Updated: 2020-06-27
     
     
     #########***#########   CHECKS   #########***#########
@@ -272,4 +272,4 @@ predict.gsm <-
       }
     }
     
-  } # end predict.smnet
+  } # end predict.gsm

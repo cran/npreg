@@ -1,4 +1,38 @@
 
+Changes from ver 1.0-2 to ver 1.0-3  (2020-07-06)
+
+
+1) Bug fix in "gsm" with user supplied weights
+	* Previously used weights for likelihood evaluation but not fitting
+	* Now uses correct weights for IRPLS algorithm fitting
+
+2) Bug fix in "check_control"
+	* Previously only allowed for searching spar between 0 and 1
+	* Now allows for any bounds that satisfy lower < upper
+
+3) Bug fix in "print" for models with fixed spar / lambda
+	* Previously didn't save method and printed GCV criterion
+	* Now prints correct criterion when spar / lambda is provided
+
+4) Bug fix in "summary.gsm" for models with nominal variables that have 2 levels
+	* Previously resulted in an error during the SE calculation
+	* Now correctly calculates SE for nominal variables have 2 levels
+
+5) Post-processing of GCV and OCV for "gsm" with gaussian response
+	* Previously returned non-constant portion of GCV / OCV
+	* Now matches "sm" output:  cv.crit.new = 2*cv.crit.old + mean(y^2) 
+
+6) Internal computational improvements to "gsm" function
+	* Previously tuned model and then refit w/ optimal parameters
+	* Now tuning returns all relevant output w/o refitting
+
+7) Slight update to package name (to clarify "nonparametric regression")
+	* Previous name: Nonparametric Regression
+	* Updated name:  Nonparametric Regression via Smoothing Splines
+
+
+
+
 Changes from ver 1.0-1 to ver 1.0-2  (2020-05-04)
 
 1) Bug fix in "summary.gsm" for models with null space dimension of one

@@ -17,7 +17,7 @@ check_family <-
         nobs <- length(y)
         0.5 * (sum(log(wt)) - nobs * (log(dev/nobs * 2 * pi) + 1))
       }
-      family$theta <- function(mu){
+      family$canpar <- function(mu){
         mu
       }
       family$cumulant <- function(mu){
@@ -31,7 +31,7 @@ check_family <-
         else wt
         ifelse(m > 0, (wt/m), 0) * dbinom(round(m * y), round(m), mu, log = TRUE)
       }
-      family$theta <- function(mu){
+      family$canpar <- function(mu){
         log(mu / (1 - mu))
       }
       family$cumulant <- function(mu){
@@ -42,7 +42,7 @@ check_family <-
       family$logLik <- function(y, n, mu, wt, dev){
         dpois(y, mu, log = TRUE) * wt
       }
-      family$theta <- function(mu){
+      family$canpar <- function(mu){
         log(mu)
       }
       family$cumulant <- function(mu){
@@ -54,7 +54,7 @@ check_family <-
         disp <- dev / sum(wt)
         dgamma(y, 1/disp, scale = mu * disp, log = TRUE) * wt
       }
-      family$theta <- function(mu){
+      family$canpar <- function(mu){
         -1/mu
       }
       family$cumulant <- function(mu){
@@ -66,13 +66,15 @@ check_family <-
         disp <- dev / sum(wt)
         -(1/2) * wt * (log(disp * 2 * pi) + 1 + 3 * log(y))
       }
-      family$theta <- function(mu){
+      family$canpar <- function(mu){
         -1/mu^2
       }
       family$cumulant <- function(mu){
         -2/mu
       }
       family$canonical <- ifelse(family$link == "1/mu^2", TRUE, FALSE)
+    } else if(family$family == "NegBin"){
+      family$canonical <- FALSE
     } else {
       stop("'family' not recognized")
     }

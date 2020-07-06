@@ -2,9 +2,9 @@ fit_gsm <-
   function(y, depe, lambda = NULL, tprk = TRUE, 
            control = check_control(), method = "GCV",
            family = check_family(gaussian)){
-    # fit semiparametric model
+    # fit generalized semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-10-28
+    # Updated: 2020-07-02
     
     
     #########***#########   INITIALIZATIONS   #########***#########
@@ -79,50 +79,102 @@ fit_gsm <-
     # estimate coefficients (and possibly tune lambda)
     if(is.null(lambda)){
       
-      # optimize lambda
+      # define search interval
       interval <- c(control$lower, control$upper)
-      opt <- optimize(f = tune.gsm, interval = interval,
-                      y = y, Kmat = depe$K, Rmat = Rmat, 
-                      weights = depe$weights, beta0 = beta0,
-                      tprk = tprk, control = control, 
-                      family = family, method = method, 
-                      tol = control$tol)
       
-      # collect results
-      spar <- opt$minimum
-      lambda <- 256^(3*(spar-1))
-      crit <- as.numeric(opt$objective)
-      df <- attr(opt$objective, "df")
-      iter <- attr(opt$objective, "iter")
-      
-      # estimate coefficients
-      opt <-tune.gsm(spar, y = y, Kmat = depe$K, Rmat = Rmat, 
+      # is NegBin with theta = NULL?
+      est.theta <- FALSE
+      if(family$family == "NegBin" && !family$fixed.theta){
+        
+        ##*## initial poisson fitting ##*##
+        est.theta <- TRUE
+        family <- check_family(poisson(link = family$link))
+        opt <- suppressWarnings({
+          optimize(f = tune.gsm, interval = interval,
+                   y = y, Kmat = depe$K, Rmat = Rmat, 
+                   weights = depe$weights, beta0 = beta0,
+                   tprk = tprk, control = control, 
+                   family = family, method = method, 
+                   tol = control$tol)
+        })
+        coef <- attr(opt$objective, "coef")
+        df <- attr(opt$objective, "df")
+        mu <- family$linkinv(cbind(depe$K, Rmat) %*% coef)
+        family$theta <- (nobs - df) / sum(depe$weights * (y - mu)^2 / mu)
+        
+        ##*## iterative update of theta and eta ##*##
+        iter.out <- 0L
+        vtol.out <- control$epsilon + 1
+        obj.old <- as.numeric(opt$objective)
+        while(iter.out < control$maxit.out & vtol.out > control$epsilon.out){
+          
+          # step 1: theta update
+          theta.mle <- exp(nlm(f = tune.theta, p = log(family$theta), y = y, 
+                               n = nobs, wt = depe$weights, mu = mu,
+                               gradtol = control$tol.out)$estimate)
+          family <- NegBin(theta = theta.mle, link = family$link)
+          
+          # step 2: eta update
+          opt <- suppressWarnings({
+            optimize(f = tune.gsm, interval = interval,
+                     y = y, Kmat = depe$K, Rmat = Rmat, 
                      weights = depe$weights, beta0 = beta0,
                      tprk = tprk, control = control, 
                      family = family, method = method, 
-                     return.coef = TRUE)
-      beta <- opt$coef
+                     tol = control$tol)
+          })
+          
+          # step 3: convergence check
+          obj.new <- as.numeric(opt$objective)
+          vtol.out <- abs( (obj.new - obj.old) / (obj.old + 1e-4) )
+          iter.out <- iter.out + 1L
+          obj.old <- obj.new
+          
+          # step 4: update mu (if needed)
+          if(vtol.out > control$epsilon && iter.out < control$maxit){
+            coef <- attr(opt$objective, "coef")
+            mu <- family$linkinv(cbind(depe$K, Rmat) %*% coef)
+          }
+          
+        } # end while(iter.out < control$maxit.out & vtol.out > control$epsilon.out)
+        
+      } else {
+        
+        # optimize lambda
+        opt <- suppressWarnings({
+          optimize(f = tune.gsm, interval = interval,
+                   y = y, Kmat = depe$K, Rmat = Rmat, 
+                   weights = depe$weights, beta0 = beta0,
+                   tprk = tprk, control = control, 
+                   family = family, method = method, 
+                   tol = control$tol)
+        })
+        
+      } # end if(family$family == "NegBin" && !family$fixed.theta)
       
     } else {
       
       # fit with given lambda
       spar <- 1 + log(lambda, base = 256) / 3
-      opt <- tune.gsm(spar, y = y, Kmat = depe$K, Rmat = Rmat, 
-                      weights = depe$weights, beta0 = beta0,
-                      tprk = tprk, control = control, 
-                      family = family, method = method, 
-                      return.coef = TRUE)
-      
-      # collect results
-      crit <- as.numeric(opt$objective)
-      df <- attr(opt$objective, "df")
-      iter <- attr(opt$objective, "iter")
-      beta <- opt$coef
+      opt <- list(objective = tune.gsm(spar, y = y, Kmat = depe$K, Rmat = Rmat, 
+                                       weights = depe$weights, beta0 = beta0,
+                                       tprk = tprk, control = control, 
+                                       family = family, method = method),
+                  minimum = spar)
       
     } # end if(is.null(lambda))
     
+    # collect results
+    spar <- opt$minimum
+    lambda <- 256^(3*(spar-1))
+    crit <- as.numeric(opt$objective)
+    df <- attr(opt$objective, "df")
+    iter <- attr(opt$objective, "iter")
+    coef <- attr(opt$objective, "coef")
+    cov.sqrt <- attr(opt$objective, "cov.sqrt")
+    
     # evaluate log-likelihood
-    eta <- cbind(depe$K, Rmat) %*% beta
+    eta <- cbind(depe$K, Rmat) %*% coef
     mu <- family$linkinv(eta)
     devres <- family$dev.resids(y, mu, depe$weights)
     dev <- sum(devres)
@@ -133,21 +185,21 @@ fit_gsm <-
     nulldev <- sum(family$dev.resids(y, wtdmu, depe$weights))
     
     # get standard errors of linear predictors
-    se.lp <- sqrt(rowSums((cbind(depe$K, Rmat) %*% opt$cov.sqrt)^2))
+    se.lp <- sqrt(rowSums((cbind(depe$K, Rmat) %*% cov.sqrt)^2))
     
     # retransform coefficients and cov.sqrt
-    beta <- Tmat %*% beta
-    opt$cov.sqrt <- Tmat %*% opt$cov.sqrt
+    coef <- Tmat %*% coef
+    cov.sqrt <- Tmat %*% cov.sqrt
     
     # name coefficients
-    names(beta) <- c(colnames(depe$K), colnames(depe$J))
+    names(coef) <- c(colnames(depe$K), colnames(depe$J))
     
     # smoothness penalty
     if(tprk){
-      penalty <- as.numeric(crossprod(beta[-nullindx], depe$Q %*% beta[-nullindx]))
+      penalty <- as.numeric(crossprod(coef[-nullindx], depe$Q %*% coef[-nullindx]))
     } else {
       penalty <- 0
-      scoefs <- beta[-nullindx]
+      scoefs <- coef[-nullindx]
       for(k in 1:length(depe$Q)){
         indx <- seq(cknots[k] + 1, cknots[k+1])
         penalty <- penalty + as.numeric(crossprod(scoefs[indx], depe$Q[[k]] %*% scoefs[indx]))
@@ -157,9 +209,14 @@ fit_gsm <-
     # R-squared
     r.squared <- as.numeric(cor(y, mu)^2)
     
+    # add outside iter
+    if(family$family == "NegBin" && est.theta){
+      iter <- c(inner = iter, outer = iter.out)
+    }
+    
     # collect results
     res <- list(iter = iter,
-                residuals = opt$resid,
+                residuals = attr(opt$objective, "resid"),
                 null.deviance = nulldev,
                 linear.predictors = as.numeric(eta), 
                 se.lp = se.lp,
@@ -168,15 +225,16 @@ fit_gsm <-
                 df = df, 
                 nsdf = nsdim,
                 r.squared = r.squared,
-                dispersion = opt$disp,
+                dispersion = attr(opt$objective, "disp"),
                 logLik = famLL, 
                 aic = 2*(df - famLL),
                 bic = log(nobs)*df - 2*famLL,
                 spar = 1 + log(lambda, base = 256)/3,
                 lambda = lambda, 
                 penalty = penalty,
-                coefficients = beta,
-                cov.sqrt = opt$cov.sqrt)
+                coefficients = coef,
+                cov.sqrt = cov.sqrt,
+                family = family)
     return(res)
     
   } # end fit_gsm
@@ -185,7 +243,7 @@ tune.gsm <-
   function(spar, y, Kmat, Rmat, weights, beta0,
            tprk = TRUE, control = check_control(),
            family = check_family(gaussian), 
-           method = "GCV", return.coef = FALSE){
+           method = "GCV"){
     
     # initialize parameters for IRLS
     lambda <- 256^(3*(spar-1))
@@ -217,7 +275,7 @@ tune.gsm <-
       # update design matrices
       mueta <- family$mu.eta(eta)
       varx <- family$variance(mu)
-      vsqrt <- as.numeric(sqrt(mueta^2/varx))
+      vsqrt <- as.numeric(sqrt(weights*mueta^2/varx))
       Kw <- as.matrix(Kmat * vsqrt)
       Rw <- Rmat * vsqrt
       
@@ -270,26 +328,26 @@ tune.gsm <-
       #etacv <- (eta - wlev * yp / vsqrt) / (1 - wlev)
       etacv <- (eta - mean(lev) * yp * vsqrt) / (1 - df/nobs)
       mucv <- family$linkinv(etacv)
-      theta <- family$theta(mucv)
+      canpar <- family$canpar(mucv)
       cumfun <- family$cumulant(mucv)
-      val <- -mean(y * theta - cumfun)
+      val <- -mean(y * canpar - cumfun)
     } else if(method == "OCV"){
       wlev <- vsqrt^2 * lev
       etacv <- (eta - wlev * yp / vsqrt) / (1 - wlev)
       mucv <- family$linkinv(etacv)
-      theta <- family$theta(mucv)
+      canpar <- family$canpar(mucv)
       cumfun <- family$cumulant(mucv)
-      val <- -mean(y * theta - cumfun)
+      val <- -mean(y * canpar - cumfun)
     } else if(method == "GACV"){
-      theta <- family$theta(mu)
+      canpar <- family$canpar(mu)
       cumfun <- family$cumulant(mu)
-      LLpart <- mean(y * theta - cumfun)
+      LLpart <- mean(y * canpar - cumfun)
       CVpart <- (sum(lev) / (nobs - df)) * mean(y * (y - mu))
       val <- CVpart - LLpart
     } else if(method == "ACV"){
-      theta <- family$theta(mu)
+      canpar <- family$canpar(mu)
       cumfun <- family$cumulant(mu)
-      LLpart <- mean(y * theta - cumfun)
+      LLpart <- mean(y * canpar - cumfun)
       wlev <- vsqrt^2 * lev
       CVpart <- mean( (wlev / (1 - wlev)) * y * (y - mu) / vsqrt^2 )
       val <- CVpart - LLpart
@@ -299,29 +357,30 @@ tune.gsm <-
       val <- log(nobs) * df - 2 * famLL
     }
     
+    # calculate dispersion
+    if(family$family == "gaussian"){
+      disp <- dev / (nobs - df)
+    } else if(family$family == "binomial"){
+      disp <- 1 / mean(weights)
+    } else if(family$family == "poisson"){
+      disp <- 1
+    } else if(family$family == "Gamma"){
+      disp <- dev / (nobs - df)
+    } else if(family$family == "inverse.gaussian"){
+      disp <- dev / (nobs - df)
+    } else if(family$family == "NegBin"){
+      disp <- 1 / family$theta
+    }
+    
     # attach attributes
     attr(val, "iter") <- iter
     attr(val, "df") <- df
+    attr(val, "coef") <- as.numeric(coef)
+    attr(val, "cov.sqrt") <- sqrt(disp) * XtXisqrt
+    attr(val, "disp") <- disp
+    attr(val, "resid") <- as.numeric(yp / vsqrt - mu)
     
     # return results
-    if(return.coef) {
-      if(family$family == "gaussian"){
-        disp <- dev / (nobs - df)
-      } else if(family$family == "binomial"){
-        disp <- 1 / mean(weights)
-      } else if(family$family == "poisson"){
-        disp <- 1
-      } else if(family$family == "Gamma"){
-        disp <- dev / (nobs - df)
-      } else if(family$family == "inverse.gaussian"){
-        disp <- dev / (nobs - df)
-      }
-      return(list(objective = val, coef = as.numeric(coef),
-                  cov.sqrt = sqrt(disp) * XtXisqrt, 
-                  disp = disp, resid = as.numeric(yp / vsqrt - mu)))
-    } else {
-      return(val)
-    }
+    return(val)
     
-  }
-
+  } # end tune.gsm

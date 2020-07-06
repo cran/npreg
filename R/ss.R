@@ -6,7 +6,7 @@ ss <-
            control.spar = list(), tol = 1e-6 * IQR(x)){
     # smoothing spline in R
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-12-09
+    # Updated: 2020-06-27
     
     
     #########***#########   INITIAL CHECKS   #########***#########
@@ -474,7 +474,7 @@ ss <-
                spar = spar, lambda = lambda, fit = fitinfo, call = match.call(),
                sigma = sigma, logLik = if(!is.null(n2LL)) (-1/2) * n2LL,
                aic = if(method == "AIC") ic, bic = if(method == "BIC") ic,
-               penalty = penalty, method = if(tunelambda) method)
+               penalty = penalty, method = method)
     class(ss) <- "ss"
     return(ss)
     
@@ -492,7 +492,7 @@ print.ss <-
     } else {
       cat("\nPenalized Criterion (RSS)", x$pen.crit)
     }
-    if(is.null(x$method) || x$method == "GCV"){
+    if(x$method == "GCV"){
       cat("\nGeneralized Cross-Validation (GCV)", x$cv.crit,"\n\n")
     } else if(x$method == "OCV"){
       cat("\nOrdinary Cross-Validation (OCV)", x$cv.crit,"\n\n")

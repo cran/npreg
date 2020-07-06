@@ -7,7 +7,7 @@ predict.sm <-
            check.newdata = TRUE, ...){
     # predict method for class "sm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-04-02
+    # Updated: 2020-06-27
     
     
     #########***#########   CHECKS   #########***#########
@@ -302,4 +302,4 @@ predict.sm <-
       return(fit)
     }
     
-  } # end predict.smnet
+  } # end predict.sm

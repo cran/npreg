@@ -4,7 +4,7 @@ sm <-
            method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC")){
     # semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-08-20
+    # Updated: 2020-06-27
     
     
     #########***#########   CHECKS   #########***#########
@@ -148,7 +148,7 @@ sm <-
     fit$data <- mf
     fit$types <- chty$type
     fit$terms <- colnames(et)
-    fit$method <- if(is.null(lambda)) method
+    fit$method <- method
     fit$formula <- formula
     fit$call <- match.call()
     
@@ -172,7 +172,7 @@ print.sm <-
     } else {
       cat("\nPenalized Criterion (RSS): ", x$sse)
     }
-    if(is.null(x$method) || x$method == "GCV"){
+    if(x$method == "GCV"){
       cat("\nGeneralized Cross-Validation (GCV): ", x$cv.crit,"\n\n")
     } else if(x$method == "OCV"){
       cat("\nOrdinary Cross-Validation (OCV): ", x$cv.crit,"\n\n")

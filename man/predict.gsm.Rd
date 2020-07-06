@@ -111,14 +111,14 @@ probs <- seq(0, 0.9, by = 0.1)
 knots <- list(x = quantile(x, probs = probs),
               z = letters[1:3])
 
-# fit sm with specified knots (tprk = TRUE)
+# fit gsm with specified knots (tprk = TRUE)
 gsm.ssa <- gsm(y ~ x * z, family = binomial, knots = knots)
 pred <- predict(gsm.ssa)
 term <- predict(gsm.ssa, type = "terms")
 mean((gsm.ssa$linear.predictors - pred)^2)
 mean((gsm.ssa$linear.predictors - rowSums(term) - attr(term, "constant"))^2)
 
-# fit sm with specified knots (tprk = FALSE)
+# fit gsm with specified knots (tprk = FALSE)
 gsm.gam <- gsm(y ~ x * z, family = binomial, knots = knots, tprk = FALSE)
 pred <- predict(gsm.gam)
 term <- predict(gsm.gam, type = "terms")

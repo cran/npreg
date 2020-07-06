@@ -5,7 +5,7 @@ gsm <-
            method = c("GCV", "OCV", "GACV", "ACV", "AIC", "BIC")){
     # generalized semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-10-30
+    # Updated: 2020-07-02
     
     
     #########***#########   CHECKS   #########***#########
@@ -145,6 +145,15 @@ gsm <-
     
     #########***#########   RETURN RESULTS   #########***#########
     
+    # check for NegBin with theta = NULL
+    if(family$family == "NegBin" && !family$fixed.theta){
+      family <- fit$family
+      family$fixed.theta <- FALSE
+      fit$family <- NULL
+    } else {
+      fit$family <- NULL
+    }
+    
     # fit specs
     specs <- list(knots = knot, thetas = depe$thetas, 
                   xrng = chty$xrng, xlev = chty$xlev,
@@ -155,17 +164,22 @@ gsm <-
     fit$data <- mf
     fit$types <- chty$type
     fit$terms <- colnames(et)
-    fit$method <- if(is.null(lambda)) method
+    fit$method <- method
     fit$formula <- formula
     fit$call <- match.call()
     fit$family <- family
     fit <- fit[c(4:length(fit), 1:3)]
     
+    # transform GCV for Gaussian
+    if(family$family == "gaussian" && (method %in% c("GCV", "OCV"))){
+      fit$cv.crit <- fit$cv.crit * 2 + mean(yvar^2)
+    }
+    
     # class and return
     class(fit) <- "gsm"
     return(fit)
     
-  } # end sm
+  } # end gsm
 
 # print function
 print.gsm <-

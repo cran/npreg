@@ -47,10 +47,10 @@ Optional list with named components controlling the root finding when the smooth
 \bold{Note} that spar is only searched for in the interval \eqn{[lower, upper]}.
   \describe{
   \item{lower:}{
-  lower bound for spar; defaults to -1.5
+  lower bound for spar; defaults to 0.
   }
   \item{upper:}{
-  upper bound for spar; defaults to +1.5.
+  upper bound for spar; defaults to 1.
   }
   \item{tol:}{
   the absolute precision (\bold{tol}erance) used by \code{\link{optimize}}; defaults to 1e-8.
@@ -202,7 +202,7 @@ If \code{tprk = FALSE}, the null space basis function matrix has the form \eqn{X
 }
 \examples{
 ##########   EXAMPLE 1   ##########
-### 1 continuous preditor
+### 1 continuous predictor
 
 # generate data
 set.seed(1)

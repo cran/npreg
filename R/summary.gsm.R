@@ -2,7 +2,7 @@ summary.gsm <-
   function(object, ...){
     # summary method for class "gsm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-03-29
+    # Updated: 2020-05-20
     
     # convert binomial (if response is a factor)
     if(object$family$family == "binomial" && any(class(object$data[,1])[1] == c("factor", "ordered"))){
@@ -72,14 +72,14 @@ summary.gsm <-
       Xpsvd <- svd(Xmats$X$p, nv = 0)
       Xmats$X$s <- Xmats$X$s - Xpsvd$u %*% crossprod(Xpsvd$u, Xmats$X$s)
       
-      ss <- sum((psolve(Xmats$X$s %*% object$cov.sqrt[-nullindx,]) %*% (Xmats$X$s %*% s.coef))^2) * object$dispersion
+      ss <- sum((psolve(Xmats$X$s %*% object$cov.sqrt[-nullindx,,drop=FALSE]) %*% (Xmats$X$s %*% s.coef))^2) * object$dispersion
       pis <- rep(0, nterms)
       for(i in 1:nterms){
         fitX <- predict(object, terms = object$terms[i],
                         combine = FALSE, design = TRUE)
         fitX$X$s <- vsqrt * fitX$X$s - Xpsvd$u %*% crossprod(Xpsvd$u, vsqrt * fitX$X$s)
         pis[i] <- sum((fitX$X$s %*% s.coef)^2)
-        s.df[i] <- sum(rowSums((fitX$X$s %*% object$cov.sqrt[-nullindx,])^2)) / object$dispersion
+        s.df[i] <- sum(rowSums((fitX$X$s %*% object$cov.sqrt[-nullindx,,drop=FALSE])^2)) / object$dispersion
       }
       pis <- pis / sum(pis)
       ss <- ss * pis
@@ -99,9 +99,9 @@ summary.gsm <-
       nsdf <- object$nsdf
       for(i in 1:nterms){
         sindx <- which(snames == object$terms[i])
-        X <- Xmats$X$s[,sindx]
-        ss[i] <- sum((psolve(X %*% object$cov.sqrt[nsdf + sindx,]) %*% (X %*% s.coef[sindx]))^2) * object$dispersion
-        s.df[i] <- sum(rowSums((X %*% object$cov.sqrt[nsdf + sindx,])^2)) / object$dispersion
+        X <- Xmats$X$s[,sindx,drop=FALSE]
+        ss[i] <- sum((psolve(X %*% object$cov.sqrt[nsdf + sindx,,drop=FALSE]) %*% (X %*% s.coef[sindx]))^2) * object$dispersion
+        s.df[i] <- sum(rowSums((X %*% object$cov.sqrt[nsdf + sindx,,drop=FALSE])^2)) / object$dispersion
       }
       
     } # end if(object$specs$tprk)
@@ -118,7 +118,7 @@ summary.gsm <-
     numdf <- object$df - 1L
     demdf <- nobs - object$df
     coef <- object$coefficients[-1]
-    chisq <- sum((psolve(object$cov.sqrt[-1,]) %*% coef)^2)
+    chisq <- sum((psolve(object$cov.sqrt[-1,,drop=FALSE]) %*% coef)^2)
     Fstat <- chisq / numdf
     fstatistic <- c(Fstat, numdf, demdf)
     names(fstatistic) <- c("value", "numdf", "demdf")

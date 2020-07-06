@@ -18,7 +18,7 @@ gsm(formula, family = gaussian, data, weights, types = NULL, tprk = TRUE,
 Object of class "formula" (or one that can be coerced to that class): a symbolic description of the model to be fitted. Uses the same syntax as \code{\link{lm}} and \code{\link{glm}}.
 }
   \item{family}{
-Description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function, or the result of a call to a family function.  
+Description of the error distribution and link function to be used in the model. This can be a character string naming a family function, a family function, or the result of a call to a family function. See the "Family Objects" section for details.
 }
   \item{data}{
 Optional data frame, list or environment (or object coercible by \code{\link{as.data.frame}} to a data frame) containing the variables in the model. If not found in data, the variables are taken from \code{environment(formula)}, typically the environment from which \code{sm} is called.  
@@ -50,10 +50,10 @@ Optional list with named components controlling the root finding when the smooth
 \bold{Note} that spar is only searched for in the interval \eqn{[lower, upper]}.
   \describe{
   \item{lower:}{
-  lower bound for spar; defaults to -1.5
+  lower bound for spar; defaults to 0.
   }
   \item{upper:}{
-  upper bound for spar; defaults to +1.5.
+  upper bound for spar; defaults to 1.
   }
   \item{tol:}{
   the absolute precision (\bold{tol}erance) used by \code{\link{optimize}}; defaults to 1e-8.
@@ -136,6 +136,20 @@ where \code{object} is the fit "gsm" object.
 For models with multiple predictors, the \code{\link{predict.gsm}} function may be more useful.
 }
 
+\section{Family Objects }{
+Supported families and links include:
+\tabular{lll}{
+\code{family} \tab \tab \code{link} \cr
+binomial \tab \tab logit, probit, cauchit, log, cloglog \cr
+gaussian \tab \tab identity, log, inverse \cr
+Gamma \tab \tab inverse, identity, log \cr
+inverse.gaussian \tab \tab 1/mu^2, inverse, identity, log \cr
+poisson \tab \tab log, identity, sqrt \cr
+NegBin \tab \tab log, identity, sqrt \cr
+}
+See \code{\link{NegBin}} for information about the Negative Binomial family.
+}
+
 \section{Types of Smooths }{
 
 The following codes specify the spline types:
@@ -207,7 +221,7 @@ If \code{tprk = FALSE}, the null space basis function matrix has the form \eqn{X
 }
 \examples{
 ##########   EXAMPLE 1   ##########
-### 1 continuous preditor
+### 1 continuous predictor
 
 # generate data
 n <- 1000
@@ -217,44 +231,57 @@ fx <- 3 * x + sin(2 * pi * x) - 1.5
 # gaussian (default)
 set.seed(1)
 y <- fx + rnorm(n, sd = 1/sqrt(2))
-gsm.ssa <- gsm(y ~ x, knots = 20)
-mean((gsm.ssa$linear.predictors - fx)^2)
+mod <- gsm(y ~ x, knots = 10)
+mean((mod$linear.predictors - fx)^2)
 
 # compare to result from sm (they are identical)
-sm.ssa <- sm(y ~ x, knots = 20)
-mean((gsm.ssa$linear.predictors - sm.ssa$fitted.values)^2)
+mod.sm <- sm(y ~ x, knots = 10)
+mean((mod$linear.predictors - mod.sm$fitted.values)^2)
 
 # binomial (no weights)
 set.seed(1)
 y <- rbinom(n = n, size = 1, p = 1 / (1 + exp(-fx)))
-gsm.ssa <- gsm(y ~ x, knots = 20, family = binomial)
-mean((gsm.ssa$linear.predictors - fx)^2)
+mod <- gsm(y ~ x, family = binomial, knots = 10)
+mean((mod$linear.predictors - fx)^2)
 
 # binomial (w/ weights)
 set.seed(1)
 w <- as.integer(rep(c(10,20,30,40,50), length.out = n))
 y <- rbinom(n = n, size = w, p = 1 / (1 + exp(-fx))) / w
-gsm.ssa <- gsm(y ~ x, knots = 20, family = binomial, weights = w)
-mean((gsm.ssa$linear.predictors - fx)^2)
+mod <- gsm(y ~ x, family = binomial, weights = w, knots = 10)
+mean((mod$linear.predictors - fx)^2)
 
 # poisson
 set.seed(1)
 y <- rpois(n = n, lambda = exp(fx))
-gsm.ssa <- gsm(y ~ x, knots = 20, family = poisson)
-mean((gsm.ssa$linear.predictors - fx)^2)
+mod <- gsm(y ~ x, family = poisson, knots = 10)
+mean((mod$linear.predictors - fx)^2)
+
+# negative binomial (known theta)
+set.seed(1)
+y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
+mod <- gsm(y ~ x, family = NegBin(theta = 1/2), knots = 10)
+mean((mod$linear.predictors - fx)^2)
+1 / mod$dispersion    # fixed theta
+
+# negative binomial (unknown theta)
+set.seed(1)
+y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
+mod <- gsm(y ~ x, family = NegBin, knots = 10)
+mean((mod$linear.predictors - fx)^2)
+1 / mod$dispersion    # estimated theta
 
 # gamma
 set.seed(1)
 y <- rgamma(n = n, shape = 2, scale = (1 / (2 + fx)) / 2)
-gsm.ssa <- gsm(y ~ x, knots = 20, family = Gamma)
-mean((gsm.ssa$linear.predictors - fx - 2)^2)
+mod <- gsm(y ~ x, family = Gamma, knots = 10)
+mean((mod$linear.predictors - fx - 2)^2)
 
 # inverse.gaussian (not run; requires statmod)
-##require(statmod)
 ##set.seed(1)
-##y <- rinvgauss(n = n, mean = sqrt(1 / (2 + fx)), shape = 2)
-##gsm.ssa <- gsm(y ~ x, knots = 20, family = inverse.gaussian)
-##mean((gsm.ssa$linear.predictors - fx - 2)^2)
+##y <- statmod::rinvgauss(n = n, mean = sqrt(1 / (2 + fx)), shape = 2)
+##mod <- gsm(y ~ x, family = inverse.gaussian, knots = 10)
+##mean((mod$linear.predictors - fx - 2)^2)
 
 
 
@@ -281,44 +308,57 @@ knots <- list(x = quantile(x, probs = probs),
 # gaussian (default)
 set.seed(1)
 y <- fx + rnorm(n, sd = 1/sqrt(2))
-gsm.ssa <- gsm(y ~ x + z, knots = knots)
-mean((gsm.ssa$linear.predictors - fx)^2)
+mod <- gsm(y ~ x + z, knots = knots)
+mean((mod$linear.predictors - fx)^2)
 
 # compare to result from sm (they are identical)
-sm.ssa <- sm(y ~ x + z, knots = knots)
-mean((gsm.ssa$linear.predictors - sm.ssa$fitted.values)^2)
+mod.sm <- sm(y ~ x + z, knots = knots)
+mean((mod$linear.predictors - mod.sm$fitted.values)^2)
 
 # binomial (no weights)
 set.seed(1)
 y <- rbinom(n = n, size = 1, p = 1 / (1 + exp(-fx)))
-gsm.ssa <- gsm(y ~ x + z, knots = knots, family = binomial)
-mean((gsm.ssa$linear.predictors - fx)^2)
+mod <- gsm(y ~ x + z, family = binomial, knots = knots)
+mean((mod$linear.predictors - fx)^2)
 
 # binomial (w/ weights)
 set.seed(1)
 w <- as.integer(rep(c(10,20,30,40,50), length.out = n))
 y <- rbinom(n = n, size = w, p = 1 / (1 + exp(-fx))) / w
-gsm.ssa <- gsm(y ~ x + z, knots = knots, family = binomial, weights = w)
-mean((gsm.ssa$linear.predictors - fx)^2)
+mod <- gsm(y ~ x + z, family = binomial, weights = w, knots = knots)
+mean((mod$linear.predictors - fx)^2)
 
 # poisson
 set.seed(1)
 y <- rpois(n = n, lambda = exp(fx))
-gsm.ssa <- gsm(y ~ x + z, knots = knots, family = poisson)
-mean((gsm.ssa$linear.predictors - fx)^2)
+mod <- gsm(y ~ x + z, family = poisson, knots = knots)
+mean((mod$linear.predictors - fx)^2)
+
+# negative binomial (known theta)
+set.seed(1)
+y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
+mod <- gsm(y ~ x + z, family = NegBin(theta = 1/2), knots = knots)
+mean((mod$linear.predictors - fx)^2)
+1 / mod$dispersion    # fixed theta
+
+# negative binomial (unknown theta)
+set.seed(1)
+y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
+mod <- gsm(y ~ x + z, family = NegBin, knots = knots)
+mean((mod$linear.predictors - fx)^2)
+1 / mod$dispersion    # estimated theta
 
 # gamma
 set.seed(1)
 y <- rgamma(n = n, shape = 2, scale = (1 / (4 + fx)) / 2)
-gsm.ssa <- gsm(y ~ x + z, knots = knots, family = Gamma)
-mean((gsm.ssa$linear.predictors - fx - 4)^2)
+mod <- gsm(y ~ x + z, family = Gamma, knots = knots)
+mean((mod$linear.predictors - fx - 4)^2)
 
 # inverse.gaussian (not run; requires statmod)
-##require(statmod)
 ##set.seed(1)
-##y <- rinvgauss(n = n, mean = sqrt(1 / (4 + fx)), shape = 2)
-##gsm.ssa <- gsm(y ~ x + z, knots = knots, family = inverse.gaussian)
-##mean((gsm.ssa$linear.predictors - fx - 4)^2)
+##y <- statmod::rinvgauss(n = n, mean = sqrt(1 / (4 + fx)), shape = 2)
+##mod <- gsm(y ~ x + z, family = inverse.gaussian, knots = knots)
+##mean((mod$linear.predictors - fx - 4)^2)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
