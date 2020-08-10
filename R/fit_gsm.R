@@ -4,7 +4,7 @@ fit_gsm <-
            family = check_family(gaussian)){
     # fit generalized semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-07-02
+    # Updated: 2020-07-24
     
     
     #########***#########   INITIALIZATIONS   #########***#########
@@ -56,7 +56,6 @@ fit_gsm <-
     # reverse transformation
     Tmat <- matrix(0, nsdim + nknots, nsdim + Qrnk)
     Tmat[nullindx,nullindx] <- diag(nsdim)
-    #Tmat[nullindx,-nullindx] <- (-1) * solve(crossprod(X.w[,nullindx])) %*% crossprod(X.w[,nullindx], R.w)
     if(tprk){
       Tmat[-nullindx,-nullindx] <- Qprj
     } else {
@@ -69,7 +68,6 @@ fit_gsm <-
         col.offset <- col.offset + ncolk
       }
     }
-    #Tmat <- Tmat %*% Xsvd$v %*% diag(1 / Xsvd$d)
     
     #########***#########   ESTIMATE COEFS   #########***#########
     
@@ -109,9 +107,10 @@ fit_gsm <-
         while(iter.out < control$maxit.out & vtol.out > control$epsilon.out){
           
           # step 1: theta update
-          theta.mle <- exp(nlm(f = tune.theta, p = log(family$theta), y = y, 
-                               n = nobs, wt = depe$weights, mu = mu,
-                               gradtol = control$tol.out)$estimate)
+          theta.mle <- tryCatch(suppressWarnings({exp(nlm(f = tune.theta, p = log(family$theta), y = y, 
+                                                          n = nobs, wt = depe$weights, mu = mu,
+                                                          gradtol = control$tol.out)$estimate)}), 
+                                error = function(e) family$theta)
           family <- NegBin(theta = theta.mle, link = family$link)
           
           # step 2: eta update
@@ -154,13 +153,69 @@ fit_gsm <-
       
     } else {
       
-      # fit with given lambda
+      # define spar corresponding to lambda
       spar <- 1 + log(lambda, base = 256) / 3
-      opt <- list(objective = tune.gsm(spar, y = y, Kmat = depe$K, Rmat = Rmat, 
-                                       weights = depe$weights, beta0 = beta0,
-                                       tprk = tprk, control = control, 
-                                       family = family, method = method),
-                  minimum = spar)
+      
+      # is NegBin with theta = NULL?
+      est.theta <- FALSE
+      if(family$family == "NegBin" && !family$fixed.theta){
+        
+        ##*## initial poisson fitting ##*##
+        est.theta <- TRUE
+        family <- check_family(poisson(link = family$link))
+        opt <- list(objective = tune.gsm(spar, y = y, Kmat = depe$K, Rmat = Rmat, 
+                                         weights = depe$weights, beta0 = beta0,
+                                         tprk = tprk, control = control, 
+                                         family = family, method = method),
+                    minimum = spar)
+        coef <- attr(opt$objective, "coef")
+        df <- attr(opt$objective, "df")
+        mu <- family$linkinv(cbind(depe$K, Rmat) %*% coef)
+        family$theta <- (nobs - df) / sum(depe$weights * (y - mu)^2 / mu)
+        
+        ##*## iterative update of theta and eta ##*##
+        iter.out <- 0L
+        vtol.out <- control$epsilon + 1
+        obj.old <- as.numeric(opt$objective)
+        while(iter.out < control$maxit.out & vtol.out > control$epsilon.out){
+          
+          # step 1: theta update
+          theta.mle <- tryCatch(suppressWarnings({exp(nlm(f = tune.theta, p = log(family$theta), y = y, 
+                                                          n = nobs, wt = depe$weights, mu = mu,
+                                                          gradtol = control$tol.out)$estimate)}), 
+                                error = function(e) family$theta)
+          family <- NegBin(theta = theta.mle, link = family$link)
+          
+          # step 2: eta update
+          opt <- list(objective = tune.gsm(spar, y = y, Kmat = depe$K, Rmat = Rmat, 
+                                           weights = depe$weights, beta0 = beta0,
+                                           tprk = tprk, control = control, 
+                                           family = family, method = method),
+                      minimum = spar)
+          
+          # step 3: convergence check
+          obj.new <- as.numeric(opt$objective)
+          vtol.out <- abs( (obj.new - obj.old) / (obj.old + 1e-4) )
+          iter.out <- iter.out + 1L
+          obj.old <- obj.new
+          
+          # step 4: update mu (if needed)
+          if(vtol.out > control$epsilon && iter.out < control$maxit){
+            coef <- attr(opt$objective, "coef")
+            mu <- family$linkinv(cbind(depe$K, Rmat) %*% coef)
+          }
+          
+        } # end while(iter.out < control$maxit.out & vtol.out > control$epsilon.out)
+        
+      } else {
+        
+        opt <- list(objective = tune.gsm(spar, y = y, Kmat = depe$K, Rmat = Rmat, 
+                                         weights = depe$weights, beta0 = beta0,
+                                         tprk = tprk, control = control, 
+                                         family = family, method = method),
+                    minimum = spar)
+        
+      }
       
     } # end if(is.null(lambda))
     
@@ -322,10 +377,23 @@ tune.gsm <-
     lev <- rowSums((Xmat %*% XtXisqrt)^2)
     df <- sum(vsqrt^2 * lev)
     
+    # calculate dispersion
+    if(family$family == "gaussian"){
+      disp <- dev / (nobs - df)
+    } else if(family$family == "binomial"){
+      disp <- 1 / mean(weights)
+    } else if(family$family == "poisson"){
+      disp <- 1
+    } else if(family$family == "Gamma"){
+      disp <- dev / (nobs - df)
+    } else if(family$family == "inverse.gaussian"){
+      disp <- dev / (nobs - df)
+    } else if(family$family == "NegBin"){
+      disp <- 1
+    }
+    
     # define loss value
     if(method == "GCV"){
-      #wlev <- df / nobs
-      #etacv <- (eta - wlev * yp / vsqrt) / (1 - wlev)
       etacv <- (eta - mean(lev) * yp * vsqrt) / (1 - df/nobs)
       mucv <- family$linkinv(etacv)
       canpar <- family$canpar(mucv)
@@ -339,37 +407,31 @@ tune.gsm <-
       cumfun <- family$cumulant(mucv)
       val <- -mean(y * canpar - cumfun)
     } else if(method == "GACV"){
-      canpar <- family$canpar(mu)
+      etacv <- (eta - mean(lev) * yp * vsqrt) / (1 - df/nobs)
+      mucv <- family$linkinv(etacv)
+      canpar <- family$canpar(mucv)
       cumfun <- family$cumulant(mu)
-      LLpart <- mean(y * canpar - cumfun)
-      CVpart <- (sum(lev) / (nobs - df)) * mean(y * (y - mu))
-      val <- CVpart - LLpart
+      val <- -mean(y * canpar - cumfun)
     } else if(method == "ACV"){
-      canpar <- family$canpar(mu)
-      cumfun <- family$cumulant(mu)
-      LLpart <- mean(y * canpar - cumfun)
       wlev <- vsqrt^2 * lev
-      CVpart <- mean( (wlev / (1 - wlev)) * y * (y - mu) / vsqrt^2 )
-      val <- CVpart - LLpart
+      etacv <- (eta - wlev * yp / vsqrt) / (1 - wlev)
+      mucv <- family$linkinv(etacv)
+      canpar <- family$canpar(mucv)
+      cumfun <- family$cumulant(mu)
+      val <- -mean(y * canpar - cumfun)
+    } else if(method == "PQL"){
+      nullindx <- 1:ncol(Kmat)
+      nknots <- ncol(Rmat)
+      rndLL <- -(1/2) * ((nlam/disp) * sum(coef[-nullindx]^2) + nknots * log(2 * pi * disp / nlam) )
+      eigRtR <- eigen((RtR + Pmat[-nullindx,-nullindx])/disp, symmetric = TRUE, only.values = TRUE)
+      nze <- sum(eigRtR$values > eigRtR$values[1] * .Machine$double.eps)
+      logdet <- sum(log(eigRtR$values[1:nze]))
+      laplace <- (nknots * log(2*pi) - logdet) / 2
+      val <- -(famLL + rndLL + laplace)
     } else if(method == "AIC"){
       val <- 2 * (df - famLL)
     } else if(method == "BIC"){
       val <- log(nobs) * df - 2 * famLL
-    }
-    
-    # calculate dispersion
-    if(family$family == "gaussian"){
-      disp <- dev / (nobs - df)
-    } else if(family$family == "binomial"){
-      disp <- 1 / mean(weights)
-    } else if(family$family == "poisson"){
-      disp <- 1
-    } else if(family$family == "Gamma"){
-      disp <- dev / (nobs - df)
-    } else if(family$family == "inverse.gaussian"){
-      disp <- dev / (nobs - df)
-    } else if(family$family == "NegBin"){
-      disp <- 1 / family$theta
     }
     
     # attach attributes

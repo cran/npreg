@@ -13,7 +13,7 @@ psolve(a, b, tol)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{a}{
-a rectungular numeric matrix containing the coefficients of the linear system. 
+a rectangular numeric matrix containing the coefficients of the linear system. 
 }
   \item{b}{
 a numeric vector or matrix giving the right-hand side(s) of the linear system. If missing, \code{b} is taken to be an identity matrix and solve will return the (pseudo-)inverse of \code{a}.
@@ -29,15 +29,15 @@ If \code{a} is a symmetric matrix, \code{\link{eigen}} is used to compute the (p
 If \code{b} is missing, returns the (pseudo-)inverse of \code{a}. Otherwise returns \code{psolve(a) \%*\% b}.
 }
 \references{
-Moore, E. H. (1920). On the reciprocal of the general algebraic matrix. \emph{Bulletin of the American Mathematical Society, 26}, 394-395.
+Moore, E. H. (1920). On the reciprocal of the general algebraic matrix. \emph{Bulletin of the American Mathematical Society, 26}, 394-395. https://doi.org/10.1090/S0002-9904-1920-03322-7
 
-Penrose, R. (1955). A generalized inverse for matrices. \emph{Mathematical Proceedings of the Cambridge Philosophical Society, 51(3)}, 406-413. https://doi.org/10.1017/S0305004100030401
+Penrose, R. (1955). A generalized inverse for matrices. \emph{Mathematical Proceedings of the Cambridge Philosophical Society, 51(3)}, 406-413. \url{https://doi.org/10.1017/S0305004100030401}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>
 }
 \note{
-The pseudo-inverse is calculated by inverting the eigen/singular values that greater than the first value multiplied by \code{tol * min(dim(a))}.
+The pseudo-inverse is calculated by inverting the eigen/singular values that are greater than the first value multiplied by \code{tol * min(dim(a))}.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

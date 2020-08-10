@@ -27,7 +27,6 @@ An object of class "\code{family}" with the functions and expressions needed to 
   \item{logLik}{function to evaluate the log-likelihood}
   \item{canpar}{function to compute the canonical parameter}
   \item{cumulant}{function to compute the cumulant function}
-  \item{canonical}{logical specifying if the canonical link was used}
   \item{theta}{the specified \code{theta} parameter}
   \item{fixed.theta}{logical specifying if \code{theta} was provided}
 }
@@ -60,12 +59,12 @@ y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
 # fit model (known theta)
 mod <- gsm(y ~ x, family = NegBin(theta = 1/2), knots = 10)
 mean((mod$linear.predictors - fx)^2)
-1 / mod$dispersion   # fixed theta
+mod$family$theta   # fixed theta
 
 # fit model (unknown theta)
 mod <- gsm(y ~ x, family = NegBin, knots = 10)
 mean((mod$linear.predictors - fx)^2)
-1 / mod$dispersion   # estimated theta
+mod$family$theta   # estimated theta
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

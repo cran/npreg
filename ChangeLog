@@ -1,4 +1,27 @@
 
+Changes from ver 1.0-3 to ver 1.0-4  (2020-08-09)
+
+1) Bug fix in "gsm" with family = NegBin regarding SE calculation
+	* Previously multiplied the se.lp by sqrt(1/theta)
+	* Now correctly uses dispersion parameter of one
+
+2) Bug fix in "gsm" with family = NegBin and user supplied spar/lambda
+	* Previously resulted in error due to lack of defining est.theta
+	* Now correctly estimates theta with a fixed lambda
+
+3) Added more tuning possibilities for "gsm" function
+	* PQL (penalized quasi-likelihood) tuning is now available
+	* GACV and ACV tuning are now available for non-canonical links
+
+4) Internal improvements to "gsm" for family = NegBin
+	* Added suppressWarnings() to eliminate warnings from nlm 
+	* Added use of tryCatch to handle any errors product by nlm
+
+5) Added new reference: Helwig (2020+) JCGS
+
+
+
+
 Changes from ver 1.0-2 to ver 1.0-3  (2020-07-06)
 
 

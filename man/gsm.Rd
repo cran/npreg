@@ -5,12 +5,12 @@
 Fit a Generalized Smooth Model
 }
 \description{
-Fits a generalized semi- or nonparametric regression model with the smoothing parameter selected via one of six methods: GCV, OCV, GACV, ACV, AIC, or BIC.
+Fits a generalized semi- or nonparametric regression model with the smoothing parameter selected via one of seven methods: GCV, OCV, GACV, ACV, PQL, AIC, or BIC.
 }
 \usage{
 gsm(formula, family = gaussian, data, weights, types = NULL, tprk = TRUE, 
     knots = NULL, update = TRUE, spar = NULL, lambda = NULL, control = list(),
-    method = c("GCV", "OCV", "GACV", "ACV", "AIC", "BIC"))
+    method = c("GCV", "OCV", "GACV", "ACV", "PQL", "AIC", "BIC"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -61,7 +61,7 @@ Optional list with named components controlling the root finding when the smooth
   }
 }
   \item{method}{
-Method for selecting the smoothing parameter. Ignored if \code{lambda} is provided. \code{GACV} and \code{ACV} are only available for canonical link functions. 
+Method for selecting the smoothing parameter. Ignored if \code{lambda} is provided.
 }
 
 }
@@ -116,13 +116,15 @@ An object of class "gsm" with components:
   \item{null.deviance}{the deviance of the null model (i.e., intercept only).}
 }
 \references{
-Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. https://doi.org/10.1007/BF01404567
+Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \url{https://doi.org/10.1007/BF01404567}
 
-Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. https://doi.org/10.1007/978-1-4614-5369-7
+Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \url{https://doi.org/10.1007/978-1-4614-5369-7}
 
-Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. https://doi.org/10.1137/0912021
+Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. \url{https://doi.org/10.1137/0912021}
 
-Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. https://doi.org/10.4135/9781526421036885885
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \url{https://doi.org/10.4135/9781526421036885885}
+
+Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. https://doi.org/10.1080/10618600.2020.1806855
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>
@@ -148,6 +150,18 @@ poisson \tab \tab log, identity, sqrt \cr
 NegBin \tab \tab log, identity, sqrt \cr
 }
 See \code{\link{NegBin}} for information about the Negative Binomial family.
+}
+
+\section{Methods }{
+The smoothing parameter can be selected using one of seven methods: \cr
+Generalized Cross-Validation (GCV) \cr
+Ordinary Cross-Validation (OCV) \cr
+Generalized Approximate Cross-Validation (GACV) \cr
+Approximate Cross-Validation (ACV) \cr
+Penalized Quasi-Likelihood (PQL) \cr
+Akaike's Information Criterion (AIC) \cr
+Bayesian Information Criterion (BIC)
+
 }
 
 \section{Types of Smooths }{
@@ -262,14 +276,14 @@ set.seed(1)
 y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
 mod <- gsm(y ~ x, family = NegBin(theta = 1/2), knots = 10)
 mean((mod$linear.predictors - fx)^2)
-1 / mod$dispersion    # fixed theta
+mod$family$theta    # fixed theta
 
 # negative binomial (unknown theta)
 set.seed(1)
 y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
 mod <- gsm(y ~ x, family = NegBin, knots = 10)
 mean((mod$linear.predictors - fx)^2)
-1 / mod$dispersion    # estimated theta
+mod$family$theta    # estimated theta
 
 # gamma
 set.seed(1)
@@ -339,14 +353,14 @@ set.seed(1)
 y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
 mod <- gsm(y ~ x + z, family = NegBin(theta = 1/2), knots = knots)
 mean((mod$linear.predictors - fx)^2)
-1 / mod$dispersion    # fixed theta
+mod$family$theta    # fixed theta
 
 # negative binomial (unknown theta)
 set.seed(1)
 y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
 mod <- gsm(y ~ x + z, family = NegBin, knots = knots)
 mean((mod$linear.predictors - fx)^2)
-1 / mod$dispersion    # estimated theta
+mod$family$theta    # estimated theta
 
 # gamma
 set.seed(1)

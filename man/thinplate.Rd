@@ -63,11 +63,11 @@ Basis: Matrix of dimension \code{c(length(x), df)} where \code{df = nrow(as.matr
 Penalty: Matrix of dimension \code{c(r, r)} where \code{r = nrow(as.matrix(x))} is the number of knots.
 }
 \references{
-Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag. doi: https://doi.org/10.1007/978-1-4614-5369-7
+Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag.  \url{https://doi.org/10.1007/978-1-4614-5369-7}
 
-Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. Frontiers in Applied Mathematics and Statistics, 3(15), 1-13. doi: https://doi.org/10.3389/fams.2017.00015
+Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. \emph{Frontiers in Applied Mathematics and Statistics, 3}(15), 1-13. \url{https://doi.org/10.3389/fams.2017.00015}
 
-Helwig, N. E., & Ma, P. (2015). Fast and stable multiple smoothing parameter selection in smoothing spline analysis of variance models with large samples. Journal of Computational and Graphical Statistics, 24(3), 715-732. doi: https://doi.org/10.1080/10618600.2014.926819
+Helwig, N. E., & Ma, P. (2015). Fast and stable multiple smoothing parameter selection in smoothing spline analysis of variance models with large samples. \emph{Journal of Computational and Graphical Statistics, 24}(3), 715-732. \url{https://doi.org/10.1080/10618600.2014.926819}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

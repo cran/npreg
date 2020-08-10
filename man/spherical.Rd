@@ -55,9 +55,9 @@ Basis: Matrix of dimension \code{c(length(x), df)} where \code{df = nrow(knots) 
 Penalty: Matrix of dimension \code{c(r, r)} where \code{r = nrow(x)} is the number of knots.
 }
 \references{
-Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag. doi: https://doi.org/10.1007/978-1-4614-5369-7
+Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag. \url{https://doi.org/10.1007/978-1-4614-5369-7}
 
-Wahba, G (1981). Spline interpolation and smoothing on the sphere. SIAM Journal on Scientific Computing, 2, 5-16.
+Wahba, G (1981). Spline interpolation and smoothing on the sphere. \emph{SIAM Journal on Scientific Computing, 2}(1), 5-16. \url{https://doi.org/10.1137/0902002}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

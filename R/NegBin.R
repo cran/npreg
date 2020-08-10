@@ -102,7 +102,7 @@ NegBin <-
                    aic = aic, mu.eta = stats$mu.eta, initialize = initialize, 
                    validmu = validmu, valideta = stats$valideta, simulate = simfun,
                    logLik = logLik, canpar = canpar, cumulant = cumulant, 
-                   canonical = FALSE, theta = theta, fixed.theta = fixed.theta), 
+                   theta = theta, fixed.theta = fixed.theta), 
               class = "family")
     
   } # end NegBin

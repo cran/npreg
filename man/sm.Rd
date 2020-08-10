@@ -109,15 +109,15 @@ An object of class "sm" with components:
   \item{call}{the matched call.}
 }
 \references{
-Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. https://doi.org/10.1007/BF01404567
+Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \url{https://doi.org/10.1007/BF01404567}
 
-Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. https://doi.org/10.1007/978-1-4614-5369-7
+Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \url{https://doi.org/10.1007/978-1-4614-5369-7}
 
-Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. https://doi.org/10.1137/0912021
+Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. \url{https://doi.org/10.1137/0912021}
 
-Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. https://doi.org/10.4135/9781526421036885885
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \url{https://doi.org/10.4135/9781526421036885885}
 
-%Helwig, N. E. (in prep). Spectrally sparse nonparametric regression via Elastic Net penalized smoothing splines.
+Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. https://doi.org/10.1080/10618600.2020.1806855
 
 %Zou, H. and Hastie, T. (2005). Regularization and variable selection via the Elastic Net. \emph{Journal of the Royal Statistical Society, Series B., 67}, 301-320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
 }
@@ -129,6 +129,19 @@ Nathaniel E. Helwig <helwig@umn.edu>
 %}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\section{Methods }{
+The smoothing parameter can be selected using one of eight methods: \cr
+Generalized Cross-Validation (GCV) \cr
+Ordinary Cross-Validation (OCV) \cr
+Generalized Approximate Cross-Validation (GACV) \cr
+Approximate Cross-Validation (ACV) \cr
+Restricted Maximum Likelihood (REML) \cr
+Maximum Likelihood (ML) \cr
+Akaike's Information Criterion (AIC) \cr
+Bayesian Information Criterion (BIC)
+
+}
 
 \section{Types of Smooths }{
 

@@ -42,11 +42,11 @@ A list with components
 \references{
 https://stat.ethz.ch/R-manual/R-devel/library/stats/html/predict.smooth.spline.html
 
-Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. https://doi.org/10.1007/BF01404567
+Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \url{https://doi.org/10.1007/BF01404567}
 
-Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. https://doi.org/10.1007/978-1-4614-5369-7
+Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \url{https://doi.org/10.1007/978-1-4614-5369-7}
 
-Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. https://doi.org/10.4135/9781526421036885885
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \url{https://doi.org/10.4135/9781526421036885885}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

@@ -23,7 +23,6 @@ check_family <-
       family$cumulant <- function(mu){
         mu^2/2
       }
-      family$canonical <- ifelse(family$link == "identity", TRUE, FALSE)
     } else if(family$family == "binomial"){
       family$logLik <- function(y, n, mu, wt, dev){
         m <- if (any(n > 1)) 
@@ -37,7 +36,6 @@ check_family <-
       family$cumulant <- function(mu){
         -log(1 - mu)
       }
-      family$canonical <- ifelse(family$link == "logit", TRUE, FALSE)
     } else if(family$family == "poisson"){
       family$logLik <- function(y, n, mu, wt, dev){
         dpois(y, mu, log = TRUE) * wt
@@ -48,7 +46,6 @@ check_family <-
       family$cumulant <- function(mu){
         mu
       }
-      family$canonical <- ifelse(family$link == "log", TRUE, FALSE)
     } else if(family$family == "Gamma"){
       family$logLik <- function(y, n, mu, wt, dev){
         disp <- dev / sum(wt)
@@ -60,7 +57,6 @@ check_family <-
       family$cumulant <- function(mu){
         log(mu)
       }
-      family$canonical <- ifelse(family$link == "inverse", TRUE, FALSE)
     } else if(family$family == "inverse.gaussian"){
       family$logLik <- function(y, n, mu, wt, dev){
         disp <- dev / sum(wt)
@@ -72,10 +68,7 @@ check_family <-
       family$cumulant <- function(mu){
         -2/mu
       }
-      family$canonical <- ifelse(family$link == "1/mu^2", TRUE, FALSE)
-    } else if(family$family == "NegBin"){
-      family$canonical <- FALSE
-    } else {
+    } else if(!family$family == "NegBin"){
       stop("'family' not recognized")
     }
     

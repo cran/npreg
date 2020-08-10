@@ -2,10 +2,10 @@ gsm <-
   function(formula, family = gaussian, data, weights, 
            types = NULL, tprk = TRUE, knots = NULL, update = TRUE, 
            spar = NULL, lambda = NULL, control = list(),
-           method = c("GCV", "OCV", "GACV", "ACV", "AIC", "BIC")){
+           method = c("GCV", "OCV", "GACV", "ACV", "PQL", "AIC", "BIC")){
     # generalized semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-07-02
+    # Updated: 2020-07-24
     
     
     #########***#########   CHECKS   #########***#########
@@ -31,12 +31,9 @@ gsm <-
     
     # check 'method'
     method <- as.character(method[1])
-    method <- pmatch(toupper(method), c("GCV", "OCV", "GACV", "ACV", "AIC", "BIC"))
+    method <- pmatch(toupper(method), c("GCV", "OCV", "GACV", "ACV", "PQL", "AIC", "BIC"))
     if(is.na(method)) stop("Invalid 'method' input.")
-    method <- c("GCV", "OCV", "GACV", "ACV", "AIC", "BIC")[method]
-    if(!family$canonical && method %in% c("GACV", "ACV")){
-      stop("Input 'method' cannot be GACV or ACV for non-canonical links")
-    }
+    method <- c("GCV", "OCV", "GACV", "ACV", "PQL","AIC", "BIC")[method]
     
     
     #########***#########   FORMULA   #########***#########
@@ -203,6 +200,8 @@ print.gsm <-
       cat("\nGeneralized Approximate Cross-Validation (GACV): ", x$cv.crit,"\n\n")
     } else if(x$method == "ACV"){
       cat("\nApproximate Cross-Validation (ACV): ", x$cv.crit,"\n\n")
+    } else if(x$method == "PQL"){
+      cat("\nPenalized Quasi-Likelihood (PQL): ", x$cv.crit,"\n\n")
     } else if(x$method == "AIC"){
       cat("\nAkaike Information Criterion (AIC): ", x$aic,"\n\n")
     } else if(x$method == "BIC"){
