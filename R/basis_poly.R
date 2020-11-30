@@ -2,10 +2,10 @@ basis_poly <-
   function(x, knots, m = 2, d = 0, 
            xmin = min(x), xmax = max(x), 
            periodic = FALSE, rescale = FALSE,
-           intercept = FALSE){
+           intercept = FALSE, bernoulli = TRUE){
     # Polynomial Smoothing Spline Basis
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2019-04-04
+    # Update: 2020-10-22
     
     ### check x and k
     x <- as.numeric(x)
@@ -21,9 +21,15 @@ basis_poly <-
     d <- as.integer(d[1])
     if(d < 0 | d > 2) stop("Input 'd' must be 0, 1, or 2.")
     
+    ### check bernoulli
+    if(!bernoulli && periodic){
+      stop("Input 'bernoulli' must be TRUE when input 'periodic' is TRUE.")
+    }
+    
     ### get kernel function name
     kerns <- c("lin", "cub", "qui")
     fname <- paste0(kerns[m], "kern", d)
+    if(!bernoulli) fname <- paste0(".", fname)
     
     ### evaluate kernel function (or its derivative)
     Xs <- outer(X = x, Y = knots, FUN = fname, periodic = periodic)
@@ -38,15 +44,28 @@ basis_poly <-
         Xp <- NULL
       }
     } else {
-      if(d == 0){
-        Xp <- as.matrix(x - 1/2)
-        if(m == 3L) Xp <- cbind(Xp, ((x - 1/2)^2 - (1/12))/2 )
-      } else if(d == 1){
-        Xp <- matrix(1, nrow = length(x), ncol = 1)
-        if(m == 3L) Xp <- cbind(Xp, x - 1/2)
+      if(bernoulli){
+        if(d == 0){
+          Xp <- as.matrix(x - 1/2)
+          if(m == 3L) Xp <- cbind(Xp, ((x - 1/2)^2 - (1/12))/2 )
+        } else if(d == 1){
+          Xp <- matrix(1, nrow = length(x), ncol = 1)
+          if(m == 3L) Xp <- cbind(Xp, x - 1/2)
+        } else {
+          Xp <- matrix(0, nrow = length(x), ncol = 1)
+          if(m == 3L) Xp <- cbind(Xp, 1)
+        }
       } else {
-        Xp <- matrix(0, nrow = length(x), ncol = 1)
-        if(m == 3L) Xp <- cbind(Xp, 1)
+        if(d == 0){
+          Xp <- as.matrix(x)
+          if(m == 3L) Xp <- cbind(Xp, x^2)
+        } else if(d == 1){
+          Xp <- matrix(1, nrow = length(x), ncol = 1)
+          if(m == 3L) Xp <- cbind(Xp, 2 * x)
+        } else {
+          Xp <- matrix(0, nrow = length(x), ncol = 1)
+          if(m == 3L) Xp <- cbind(Xp, 2)
+        }
       }
       nullnames <- "x"
       if(m == 3L) nullnames <- c(nullnames, "x^2")
@@ -60,6 +79,7 @@ basis_poly <-
     # rescale?
     if(rescale){
       fname <- paste0(kerns[m], "kern", 0)
+      if(!bernoulli) fname <- paste0(".", fname)
       theta <- 0
       for(k in 1:length(knots)) {
         fargs <- list(x = knots[k], y = knots[k], periodic = periodic)
@@ -176,4 +196,56 @@ quikern2 <-
       val <- val + vx * vy 
     }
     val
+  }
+
+# linear smoothing spline (deriv = 0)
+.linkern0 <- 
+  function(x, y, periodic = FALSE){
+    pmin(x,y)
+  }
+
+# linear smoothing spline (deriv = 1)
+.linkern1 <- 
+  function(x, y, periodic = FALSE){
+    ifelse(x <= y, 1, 0)
+  }
+
+# cubic smoothing spline (deriv = 0)
+.cubkern0 <- 
+  function(x, y, periodic = FALSE){
+    xymin <- pmin(x, y)
+    xymax <- pmax(x, y)
+    xymin^2 * (3 * xymax - xymin) / 6
+  }
+
+# cubic smoothing spline (deriv = 1)
+.cubkern1 <- 
+  function(x, y, periodic = FALSE){
+    ifelse(x < y, x * y - x^2 / 2, y^2 / 2)
+  }
+
+# cubic smoothing spline (deriv = 2)
+.cubkern2 <- 
+  function(x, y, periodic = FALSE){
+    ifelse(x < y, y - x, 0)
+  }
+
+# quintic smoothing spline (deriv = 0)
+.quikern0 <- 
+  function(x, y, periodic = FALSE){
+    xymin <- pmin(x, y)
+    xymax <- pmax(x, y)
+    (xymin^3 * (xymin^2 - 5 * xymin * xymax + 10 * xymax^2)) / 120
+  }
+
+# quintic smoothing spline (deriv = 1)
+.quikern1 <- 
+  function(x, y, periodic = FALSE){
+    ifelse(x < y, x^2 * (x^2 - 4 * x * y + 6 * y^2), y^3 * (4 * x - y)) / 24
+  }
+
+# quintic smoothing spline (deriv = 2)
+.quikern2 <- 
+  function(x, y, periodic = FALSE){
+    ifelse(x < y, x * (x^2 - 3 * x * y + 3 * y^2), y^3) / 6
   }

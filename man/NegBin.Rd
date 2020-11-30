@@ -44,7 +44,9 @@ Nathaniel E. Helwig <helwig@umn.edu>
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{gsm}}
+\code{\link{gsm}} for fitting generalized smooth models with Negative Binomial responses
+
+\code{\link{theta.mle}} for maximum likelihood estimation of theta
 }
 \examples{
 # generate data

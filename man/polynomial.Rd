@@ -13,10 +13,10 @@ Generate the smoothing spline basis and penalty matrix for a polynomial spline. 
 basis_poly(x, knots, m = 2, d = 0, 
            xmin = min(x), xmax = max(x), 
            periodic = FALSE, rescale = FALSE, 
-           intercept = FALSE)
+           intercept = FALSE, bernoulli = TRUE)
 
 penalty_poly(x, m = 2, xmin = min(x), xmax = max(x), 
-             periodic = FALSE, rescale = FALSE)
+             periodic = FALSE, rescale = FALSE, bernoulli = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -47,6 +47,9 @@ If \code{TRUE}, the nonparametric part of the basis is divided by the average of
   \item{intercept}{
 If \code{TRUE}, the first column of the basis will be a column of ones. 
 }
+  \item{bernoulli}{
+If \code{TRUE}, scaled Bernoulli polynomials are used for the basis and penalty functions.
+}
 }
 \details{
 Generates a basis function or penalty matrix used to fit linear, cubic, and quintic smoothing splines (or evaluate their derivatives). 
@@ -70,6 +73,10 @@ For non-periodic smoothing splines, the penalty matrix consists of the \emph{rep
 evaluated at all combinations of \code{x}. For periodic smoothing splines, the modified reproducing kernel function
 \deqn{\rho(x, y) = (-1)^{m-1} \kappa_{2m}(|x-y|)}
 is evaluated for all combinations of \code{x}.
+
+If \code{bernoulli = FALSE}, the reproducing kernel function is defined as
+\deqn{\rho(x, y) = (1/(m-1)!)^2 \int_0^1 (x - u)_+^{m-1} (y - u)_+^{m-1} du }
+where \eqn{(.)_+ = \max(., 0)}. This produces the "classic" definition of a smoothing spline, where the function estimate is a piecewise polynomial function with pieces of degree \eqn{2m - 1}.
 }
 \value{
 Basis: Matrix of dimension \code{c(length(x), df)} where \code{df >= length(knots)}. If the smoothing spline basis is not periodic (default), then the number of columns is \code{df = length(knots) + m - !intercept}. For periodic smoothing splines, the basis has \code{m} fewer columns.

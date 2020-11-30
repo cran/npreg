@@ -4,7 +4,7 @@ fit_gsm <-
            family = check_family(gaussian)){
     # fit generalized semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-07-24
+    # Updated: 2020-08-23
     
     
     #########***#########   INITIALIZATIONS   #########***#########
@@ -96,9 +96,7 @@ fit_gsm <-
                    tol = control$tol)
         })
         coef <- attr(opt$objective, "coef")
-        df <- attr(opt$objective, "df")
         mu <- family$linkinv(cbind(depe$K, Rmat) %*% coef)
-        family$theta <- (nobs - df) / sum(depe$weights * (y - mu)^2 / mu)
         
         ##*## iterative update of theta and eta ##*##
         iter.out <- 0L
@@ -107,11 +105,10 @@ fit_gsm <-
         while(iter.out < control$maxit.out & vtol.out > control$epsilon.out){
           
           # step 1: theta update
-          theta.mle <- tryCatch(suppressWarnings({exp(nlm(f = tune.theta, p = log(family$theta), y = y, 
-                                                          n = nobs, wt = depe$weights, mu = mu,
-                                                          gradtol = control$tol.out)$estimate)}), 
-                                error = function(e) family$theta)
-          family <- NegBin(theta = theta.mle, link = family$link)
+          theta.hat <- theta.mle(y = y, mu = mu, wt = depe$weights)
+          family <- NegBin(theta = theta.hat, link = family$link)
+          attr(family$theta, "SE") <- attr(theta.hat, "SE")
+          attr(family$theta, "iter") <- attr(theta.hat, "iter")
           
           # step 2: eta update
           opt <- suppressWarnings({
@@ -169,9 +166,7 @@ fit_gsm <-
                                          family = family, method = method),
                     minimum = spar)
         coef <- attr(opt$objective, "coef")
-        df <- attr(opt$objective, "df")
         mu <- family$linkinv(cbind(depe$K, Rmat) %*% coef)
-        family$theta <- (nobs - df) / sum(depe$weights * (y - mu)^2 / mu)
         
         ##*## iterative update of theta and eta ##*##
         iter.out <- 0L
@@ -180,11 +175,10 @@ fit_gsm <-
         while(iter.out < control$maxit.out & vtol.out > control$epsilon.out){
           
           # step 1: theta update
-          theta.mle <- tryCatch(suppressWarnings({exp(nlm(f = tune.theta, p = log(family$theta), y = y, 
-                                                          n = nobs, wt = depe$weights, mu = mu,
-                                                          gradtol = control$tol.out)$estimate)}), 
-                                error = function(e) family$theta)
-          family <- NegBin(theta = theta.mle, link = family$link)
+          theta.hat <- theta.mle(y = y, mu = mu, wt = depe$weights)
+          family <- NegBin(theta = theta.hat, link = family$link)
+          attr(family$theta, "SE") <- attr(theta.hat, "SE")
+          attr(family$theta, "iter") <- attr(theta.hat, "iter")
           
           # step 2: eta update
           opt <- list(objective = tune.gsm(spar, y = y, Kmat = depe$K, Rmat = Rmat, 

@@ -29,6 +29,8 @@
 \alias{print.ss}
 %\alias{print.ssnet}
 \alias{rowkro}
+\alias{theta.grad}
+\alias{theta.info}
 \alias{tune.gsm}
 \alias{tune.acv.ss}
 \alias{tune.aic.ss}
@@ -37,7 +39,7 @@
 %\alias{tune.gcv.ssnet}
 \alias{tune.ocv.ss}
 \alias{tune.mle.ss}
-\alias{tune.theta}
+%\alias{tune.theta}
 
 \alias{ordkern}
 \alias{linkern0}
@@ -48,6 +50,14 @@
 \alias{quikern0}
 \alias{quikern1}
 \alias{quikern2}
+\alias{.linkern0}
+\alias{.linkern1}
+\alias{.cubkern0}
+\alias{.cubkern1}
+\alias{.cubkern2}
+\alias{.quikern0}
+\alias{.quikern1}
+\alias{.quikern2}
 \alias{s2fun}
 \alias{s4fun}
 \alias{s6fun}

@@ -71,6 +71,7 @@ In all cases, the inferential results are based on a (pseudo) F or chi-square st
   \item{kappa }{the collinearity indices. A value of 1 indicates no collinearity, and higher values indicate more collinearity of a given term with other model terms.}
   \item{pi }{the importance indices. Larger values indicate more importance, and the values satisfy \code{sum(pi) = 1}. Note that elements of \code{pi} can be negative.}
   \item{call }{the original function call.}
+  \item{family }{the specified family (for gsm objects).}
 }
 \references{
 Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \url{https://doi.org/10.4135/9781526421036885885}

@@ -124,7 +124,7 @@ Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing p
 
 Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \url{https://doi.org/10.4135/9781526421036885885}
 
-Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. https://doi.org/10.1080/10618600.2020.1806855
+Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \url{https://doi.org/10.1080/10618600.2020.1806855}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

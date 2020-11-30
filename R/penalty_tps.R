@@ -2,7 +2,7 @@ penalty_tps <-
   function(x, m = 2, rk = TRUE){
     # Thin-Plate Spline Penalty
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2019-04-04
+    # Update: 2020-11-28
     
     # initializations
     m <- as.integer(m)
@@ -28,7 +28,7 @@ penalty_tps <-
     Rkern <- const * (dmat ^ (2 * m - xdim))
     if(even){
       dmat <- log(dmat)
-      naid <- which(is.na(dmat))
+      naid <- which(is.infinite(dmat))
       dmat[naid] <- 0
       Rkern <- Rkern * dmat
     } 

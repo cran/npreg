@@ -12,7 +12,7 @@ ss(x, y = NULL, w = NULL, df, spar = NULL, lambda = NULL,
    method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"), 
    m = 2L, periodic = FALSE, all.knots = FALSE, nknots = .nknots.smspl, 
    knots = NULL, keep.data = TRUE, df.offset = 0, penalty = 1, 
-   control.spar = list(), tol = 1e-6 * IQR(x))
+   control.spar = list(), tol = 1e-6 * IQR(x), bernoulli = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,7 +26,7 @@ Response vector of length \eqn{n}. If y is missing or NULL, the responses are as
 Weights vector of length \eqn{n}. Defaults to all 1.  
 }
   \item{df}{
-Equivalent degrees of freedom (trace of the smoother matrix). Must be in \eqn{(1,nx]}, where \eqn{nx} is the number of unique x values, see below.  
+Equivalent degrees of freedom (trace of the smoother matrix). Must be in \eqn{[m,nx]}, where \eqn{nx} is the number of unique x values, see below.  
 }
   \item{spar}{
 Smoothing parameter. Typically (but not always) in the range \eqn{(0,1]}. If specified \code{lambda = 256^(3*(spar-1))}.
@@ -80,6 +80,9 @@ Optional list with named components controlling the root finding when the smooth
   \item{tol}{
 Tolerance for same-ness or uniqueness of the x values. The values are binned into bins of size tol and values which fall into the same bin are regarded as the same. Must be strictly positive (and finite).
 }
+  \item{bernoulli}{
+If \code{TRUE}, scaled Bernoulli polynomials are used for the basis and penalty functions. If \code{FALSE}, produces the "classic" definition of a smoothing spline, where the function estimate is a piecewise polynomial function with pieces of degree \eqn{2m - 1}. See \code{\link{polynomial}} for details.  
+}
 
 }
 \details{
@@ -131,6 +134,7 @@ An object of class "ss" with components:
     \item{periodic:}{is spline periodic?}
     \item{cov.sqrt}{square root of covariance matrix of \code{coef} such that \code{tcrossprod(coef)} reconstructs the covariance matrix.}
     \item{weighted}{were weights \code{w} used in fitting?}
+    \item{bernoulli}{were Bernoulli polynomials used in fitting?}
   }
   }
   \item{call}{the matched call.}
@@ -150,7 +154,7 @@ Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \
 
 Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \url{https://doi.org/10.4135/9781526421036885885}
 
-Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. https://doi.org/10.1080/10618600.2020.1806855
+Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \url{https://doi.org/10.1080/10618600.2020.1806855}
 
 Wahba, G. (1985). A comparison of {GCV} and {GML} for choosing the smoothing parameters in the generalized spline smoothing problem. \emph{The Annals of Statistics, 4}, 1378-1402. \url{https://doi.org/10.1214/aos/1176349743}
 }

@@ -3,10 +3,10 @@ ss <-
            method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"),
            m = 2L, periodic = FALSE, all.knots = FALSE, nknots = .nknots.smspl, 
            knots = NULL, keep.data = TRUE, df.offset = 0, penalty = 1, 
-           control.spar = list(), tol = 1e-6 * IQR(x)){
+           control.spar = list(), tol = 1e-6 * IQR(x), bernoulli = TRUE){
     # smoothing spline in R
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-06-27
+    # Updated: 2020-10-22
     
     
     #########***#########   INITIAL CHECKS   #########***#########
@@ -200,10 +200,10 @@ ss <-
     # make basis function matrix
     X <- cbind(1, basis_poly(x = data$x, knots = knots, 
                              m = m, xmin = xmin, xmax = xmax, 
-                             periodic = periodic))
+                             periodic = periodic, bernoulli = bernoulli))
     nsdim <- ifelse(periodic, 1, m)
-    Q <- penalty_poly(x = knots, m = m, xmin = xmin, 
-                      xmax = xmax, periodic = periodic)
+    Q <- penalty_poly(x = knots, m = m, xmin = xmin, xmax = xmax, 
+                      periodic = periodic, bernoulli = bernoulli)
     
     # EVD of Q
     eps <- .Machine$double.eps
@@ -467,7 +467,7 @@ ss <-
     # collect results
     fitinfo <- list(n = n, knot = knots, nk = nsdim + nknots, coef = beta,
                     min = xmin, range = xmax - xmin, m = m, periodic = periodic,
-                    cov.sqrt = cov.sqrt, weighted = !no.wghts)
+                    cov.sqrt = cov.sqrt, weighted = !no.wghts, bernoulli = bernoulli)
     ss <- list(x = data$x, y = fit, w = data$w, yin = data$wy / ifelse(data$w > 0, data$w, 1),
                tol = tol, data = if(keep.data) data.orig, lev = lev, 
                cv.crit = cv.crit, pen.crit = sse, crit = crit, df = df, 

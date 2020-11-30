@@ -1,3 +1,39 @@
+Changes from ver 1.0-4 to ver 1.0-5  (2020-11-30)
+
+1) Bug fix for summary.gsm regarding p-values for smooth terms
+	* Previously returned incorrect chi-square and p-values
+	* Now uses correct chi-square (or F-test) and p-values
+
+2) Bug fix for penalty_tps with two-dimensional predictor
+	* Previously used is.na() instead of is.infinite() resulting in NaN
+	* Thanks to Joseph Antonelli at Florida for discovering the bug
+
+3) Improvements to pseudo-significance testing for smooth terms
+	* Previously allowed for df < 1, which could result in artificially
+	  small p-values for effect functions with df < 1
+	* Now uses pmax(df,1) for significance tests to avoid this issue
+
+4) New argument "df" for the "sm" function (supplement to "spar" and "lambda").
+	* Fits a smooth with a specified equivalent degrees of freedom.
+	* Equivalent degrees of freedom = the trace of the smoother matrix.
+
+5) New argument "bernoulli" to the "basis_poly", "penalty_poly" and "ss" functions
+	* If TRUE (default) uses scaled Bernoulli polynomials for kernel
+	* If FALSE produces classic definition of smoothing spline
+
+6) Internal improvements for "gsm" with family = NegBin and unknown theta
+	* Previously used nlm function to optimize the log-likelihood
+	* Now uses theta.mle function, which is faster and more stable
+
+7) Internal improvements for "psolve" when checking symmetry of a
+	* Previously used isSymmetric(a) to check for symmetry
+	* Now uses isSymmetric(unname(a)) to check for symmetry 
+
+8) Added DOI hyperlink for Helwig (2020+) JCGS
+
+
+
+
 
 Changes from ver 1.0-3 to ver 1.0-4  (2020-08-09)
 

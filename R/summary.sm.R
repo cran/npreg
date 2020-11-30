@@ -2,7 +2,7 @@ summary.sm <-
   function(object, ...){
     # summary method for class "sm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-09-24
+    # Updated: 2020-08-30
     
     # get residuals
     resid <- object$data[,1] - object$fitted.values
@@ -83,7 +83,8 @@ summary.sm <-
     
     # smooth coefficients table
     s.Fstat <- (pmax(ss, 0) / s.df) / object$sigma^2
-    s.pvals <- 1 - pf(s.Fstat, df1 = s.df, df2 = erdf)
+    #s.pvals <- 1 - pf(s.Fstat, df1 = s.df, df2 = erdf)
+    s.pvals <- 1 - pf(s.Fstat, df1 = pmax(s.df, 1), df2 = erdf)
     s.table <- rbind(cbind(s.df, ss, ss / s.df, s.Fstat, s.pvals),
                      c(erdf, erdf * object$sigma^2, object$sigma^2, NA, NA))
     colnames(s.table) <- c("Df", "Sum Sq", "Mean Sq", "F value", "Pr(>F)")

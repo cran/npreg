@@ -2,7 +2,7 @@ psolve <-
   function(a, b, tol){
     # Pseudo-Solve a System of Equations
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2019-04-01
+    # Update: 2020-11-29
     
     
     ######  CHECK  ######
@@ -40,7 +40,7 @@ psolve <-
     ######  SOLVE  ######
     
     ## symmetric a?
-    symmetric <- isSymmetric(a)
+    symmetric <- isSymmetric(unname(a))
     if(symmetric){
       aeig <- eigen(a, symmetric = TRUE)
       arnk <- sum(aeig$values > aeig$values[1] * tol * mdim)

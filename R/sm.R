@@ -1,10 +1,10 @@
 sm <- 
   function(formula, data, weights, types = NULL, tprk = TRUE, knots = NULL, 
-           update = TRUE, spar = NULL, lambda = NULL, control = list(),
+           update = TRUE, df, spar = NULL, lambda = NULL, control = list(),
            method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC")){
     # semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-06-27
+    # Updated: 2020-10-21
     
     
     #########***#########   CHECKS   #########***#########
@@ -104,8 +104,16 @@ sm <-
     
     #########***#########   FIT MODEL   #########***#########
     
+    # check df
+    if(!missing(df)){
+      df <- as.numeric(df[1])
+      if(df < ncol(depe$K) | df > nobs) stop("'df' must satisfy:  m < df < n")
+    } else {
+      df <- NULL
+    }
+    
     # fit model
-    fit <- fit_sm(y = yvar, depe = depe, lambda = lambda,
+    fit <- fit_sm(y = yvar, depe = depe, df = df, lambda = lambda,
                   tprk = tprk, control = control, method = method)
     
     # use Algorithm 3.2 from Gu and Wahba (1991)
@@ -130,7 +138,7 @@ sm <-
       }
       
       # refit model
-      fit <- fit_sm(y = yvar, depe = depe, lambda = lambda,
+      fit <- fit_sm(y = yvar, depe = depe, df = df, lambda = lambda,
                     tprk = tprk, control = control, method = method)
       
     } # end if(update && (length(depe$thetas) > 1L) && !allzero)

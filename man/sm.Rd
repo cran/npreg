@@ -9,7 +9,7 @@ Fits a semi- or nonparametric regression model with the smoothing parameter sele
 }
 \usage{
 sm(formula, data, weights, types = NULL, tprk = TRUE, knots = NULL,
-   update = TRUE, spar = NULL, lambda = NULL, control = list(),
+   update = TRUE, df, spar = NULL, lambda = NULL, control = list(),
    method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"))
 }
 %- maybe also 'usage' for other objects documented here.
@@ -34,6 +34,9 @@ Spline knots for the estimation of the nonparametric effects. For models with mu
 }
   \item{update}{
 If \code{TRUE}, steps 1-2 of Gu and Wahba's (1991) algorithm 3.2 are used to update the "extra" smoothing parameters. If \code{FALSE}, only step 1 of algorithm 3.2 is used, so each effect is given equal influence on the penalty. Only applicable when multiple smooth terms are included. 
+}
+  \item{df}{
+Equivalent degrees of freedom (trace of the smoother matrix). Must be in \eqn{[m,n]} where \eqn{m} is the number of columns of the null space basis function matrix \eqn{X}, and \eqn{n} is the number of observations.
 }
   \item{spar}{
 Smoothing parameter. Typically (but not always) in the range \eqn{(0,1]}. If specified \code{lambda = 256^(3*(spar-1))}.
@@ -117,7 +120,7 @@ Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing p
 
 Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \url{https://doi.org/10.4135/9781526421036885885}
 
-Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. https://doi.org/10.1080/10618600.2020.1806855
+Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \url{https://doi.org/10.1080/10618600.2020.1806855}
 
 %Zou, H. and Hastie, T. (2005). Regularization and variable selection via the Elastic Net. \emph{Journal of the Royal Statistical Society, Series B., 67}, 301-320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
 }

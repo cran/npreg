@@ -1,9 +1,9 @@
 fit_sm <-
-  function(y, depe, lambda = NULL, tprk = TRUE, 
-           control = list(), method = "GCV"){
+  function(y, depe, df = NULL, lambda = NULL, 
+           tprk = TRUE, control = list(), method = "GCV"){
     # fit semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2019-10-28
+    # Updated: 2020-10-21
     
     
     #########***#########   REPARAMETERIZATION   #########***#########
@@ -117,7 +117,7 @@ fit_sm <-
     
     df.offset <- 0
     penalty <- 1
-    if(is.null(lambda)){
+    if(is.null(df) && is.null(lambda)){
       interval <- c(control$lower, control$upper)
       if(method == "GCV"){
         
@@ -245,6 +245,15 @@ fit_sm <-
       } # end if(method == "GCV")
       
     } else {
+      
+      # convert df to lambda
+      if(is.null(lambda)){
+        interval <- 256^(3 * c(control$lower - 1, control$upper - 1))
+        getlam <- optimize(df2lambda, interval = interval, df = df, n = n, 
+                           nsdim = nsdim, dvec = dvec, tol = .Machine$double.eps)
+        lambda <- getlam$minimum
+        crit <- getlam$objective
+      } # end if(is.null(lambda))
       
       # fitting with lambda
       shrink <- 1 / (1 + n * lambda * dvec)
