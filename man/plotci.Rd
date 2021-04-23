@@ -9,8 +9,9 @@ Modification to the \code{\link{plot}} function that adds confidence intervals. 
 }
 \usage{
 plotci(x, y, se, level = 0.95, crit.val = NULL, 
-       add = FALSE, col.ci = NULL, alpha = NULL, 
-       bars = NULL, bw = 0.05, linkinv = NULL, ...)
+       add = FALSE, col = NULL, col.ci = NULL, 
+       alpha = NULL, bars = NULL, bw = 0.05, 
+       linkinv = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,6 +32,9 @@ an optional critical value for the intervals. If provided, the \code{level} inpu
 }
   \item{add}{
 a switch controlling whether a new plot should be created (via a call to \code{\link{plot}}) or if the plot should be added to the current plot (via a call to \code{\link{lines}}).
+}
+  \item{col}{
+a character specifying the color for plotting the lines/points.  
 }
   \item{col.ci}{
 a character specifying the color for plotting the intervals.  

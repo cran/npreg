@@ -116,15 +116,15 @@ An object of class "gsm" with components:
   \item{null.deviance}{the deviance of the null model (i.e., intercept only).}
 }
 \references{
-Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \url{https://doi.org/10.1007/BF01404567}
+Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \doi{10.1007/BF01404567}
 
-Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \url{https://doi.org/10.1007/978-1-4614-5369-7}
+Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \doi{10.1007/978-1-4614-5369-7}
 
-Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. \url{https://doi.org/10.1137/0912021}
+Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. \doi{10.1137/0912021}
 
-Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \url{https://doi.org/10.4135/9781526421036885885}
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \doi{10.4135/9781526421036885885}
 
-Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \url{https://doi.org/10.1080/10618600.2020.1806855}
+Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \doi{10.1080/10618600.2020.1806855}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>
@@ -192,7 +192,7 @@ tps.cub \tab Cubic thin-plate spline (\eqn{m = 2}). \cr
 tps.qui \tab Quintic thin-plate spline (\eqn{m = 3}). \cr
 }
 
-For details on the spline kernel functions, see \code{\link{basis_nom}} (nominal), \code{\link{basis_ord}} (ordinal), \code{\link{basis_poly}} (polynomial), \code{\link{basis_sph}} (spherical), and \code{\link{basis_tps}} (thin-plate).
+For details on the spline kernel functions, see \code{\link{basis.nom}} (nominal), \code{\link{basis.ord}} (ordinal), \code{\link{basis.poly}} (polynomial), \code{\link{basis.sph}} (spherical), and \code{\link{basis.tps}} (thin-plate).
 
 }
 

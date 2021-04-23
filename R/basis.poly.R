@@ -1,11 +1,10 @@
-basis_poly <-
-  function(x, knots, m = 2, d = 0, 
-           xmin = min(x), xmax = max(x), 
-           periodic = FALSE, rescale = FALSE,
-           intercept = FALSE, bernoulli = TRUE){
+basis.poly <-
+  function(x, knots, m = 2, d = 0, xmin = min(x), xmax = max(x), 
+           periodic = FALSE, rescale = FALSE, intercept = FALSE, 
+           bernoulli = TRUE, ridge = FALSE){
     # Polynomial Smoothing Spline Basis
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2020-10-22
+    # Update: 2021-04-09
     
     ### check x and k
     x <- as.numeric(x)
@@ -77,7 +76,7 @@ basis_poly <-
     } # end if(periodic || m == 1L)
     
     # rescale?
-    if(rescale){
+    if(rescale & !ridge){
       fname <- paste0(kerns[m], "kern", 0)
       if(!bernoulli) fname <- paste0(".", fname)
       theta <- 0
@@ -90,10 +89,21 @@ basis_poly <-
       theta <- 1
     }
     
+    # check ridge
+    if(ridge){
+      Q <- penalty.poly(knots, m = m, xmin = xmin, xmax = xmax,
+                        periodic = periodic, bernoulli = bernoulli)
+      Qeig <- eigen(Q, symmetric = TRUE)
+      Qrnk <- sum(Qeig$values > Qeig$values[1] * ncol(Q) * .Machine$double.eps)
+      Qisqrt <- Qeig$vectors[,1:Qrnk,drop=FALSE] %*% diag(1/sqrt(Qeig$values[1:Qrnk]), nrow = Qrnk, ncol = Qrnk)
+      Xs <- Xs %*% Qisqrt
+      colnames(Xs) <- paste("knot", 1:ncol(Xs), sep = ".")
+    }
+    
     # return results
     return(cbind(Xp, theta * Xs))
     
-  } # end basis_poly.R
+  } # end basis.poly.R
 
 # linear smoothing spline (deriv = 0)
 linkern0 <- 

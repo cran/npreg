@@ -1,8 +1,8 @@
-penalty_sph <- 
+penalty.sph <- 
   function(x, m = 2, rescale = TRUE){
     # Spherical Smoothing Spline Penalty
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2019-04-04
+    # Update: 2021-04-09
     
     # initializations
     m <- as.integer(m)

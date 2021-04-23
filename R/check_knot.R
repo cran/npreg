@@ -2,7 +2,7 @@ check_knot <-
   function(mf, type, xrng, xlev, tprk, knots = NULL){
     # check and/or sample spline knots
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: Mar 31, 2019
+    # last updated: 2021-04-20
     
     ### initializations
     mt <- attr(mf, "terms")                 # mt contains model info and terms 
@@ -26,13 +26,14 @@ check_knot <-
       knots <- vector("list", nxvar)
       names(knots) <- xnames
       if(!tprk){
-        for(j in 1:nxvar) knots[[j]] <- knot1samp(mf[,j+1])
+        nk <- ifelse(nxvar == 1L, 10, 5)
+        for(j in 1:nxvar) knots[[j]] <- knot1samp(mf[,j+1], nk)
       } else {
         if(nxvar == 1L){
-          knots[[1]] <- knot1samp(mf[,2])
+          knots[[1]] <- knot1samp(mf[,2], 10)
         } else {
-          if(nxvar < 4L){
-            knotid <- bin_sample(mf[,-1], index.return = TRUE)$ix
+          if(nxvar < 14L){
+            knotid <- bin.sample(mf[,-1], index.return = TRUE)$ix
             if(length(knotid) > 100) knotid <- sample(knotid, size = 100)
           } else {
             knotid <- sample(1:nobs, size = min(100, nobs))
@@ -169,12 +170,16 @@ check_knot <-
         }
         
         # multiple predictor variables
-        knotid <- bin_sample(mf[,-1,drop=FALSE], index.return = TRUE)$ix
-        lk <- length(knotid)
-        if(lk > nknots){
-          knotid <- sample(knotid, nknots)
-        } else if(lk < nknots) {
-          knotid <- c(knotid, sample(seq(1,nobs)[-knotid], nknots - lk))
+        if(nxvar < 14L){
+          knotid <- bin.sample(mf[,-1,drop=FALSE], index.return = TRUE)$ix
+          lk <- length(knotid)
+          if(lk > nknots){
+            knotid <- sample(knotid, nknots)
+          } else if(lk < nknots) {
+            knotid <- c(knotid, sample(seq(1,nobs)[-knotid], nknots - lk))
+          }
+        } else {
+          knotid <- sample(1:nobs, size = nknots)
         }
         for(j in 1:nxvar) knots[[j]] <- mf[knotid,j+1]
         return(knots)
@@ -300,21 +305,8 @@ check_knot <-
           return(knots)
         }
         
-        # single predictor variable
-        if(nxvar == 1L){
-          knots[[1]] <- knot1samp(mf[,2L], nknots)
-          return(knots)
-        }
-        
-        # multiple predictor variables
-        knotid <- bin_sample(mf[,-1,drop=FALSE], index.return = TRUE)$ix
-        lk <- length(knotid)
-        if(lk > nknots){
-          knotid <- sample(knotid, nknots)
-        } else if(lk < nknots) {
-          knotid <- c(knotid, sample(seq(1,nobs)[-knotid], nknots - lk))
-        }
-        for(j in 1:nxvar) knots[[j]] <- mf[knotid,j+1]
+        # select nknots for each predictor
+        for(j in 1:nxvar) knots[[j]] <- knot1samp(mf[,j+1], nknots)
         return(knots)
         
       } else {

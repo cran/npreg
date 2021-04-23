@@ -9,7 +9,8 @@ Computes the maximum likelihood estimate of the size (theta) parameter for the N
 }
 \usage{
 theta.mle(y, mu, theta, wt = 1, 
-          maxit = 100, tol = .Machine$double.eps^0.5)
+          maxit = 100, maxth = .Machine$double.xmax,
+          tol = .Machine$double.eps^0.5)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,6 +28,9 @@ weight vector
 }
   \item{maxit}{
 max number of iterations  
+}
+  \item{maxth}{
+max possible value of \code{theta}
 }
   \item{tol}{
 convergence tolerance  

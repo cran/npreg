@@ -74,11 +74,11 @@ In all cases, the inferential results are based on a (pseudo) F or chi-square st
   \item{family }{the specified family (for gsm objects).}
 }
 \references{
-Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \url{https://doi.org/10.4135/9781526421036885885}
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \doi{10.4135/9781526421036885885}
 
-Nychka, D. (1988). Bayesian confience intervals for smoothing splines. \emph{Journal of the American Statistical Association, 83(404)}, 1134-1143. \url{https://doi.org/10.2307/2290146}
+Nychka, D. (1988). Bayesian confience intervals for smoothing splines. \emph{Journal of the American Statistical Association, 83(404)}, 1134-1143. \doi{10.2307/2290146}
 
-Wahba, G. (1983). Bayesian "confidence intervals" for the cross-validated smoothing spline. \emph{Journal of the Royal Statistical Society. Series B, 45(1)}, 133-150. \url{https://doi.org/10.1111/j.2517-6161.1983.tb01239.x}
+Wahba, G. (1983). Bayesian "confidence intervals" for the cross-validated smoothing spline. \emph{Journal of the Royal Statistical Society. Series B, 45(1)}, 133-150. \doi{10.1111/j.2517-6161.1983.tb01239.x}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

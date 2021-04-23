@@ -1,4 +1,39 @@
-Changes from ver 1.0-4 to ver 1.0-5  (2020-11-30)
+
+Changes:  ver 1.0-6  (2021-04-22)
+
+1) varimp: new function for variable importance indices
+	* Calculates importance index for each term in smooth model
+	* Partitions importance into parametric and nonparametric components
+
+2) bin.sample: new function for bin sampling observations (for spline knots)
+	* Bin multidimensional data and randomly sample w/in each bin
+	* Options to return bin indices and/or breaks defining bins
+
+3) sm and gsm knot sampling changes (improvements) for all options
+	* Now uses type = 2 quantiles for continuous predictors (instead of type = 7)
+	* Unless knots are provided, bin.sample generates knots for 13 or fewer predictors
+
+4) Added "ridge" parameterization for all basis functions
+	* Basis matrix is post-multiplied by inverse square root of penalty matrix 
+	* Penalty matrix is identity matrix when using ridge parameterization
+
+5) plotci improvements
+	* Added col argument (for lines and points)
+	* Can now add factors without axes warning
+
+6) theta.mle and gsm improvements for NegBin with unknown theta
+	* Stabilized iterative algorithm to avoid Inf estimates
+	* Estimated theta now must be less than .Machine$double.xmax
+
+7) More flexibility for names of basis and penalty functions
+	* Now can use "." instead of "_" for any basis or penalty function
+	* Ex:  basis.poly() is equivalent to basis_poly()
+
+
+
+
+
+Changes:  ver 1.0-5  (2020-11-30)
 
 1) Bug fix for summary.gsm regarding p-values for smooth terms
 	* Previously returned incorrect chi-square and p-values
@@ -35,7 +70,7 @@ Changes from ver 1.0-4 to ver 1.0-5  (2020-11-30)
 
 
 
-Changes from ver 1.0-3 to ver 1.0-4  (2020-08-09)
+Changes:  ver 1.0-4  (2020-08-09)
 
 1) Bug fix in "gsm" with family = NegBin regarding SE calculation
 	* Previously multiplied the se.lp by sqrt(1/theta)
@@ -58,7 +93,7 @@ Changes from ver 1.0-3 to ver 1.0-4  (2020-08-09)
 
 
 
-Changes from ver 1.0-2 to ver 1.0-3  (2020-07-06)
+Changes:  ver 1.0-3  (2020-07-06)
 
 
 1) Bug fix in "gsm" with user supplied weights
@@ -92,7 +127,7 @@ Changes from ver 1.0-2 to ver 1.0-3  (2020-07-06)
 
 
 
-Changes from ver 1.0-1 to ver 1.0-2  (2020-05-04)
+Changes:  ver 1.0-2  (2020-05-04)
 
 1) Bug fix in "summary.gsm" for models with null space dimension of one
 	* Previously resulted in an error during the SE calculation
@@ -119,7 +154,7 @@ Changes from ver 1.0-1 to ver 1.0-2  (2020-05-04)
 
 
 
-Changes from ver 1.0-0 to ver 1.0-1  (2019-12-09)
+Changes:  ver 1.0-1  (2019-12-09)
 
 1) Improvement to "gsm" function for binomial responses
 	* Now allows the response variable to be a factor

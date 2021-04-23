@@ -1,8 +1,8 @@
-penalty_tps <-
+penalty.tps <-
   function(x, m = 2, rk = TRUE){
     # Thin-Plate Spline Penalty
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2020-11-28
+    # Update: 2021-04-09
     
     # initializations
     m <- as.integer(m)

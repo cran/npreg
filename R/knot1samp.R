@@ -44,11 +44,13 @@ knot1samp <-
     
     # if x is a vector, return quantiles as knots
     if(any(xc == c("integer", "numeric"))){
-      probs <- seq(0, 1, length.out = n + 1)[1:n]
-      return(quantile(x, probs = probs))
+      #probs <- seq(0, 1, length.out = n + 1)[1:n]
+      #return(quantile(x, probs = probs))
+      probs <- seq(0, 1, length.out = n)
+      return(quantile(x, probs = probs, type = 2))
     }
     
     # if x is a matrix, return bin-sampled knots
-    return(bin_sample(x, n, breaks.return = TRUE)$bx)
+    return(bin.sample(x, n, breaks.return = TRUE)$bx)
     
   }

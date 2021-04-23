@@ -1,9 +1,9 @@
-penalty_poly <-
+penalty.poly <-
   function(x, m = 2, xmin = min(x), xmax = max(x), 
            periodic = FALSE, rescale = FALSE, bernoulli = TRUE){
     # Polynomial Smoothing Spline Penalty
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2020-10-22
+    # Update: 2021-04-09
     
     # initializations
     m <- as.integer(m)

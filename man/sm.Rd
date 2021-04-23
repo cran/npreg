@@ -112,15 +112,15 @@ An object of class "sm" with components:
   \item{call}{the matched call.}
 }
 \references{
-Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \url{https://doi.org/10.1007/BF01404567}
+Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \doi{10.1007/BF01404567}
 
-Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \url{https://doi.org/10.1007/978-1-4614-5369-7}
+Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \doi{10.1007/978-1-4614-5369-7}
 
-Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. \url{https://doi.org/10.1137/0912021}
+Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing parameters via the Newton method. \emph{SIAM Journal on Scientific and Statistical Computing, 12(2)}, 383-398. \doi{10.1137/0912021}
 
-Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \url{https://doi.org/10.4135/9781526421036885885}
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \doi{10.4135/9781526421036885885}
 
-Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \url{https://doi.org/10.1080/10618600.2020.1806855}
+Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \doi{10.1080/10618600.2020.1806855}
 
 %Zou, H. and Hastie, T. (2005). Regularization and variable selection via the Elastic Net. \emph{Journal of the Royal Statistical Society, Series B., 67}, 301-320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
 }
@@ -174,7 +174,7 @@ tps.cub \tab Cubic thin-plate spline (\eqn{m = 2}). \cr
 tps.qui \tab Quintic thin-plate spline (\eqn{m = 3}). \cr
 }
 
-For details on the spline kernel functions, see \code{\link{basis_nom}} (nominal), \code{\link{basis_ord}} (ordinal), \code{\link{basis_poly}} (polynomial), \code{\link{basis_sph}} (spherical), and \code{\link{basis_tps}} (thin-plate).
+For details on the spline kernel functions, see \code{\link{basis.nom}} (nominal), \code{\link{basis.ord}} (ordinal), \code{\link{basis.poly}} (polynomial), \code{\link{basis.sph}} (spherical), and \code{\link{basis.tps}} (thin-plate).
 
 }
 
@@ -353,10 +353,10 @@ knots <- list(x1v = quantile(data$x1v, probs = seq(0, 1, length.out = 10)),
               x4v = quantile(data$x4v, probs = seq(0, 1, length.out = 10)))
               
 # define ssa knot indices
-knots.indx <- c(bin_sample(data$x1v, nbin = 10, index.return = TRUE)$ix,
-                bin_sample(data$x2v, nbin = 10, index.return = TRUE)$ix,
-                bin_sample(data$x3v, nbin = 10, index.return = TRUE)$ix,
-                bin_sample(data$x4v, nbin = 10, index.return = TRUE)$ix)
+knots.indx <- c(bin.sample(data$x1v, nbin = 10, index.return = TRUE)$ix,
+                bin.sample(data$x2v, nbin = 10, index.return = TRUE)$ix,
+                bin.sample(data$x3v, nbin = 10, index.return = TRUE)$ix,
+                bin.sample(data$x4v, nbin = 10, index.return = TRUE)$ix)
 
 # fit sm with specified knots (tprk = TRUE)
 sm.ssa <- sm(y ~ x1v + x2v + x3v + x4v, data = data, knots = knots.indx)

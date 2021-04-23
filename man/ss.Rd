@@ -148,15 +148,15 @@ An object of class "ss" with components:
 \references{
 https://stat.ethz.ch/R-manual/R-devel/library/stats/html/smooth.spline.html
 
-Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \url{https://doi.org/10.1007/BF01404567}
+Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \doi{10.1007/BF01404567}
 
-Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \url{https://doi.org/10.1007/978-1-4614-5369-7}
+Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \doi{10.1007/978-1-4614-5369-7}
 
-Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \url{https://doi.org/10.4135/9781526421036885885}
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \doi{10.4135/9781526421036885885}
 
-Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \url{https://doi.org/10.1080/10618600.2020.1806855}
+Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \doi{10.1080/10618600.2020.1806855}
 
-Wahba, G. (1985). A comparison of {GCV} and {GML} for choosing the smoothing parameters in the generalized spline smoothing problem. \emph{The Annals of Statistics, 4}, 1378-1402. \url{https://doi.org/10.1214/aos/1176349743}
+Wahba, G. (1985). A comparison of {GCV} and {GML} for choosing the smoothing parameters in the generalized spline smoothing problem. \emph{The Annals of Statistics, 4}, 1378-1402. \doi{10.1214/aos/1176349743}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>

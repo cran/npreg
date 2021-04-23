@@ -1,6 +1,9 @@
-bin_sample <- 
+bin.sample <- 
   function(x, nbin = 5, size = 1, equidistant = FALSE, 
            index.return = FALSE, breaks.return = FALSE){
+    # bin sample vector, matrix, or data frame
+    # Nathaniel E. Helwig (helwig@umn.edu)
+    # last updated: 2021-04-11
     
     # check 'x'
     xc <- class(x)[1]

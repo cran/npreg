@@ -1,6 +1,8 @@
 \name{spherical}
 \alias{spherical}
+\alias{basis.sph}
 \alias{basis_sph}
+\alias{penalty.sph}
 \alias{penalty_sph}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -10,9 +12,9 @@ Spherical Spline Basis and Penalty
 Generate the smoothing spline basis and penalty matrix for a spherical spline. This basis is designed for a 3D predictor where the values are points on a sphere.
 }
 \usage{
-basis_sph(x, knots, m = 2, rescale = TRUE, intercept = FALSE)
+basis.sph(x, knots, m = 2, rescale = TRUE, intercept = FALSE, ridge = FALSE)
 
-penalty_sph(x, m = 2, rescale = TRUE)
+penalty.sph(x, m = 2, rescale = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,6 +32,9 @@ If \code{TRUE}, the nonparametric part of the basis is divided by the average of
 }
   \item{intercept}{
 If \code{TRUE}, the first column of the basis will be a column of ones. 
+}
+  \item{ridge}{
+If \code{TRUE}, the basis matrix is post-multiplied by the inverse square root of the penalty matrix. See Note and Examples.
 }
 }
 \details{
@@ -55,15 +60,17 @@ Basis: Matrix of dimension \code{c(length(x), df)} where \code{df = nrow(knots) 
 Penalty: Matrix of dimension \code{c(r, r)} where \code{r = nrow(x)} is the number of knots.
 }
 \references{
-Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag. \url{https://doi.org/10.1007/978-1-4614-5369-7}
+Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag. \doi{10.1007/978-1-4614-5369-7}
 
-Wahba, G (1981). Spline interpolation and smoothing on the sphere. \emph{SIAM Journal on Scientific Computing, 2}(1), 5-16. \url{https://doi.org/10.1137/0902002}
+Wahba, G (1981). Spline interpolation and smoothing on the sphere. \emph{SIAM Journal on Scientific Computing, 2}(1), 5-16. \doi{10.1137/0902002}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>
 }
 \note{
 The inputs \code{x} and \code{knots} must have the same dimension.
+
+If \code{ridge = TRUE}, the penalty matrix is the identity matrix.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -72,6 +79,8 @@ The inputs \code{x} and \code{knots} must have the same dimension.
 See \code{\link{thinplate}} for a thin-plate spline basis and penalty.
 }
 \examples{
+######***######   standard parameterization   ######***######
+
 # function with three spherical predictors
 set.seed(0)
 n <- 1000
@@ -85,13 +94,47 @@ y <- eta + rnorm(n, sd = 0.5)
 knots <- x[1:100,]
 
 # cubic spherical spline basis
-X <- basis_sph(x, knots, intercept = TRUE)
+X <- basis.sph(x, knots, intercept = TRUE)
 
 # cubic spherical spline penalty
-Q <- penalty_sph(knots)
+Q <- penalty.sph(knots)
 
-# padd Q with zeros (for intercept)
+# pad Q with zeros (for intercept)
 Q <- rbind(0, cbind(0, Q))
+
+# define smoothing parameter
+lambda <- 1e-5
+
+# estimate coefficients
+coefs <- psolve(crossprod(X) + n * lambda * Q) \%*\% crossprod(X, y)
+
+# estimate eta
+yhat <- X \%*\% coefs
+
+# check rmse
+sqrt(mean((eta - yhat)^2))
+
+
+
+######***######   ridge parameterization   ######***######
+
+# function with three spherical predictors
+set.seed(0)
+n <- 1000
+myfun <- function(x){
+  sin(pi*x[,1]) + cos(2*pi*x[,2]) + cos(pi*x[,3])
+  }
+x <- cbind(runif(n), runif(n), runif(n)) - 0.5
+x <- t(apply(x, 1, function(x) x / sqrt(sum(x^2))))
+eta <- myfun(x)
+y <- eta + rnorm(n, sd = 0.5)
+knots <- x[1:100,]
+
+# cubic spherical spline basis
+X <- basis.sph(x, knots, intercept = TRUE, ridge = TRUE)
+
+# cubic spherical spline penalty (ridge)
+Q <- diag(rep(c(0, 1), times = c(1, ncol(X) - 1)))
 
 # define smoothing parameter
 lambda <- 1e-5

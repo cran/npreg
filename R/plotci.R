@@ -1,10 +1,11 @@
 plotci <- 
   function(x, y, se, level = 0.95, crit.val = NULL, 
-           add = FALSE, col.ci = NULL, alpha = NULL, 
-           bars = NULL, bw = 0.05, linkinv = NULL, ...){
+           add = FALSE, col = NULL, col.ci = NULL, 
+           alpha = NULL, bars = NULL, bw = 0.05, 
+           linkinv = NULL, ...){
     # generic x-y plotting with confidence intervals
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-05-01
+    # Updated: 2021-02-26
   
     ### INITIAL CHECKS
     
@@ -71,6 +72,11 @@ plotci <-
       if(crit.val <= 0) stop("Input 'crit.val' must be a positive scalar.")
     }
     
+    # check col input
+    if(is.null(col)){
+      col <- "black"
+    }
+    
     # check col.ci input
     if(is.null(col.ci)){
       col.ci <- ifelse(xfac, "black", "gray")
@@ -122,6 +128,9 @@ plotci <-
     args$x <- x
     args$y <- if(link) ylink else y
     
+    # add col
+    args$col <- col
+    
     # missing type?
     if(is.null(args$type)) args$type <- ifelse(xfac, "p", "l")
     
@@ -154,6 +163,7 @@ plotci <-
     
     # plot x vs y
     if(add){
+      args$axes <- NULL
       do.call(lines.default, args)
     } else {
       do.call(plot.default, args)
@@ -161,7 +171,7 @@ plotci <-
     }
     
     # add axes for factors
-    if(xfac){
+    if(!add && xfac){
       axis(1, at = x, labels = xlev, ...)
       axis(2, ...)
       box()

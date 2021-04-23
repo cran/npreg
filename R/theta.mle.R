@@ -1,17 +1,19 @@
 theta.mle <-
   function(y, mu, theta, wt = 1, 
-           maxit = 100, tol = .Machine$double.eps^0.5){
-    # MLE of theta for NegBinomial
+           maxit = 100, maxth = .Machine$double.xmax,
+           tol = .Machine$double.eps^0.5){
+    # MLE of theta for NegBin
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-08-23
+    # Updated: 2021-04-09
     
     iter <- 0
     delta <- tol + 1
     if(missing(theta)) theta <- 1 / mean(wt * (y / mu - 1)^2)
-    while(iter < maxit & abs(delta) > tol){
+    while(iter < maxit && theta < maxth && abs(delta) > tol){
       g <- theta.grad(theta, y, mu, wt)
       i <- theta.info(theta, y, mu, wt)
       delta <- g / i
+      if(is.nan(delta) | is.na(delta) | is.infinite(delta)) delta <- 0
       theta <- abs(theta + delta)
       iter <- iter + 1
     }

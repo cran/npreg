@@ -1,6 +1,8 @@
 \name{ordinal}
 \alias{ordinal}
+\alias{basis.ord}
 \alias{basis_ord}
+\alias{penalty.ord}
 \alias{penalty_ord}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -10,9 +12,9 @@ Ordinal Smoothing Spline Basis and Penalty
 Generate the smoothing spline basis and penalty matrix for an ordinal spline. This basis and penalty are for an ordered factor.
 }
 \usage{
-basis_ord(x, knots, K = NULL, intercept = FALSE)
+basis.ord(x, knots, K = NULL, intercept = FALSE, ridge = FALSE)
 
-penalty_ord(x, K = NULL, xlev = NULL)
+penalty.ord(x, K = NULL, xlev = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,6 +32,9 @@ Factor levels of \code{x} (for penalty). If \code{NULL}, the levels are defined 
 }
   \item{intercept}{
 If \code{TRUE}, the first column of the basis will be a column of ones. 
+}
+  \item{ridge}{
+If \code{TRUE}, the basis matrix is post-multiplied by the inverse square root of the penalty matrix. See Note and Examples.
 }
 }
 \details{
@@ -51,11 +56,11 @@ Basis: Matrix of dimension \code{c(length(x), df)} where \code{df = length(knots
 Penalty: Matrix of dimension \code{c(r, r)} where \code{r = length(x)} is the number of knots.
 }
 \references{
-Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag. \url{https://doi.org/10.1007/978-1-4614-5369-7}
+Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag. \doi{10.1007/978-1-4614-5369-7}
 
-Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. \emph{Frontiers in Applied Mathematics and Statistics, 3}(15), 1-13. \url{https://doi.org/10.3389/fams.2017.00015}
+Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. \emph{Frontiers in Applied Mathematics and Statistics, 3}(15), 1-13. \doi{10.3389/fams.2017.00015}
 
-Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \url{https://doi.org/10.4135/9781526421036885885}
+Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \doi{10.4135/9781526421036885885}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>
@@ -64,6 +69,8 @@ Nathaniel E. Helwig <helwig@umn.edu>
 If the inputs \code{x} and \code{knots} are factors, they should have the same levels.
 
 If the inputs \code{x} and \code{knots} are integers, the \code{knots} should be a subset of the input \code{x}.
+
+If \code{ridge = TRUE}, the penalty matrix is the identity matrix.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -74,6 +81,8 @@ See \code{\link{nominal}} for a basis and penalty for unordered factors.
 See \code{\link{polynomial}} for a basis and penalty for numeric variables.
 }
 \examples{
+######***######   standard parameterization   ######***######
+
 # generate data
 set.seed(0)
 n <- 101
@@ -83,13 +92,43 @@ eta <- 1:4
 y <- eta[x] + rnorm(n, sd = 0.5)
 
 # ordinal smoothing spline basis
-X <- basis_ord(x, knots, intercept = TRUE)
+X <- basis.ord(x, knots, intercept = TRUE)
 
 # ordinal smoothing spline penalty
-Q <- penalty_ord(knots, K = 4)
+Q <- penalty.ord(knots, K = 4)
 
-# padd Q with zeros (for intercept)
+# pad Q with zeros (for intercept)
 Q <- rbind(0, cbind(0, Q))
+
+# define smoothing parameter
+lambda <- 1e-5
+
+# estimate coefficients
+coefs <- solve(crossprod(X) + n * lambda * Q) \%*\% crossprod(X, y)
+
+# estimate eta
+yhat <- X \%*\% coefs
+
+# check rmse
+sqrt(mean((eta[x] - yhat)^2))
+
+
+
+######***######   ridge parameterization   ######***######
+
+# generate data
+set.seed(0)
+n <- 101
+x <- factor(sort(rep(LETTERS[1:4], length.out = n)))
+knots <- LETTERS[1:3]
+eta <- 1:4
+y <- eta[x] + rnorm(n, sd = 0.5)
+
+# ordinal smoothing spline basis
+X <- basis.ord(x, knots, intercept = TRUE, ridge = TRUE)
+
+# ordinal smoothing spline penalty (ridge)
+Q <- diag(rep(c(0, 1), times = c(1, ncol(X) - 1)))
 
 # define smoothing parameter
 lambda <- 1e-5

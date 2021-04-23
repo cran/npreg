@@ -198,11 +198,11 @@ ss <-
     #########***#########   BASIS AND PENALTY   #########***#########
     
     # make basis function matrix
-    X <- cbind(1, basis_poly(x = data$x, knots = knots, 
+    X <- cbind(1, basis.poly(x = data$x, knots = knots, 
                              m = m, xmin = xmin, xmax = xmax, 
                              periodic = periodic, bernoulli = bernoulli))
     nsdim <- ifelse(periodic, 1, m)
-    Q <- penalty_poly(x = knots, m = m, xmin = xmin, xmax = xmax, 
+    Q <- penalty.poly(x = knots, m = m, xmin = xmin, xmax = xmax, 
                       periodic = periodic, bernoulli = bernoulli)
     
     # EVD of Q

@@ -4,7 +4,7 @@ predict.ss <-
     # Nathaniel E. Helwig (helwig@umn.edu)
     # Updated: 2020-10-22
     
-    X <- basis_poly(x = x, knots = object$fit$knot, 
+    X <- basis.poly(x = x, knots = object$fit$knot, 
                     m = object$fit$m, d = deriv,
                     xmin = object$fit$min,
                     xmax = object$fit$min + object$fit$range,

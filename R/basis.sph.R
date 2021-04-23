@@ -1,8 +1,8 @@
-basis_sph <- 
-  function(x, knots, m = 2, rescale = TRUE, intercept = FALSE){
+basis.sph <- 
+  function(x, knots, m = 2, rescale = TRUE, intercept = FALSE, ridge = FALSE){
     # Spherical Smoothing Spline Basis
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2019-04-04
+    # Update: 2021-04-09
     
     # initializations
     m <- as.integer(m)
@@ -19,7 +19,7 @@ basis_sph <-
     if(rescale){
       theta <- 0
       for(k in 1:nk){
-        theta <- theta + c(penalty_sph(knots[k,,drop=FALSE], m = m, rescale = FALSE))
+        theta <- theta + c(penalty.sph(knots[k,,drop=FALSE], m = m, rescale = FALSE))
       }
       theta <- nk / theta
     } else {
@@ -50,6 +50,16 @@ basis_sph <-
       X <- theta * (s4fun(ang) - alpha) / beta
     } else {
       X <- theta * (s6fun(ang) - alpha) / beta
+    }
+    
+    # check ridge
+    if(ridge){
+      Q <- penalty.sph(knots, m = m / 2, rescale = rescale)
+      Qeig <- eigen(Q, symmetric = TRUE)
+      Qrnk <- sum(Qeig$values > Qeig$values[1] * ncol(Q) * .Machine$double.eps)
+      Qisqrt <- Qeig$vectors[,1:Qrnk,drop=FALSE] %*% diag(1/sqrt(Qeig$values[1:Qrnk]), nrow = Qrnk, ncol = Qrnk)
+      X <- X %*% Qisqrt
+      knot.names <- knot.names[1:ncol(X)]
     }
     
     # intercept?

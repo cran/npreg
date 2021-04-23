@@ -1,8 +1,8 @@
-penalty_nom <- 
+penalty.nom <- 
   function(x, K = NULL){
     # Nominal Smoothing Spline Penalty
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2019-04-04
+    # Update: 2021-04-09
     
     if(is.null(K)) K <- length(unique(x))
     outer(x, x, FUN = "==") - 1/K

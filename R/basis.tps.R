@@ -1,8 +1,8 @@
-basis_tps <-
-  function(x, knots, m = 2, rk = TRUE, intercept = FALSE){
+basis.tps <-
+  function(x, knots, m = 2, rk = TRUE, intercept = FALSE, ridge = FALSE){
     # Thin-Plate Spline Basis
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2019-03-13
+    # Update: 2021-04-09
     
     # initializations
     m <- as.integer(m)
@@ -127,6 +127,16 @@ basis_tps <-
     KinvR <-  Ksvd$v %*% diag(1/Ksvd$d) %*% crossprod(Ksvd$u, RkernK)
     Rkern <- Rkern - cbind(matrix(1, nx), Xnull) %*% KinvR
     Rkern <- Rkern - tcrossprod(Rkern %*% Ksvd$u, Ksvd$u)
+    
+    # check ridge
+    if(ridge){
+      Q <- penalty.tps(knots, m = m)
+      Qeig <- eigen(Q, symmetric = TRUE)
+      Qrnk <- sum(Qeig$values > Qeig$values[1] * ncol(Q) * .Machine$double.eps)
+      Qisqrt <- Qeig$vectors[,1:Qrnk,drop=FALSE] %*% diag(1/sqrt(Qeig$values[1:Qrnk]), nrow = Qrnk, ncol = Qrnk)
+      Rkern <- Rkern %*% Qisqrt
+      knot.names <- knot.names[1:ncol(Rkern)]
+    }
     
     # return results
     if(intercept) {

@@ -1,6 +1,8 @@
 \name{thinplate}
 \alias{thinplate}
+\alias{basis.tps}
 \alias{basis_tps}
+\alias{penalty.tps}
 \alias{penalty_tps}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -10,9 +12,9 @@ Thin-Plate Spline Basis and Penalty
 Generate the smoothing spline basis and penalty matrix for a thin-plate spline.
 }
 \usage{
-basis_tps(x, knots, m = 2, rk = TRUE, intercept = FALSE)
+basis.tps(x, knots, m = 2, rk = TRUE, intercept = FALSE, ridge = FALSE)
 
-penalty_tps(x, m = 2, rk = TRUE)
+penalty.tps(x, m = 2, rk = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,6 +32,9 @@ If true (default), the reproducing kernel parameterization is used. Otherwise, t
 }
   \item{intercept}{
 If \code{TRUE}, the first column of the basis will be a column of ones. 
+}
+  \item{ridge}{
+If \code{TRUE}, the basis matrix is post-multiplied by the inverse square root of the penalty matrix. Only applicable if \code{rk = TRUE}. See Note and Examples.
 }
 }
 \details{
@@ -63,17 +68,19 @@ Basis: Matrix of dimension \code{c(length(x), df)} where \code{df = nrow(as.matr
 Penalty: Matrix of dimension \code{c(r, r)} where \code{r = nrow(as.matrix(x))} is the number of knots.
 }
 \references{
-Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag.  \url{https://doi.org/10.1007/978-1-4614-5369-7}
+Gu, C. (2013). Smoothing Spline ANOVA Models. 2nd Ed. New York, NY: Springer-Verlag.  \doi{10.1007/978-1-4614-5369-7}
 
-Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. \emph{Frontiers in Applied Mathematics and Statistics, 3}(15), 1-13. \url{https://doi.org/10.3389/fams.2017.00015}
+Helwig, N. E. (2017). Regression with ordered predictors via ordinal smoothing splines. \emph{Frontiers in Applied Mathematics and Statistics, 3}(15), 1-13. \doi{10.3389/fams.2017.00015}
 
-Helwig, N. E., & Ma, P. (2015). Fast and stable multiple smoothing parameter selection in smoothing spline analysis of variance models with large samples. \emph{Journal of Computational and Graphical Statistics, 24}(3), 715-732. \url{https://doi.org/10.1080/10618600.2014.926819}
+Helwig, N. E., & Ma, P. (2015). Fast and stable multiple smoothing parameter selection in smoothing spline analysis of variance models with large samples. \emph{Journal of Computational and Graphical Statistics, 24}(3), 715-732. \doi{10.1080/10618600.2014.926819}
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>
 }
 \note{
 The inputs \code{x} and \code{knots} must have the same dimension.
+
+If \code{rk = TRUE} and \code{ridge = TRUE}, the penalty matrix is the identity matrix.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -84,6 +91,8 @@ See \code{\link{polynomial}} for a basis and penalty for numeric variables.
 See \code{\link{spherical}} for a basis and penalty for spherical variables.
 }
 \examples{
+######***######   standard parameterization   ######***######
+
 # generate data
 set.seed(0)
 n <- 101
@@ -93,13 +102,47 @@ eta <- 1 + 2 * x + sin(2 * pi * x)
 y <- eta + rnorm(n, sd = 0.5)
 
 # cubic thin-plate spline basis
-X <- basis_tps(x, knots, intercept = TRUE)
+X <- basis.tps(x, knots, intercept = TRUE)
 
 # cubic thin-plate spline penalty
-Q <- penalty_tps(knots)
+Q <- penalty.tps(knots)
 
-# padd Q with zeros (for intercept and linear effect)
+# pad Q with zeros (for intercept and linear effect)
 Q <- rbind(0, 0, cbind(0, 0, Q))
+
+# define smoothing parameter
+lambda <- 1e-5
+
+# estimate coefficients
+coefs <- psolve(crossprod(X) + n * lambda * Q) \%*\% crossprod(X, y)
+
+# estimate eta
+yhat <- X \%*\% coefs
+
+# check rmse
+sqrt(mean((eta - yhat)^2))
+
+# plot results
+plot(x, y)
+lines(x, yhat)
+
+
+
+######***######   ridge parameterization   ######***######
+
+# generate data
+set.seed(0)
+n <- 101
+x <- seq(0, 1, length.out = n)
+knots <- seq(0, 0.95, by = 0.05)
+eta <- 1 + 2 * x + sin(2 * pi * x)
+y <- eta + rnorm(n, sd = 0.5)
+
+# cubic thin-plate spline basis
+X <- basis.tps(x, knots, intercept = TRUE, ridge = TRUE)
+
+# cubic thin-plate spline penalty (ridge)
+Q <- diag(rep(c(0, 1), times = c(2, ncol(X) - 2)))
 
 # define smoothing parameter
 lambda <- 1e-5
