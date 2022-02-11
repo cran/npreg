@@ -3,10 +3,11 @@ ss <-
            method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"),
            m = 2L, periodic = FALSE, all.knots = FALSE, nknots = .nknots.smspl, 
            knots = NULL, keep.data = TRUE, df.offset = 0, penalty = 1, 
-           control.spar = list(), tol = 1e-6 * IQR(x), bernoulli = TRUE){
+           control.spar = list(), tol = 1e-6 * IQR(x), bernoulli = TRUE,
+           xmin = NULL, xmax = NULL){
     # smoothing spline in R
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-10-22
+    # Updated: 2021-10-29
     
     
     #########***#########   INITIAL CHECKS   #########***#########
@@ -41,8 +42,18 @@ ss <-
       if(any(is.na(y)) | any(is.infinite(y)) | any(is.nan(y))) 
         stop("'x' and 'y' cannot contain missing (NA), infinite (Inf), or undefined (NaN) values")
     }
-    xmin <- min(x)
-    xmax <- max(x)
+    if(is.null(xmin)){
+      xmin <- min(x)
+    } else {
+      xmin <- as.numeric(xmin[1])
+      if(xmin > min(x)) stop("Input 'xmin' is greater than min(x)")
+    }
+    if(is.null(xmax)){
+      xmax <- max(x)
+    } else {
+      xmax <- as.numeric(xmax[1])
+      if(xmax < max(x)) stop("Input 'xmax' is less than max(x)")
+    }
     xrange <- xmax - xmin
     
     # check method
@@ -190,7 +201,7 @@ ss <-
       } # end if(all.knots)
     } else {
       # use provided 'knots'
-      if(nknots > nux) stop("Too many knots! Need length(unique(knots)) <= length(unique(x))")
+      if(nknots > nux) warning("length(unique(knots)) > length(unique(x))")
       if(min(knots) < xmin | max(knots) > xmax) warning("Input 'knots' are outside of range of input 'x'")
     }
     
@@ -231,6 +242,13 @@ ss <-
     
     # SVD of weighted X
     XsvdC <- svd(X.w[,-nullindx,drop=FALSE])
+    #Xrnk <- length(XsvdC$d)
+    Xrnk <- sum(XsvdC$d > sqrt(nknots * eps) * XsvdC$d[1])
+    if(Xrnk < length(XsvdC$d)){
+      XsvdC$d <- XsvdC$d[1:Xrnk]
+      XsvdC$u <- XsvdC$u[,1:Xrnk,drop=FALSE]
+      XsvdC$v <- XsvdC$v[,1:Xrnk,drop=FALSE]
+    }
     bvec <- crossprod(XsvdC$u, y.w)
     dvec <- 1/XsvdC$d^2
     
@@ -245,12 +263,19 @@ ss <-
     }
     
     # reverse transformation
-    Tmat <- matrix(0, nsdim + nknots, nsdim + Qrnk)
-    Tmat[nullindx,nullindx] <- diag(nsdim)
-    Tmat[nullindx,-nullindx] <- (-1) * solve(crossprod(X.w[,nullindx])) %*% crossprod(X.w[,nullindx], R.w)
-    Tmat[-nullindx,-nullindx] <- Qprj
-    Tmat[,nullindx] <- Tmat[,nullindx,drop=FALSE] %*% XsvdN$v %*% diag(1 / XsvdN$d, nrow = nsdim, ncol = nsdim)
-    Tmat[,-nullindx] <- Tmat[,-nullindx] %*% XsvdC$v %*% diag(1 / XsvdC$d)
+    VDi.x <- XsvdN$v %*% diag(1 / XsvdN$d, nrow = nsdim, ncol = nsdim)
+    VDi.z <- XsvdC$v %*% diag(1 / XsvdC$d)
+    Tmat <- matrix(0, nsdim + nknots, nsdim + min(Qrnk, Xrnk))
+    Tmat[nullindx,nullindx] <- VDi.x
+    Tmat[nullindx,-nullindx] <- 0 - VDi.x %*% crossprod(XsvdN$u, R.w) %*% VDi.z
+    Tmat[-nullindx,-nullindx] <- Qprj %*% VDi.z
+    
+    # Tmat <- matrix(0, nsdim + nknots, nsdim + Qrnk)
+    # Tmat[nullindx,nullindx] <- diag(nsdim)
+    # Tmat[nullindx,-nullindx] <- (-1) * solve(crossprod(X.w[,nullindx])) %*% crossprod(X.w[,nullindx], R.w)
+    # Tmat[-nullindx,-nullindx] <- Qprj
+    # Tmat[,nullindx] <- Tmat[,nullindx,drop=FALSE] %*% XsvdN$v %*% diag(1 / XsvdN$d, nrow = nsdim, ncol = nsdim)
+    # Tmat[,-nullindx] <- Tmat[,-nullindx] %*% XsvdC$v %*% diag(1 / XsvdC$d)
     
     # remove junk
     rm(X, Qeig, Qprj, Qrnk, X.w, R.w)
@@ -467,7 +492,8 @@ ss <-
     # collect results
     fitinfo <- list(n = n, knot = knots, nk = nsdim + nknots, coef = beta,
                     min = xmin, range = xmax - xmin, m = m, periodic = periodic,
-                    cov.sqrt = cov.sqrt, weighted = !no.wghts, bernoulli = bernoulli)
+                    cov.sqrt = cov.sqrt, weighted = !no.wghts, df.offset = df.offset, 
+                    penalty = penalty, control.spar = control.spar, bernoulli = bernoulli)
     ss <- list(x = data$x, y = fit, w = data$w, yin = data$wy / ifelse(data$w > 0, data$w, 1),
                tol = tol, data = if(keep.data) data.orig, lev = lev, 
                cv.crit = cv.crit, pen.crit = sse, crit = crit, df = df, 

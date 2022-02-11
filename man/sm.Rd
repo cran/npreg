@@ -112,6 +112,8 @@ An object of class "sm" with components:
   \item{call}{the matched call.}
 }
 \references{
+Berry, L. N., & Helwig, N. E. (2021). Cross-validation, information theory, or maximum likelihood? A comparison of tuning methods for penalized splines. \emph{Stats, 4}(3), 701-724. \doi{10.3390/stats4030042}
+
 Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \doi{10.1007/BF01404567}
 
 Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \doi{10.1007/978-1-4614-5369-7}
@@ -120,7 +122,7 @@ Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing p
 
 Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \doi{10.4135/9781526421036885885}
 
-Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \doi{10.1080/10618600.2020.1806855}
+Helwig, N. E. (2021). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics, 30}(1), 182-191. \doi{10.1080/10618600.2020.1806855}
 
 %Zou, H. and Hastie, T. (2005). Regularization and variable selection via the Elastic Net. \emph{Journal of the Royal Statistical Society, Series B., 67}, 301-320. https://doi.org/10.1111/j.1467-9868.2005.00503.x
 }
@@ -157,8 +159,8 @@ lin \tab Linear smoothing spline (integer or numeric). \cr
 cub \tab Cubic smoothing spline (integer or numeric). \cr
 qui \tab Quintic smoothing spline (integer or numeric). \cr
 per \tab Periodic smoothing spline (integer or numeric).\cr  
-sph \tab Spherical spline (matrix with \eqn{d = 3} columns). \cr
-tps \tab Thin-plate spline (matrix with \eqn{d \ge 1} columns).
+sph \tab Spherical spline (matrix with \eqn{d = 2} columns: lat, long). \cr
+tps \tab Thin plate spline (matrix with \eqn{d \ge 1} columns).
 }
 
 For finer control of some specialized spline types:
@@ -166,15 +168,15 @@ For finer control of some specialized spline types:
 per.lin \tab Linear periodic spline (\eqn{m = 1}). \cr
 per.cub \tab Cubic periodic spline (\eqn{m = 2}). \cr
 per.qui \tab Quintic periodic spline (\eqn{m = 3}). \cr
-sph.lin \tab Linear spherical spline (\eqn{m = 1}). \cr
-sph.cub \tab Cubic spherical spline (\eqn{m = 2}). \cr
-sph.qui \tab Quintic spherical spline (\eqn{m = 3}). \cr
-tps.lin \tab Linear thin-plate spline (\eqn{m = 1}). \cr
-tps.cub \tab Cubic thin-plate spline (\eqn{m = 2}). \cr
-tps.qui \tab Quintic thin-plate spline (\eqn{m = 3}). \cr
+sph.2 \tab Linear spherical spline (\eqn{m = 2}). \cr
+sph.3 \tab Cubic spherical spline (\eqn{m = 3}). \cr
+sph.4 \tab Quintic spherical spline (\eqn{m = 4}). \cr
+tps.lin \tab Linear thin plate spline (\eqn{m = 1}). \cr
+tps.cub \tab Cubic thin plate spline (\eqn{m = 2}). \cr
+tps.qui \tab Quintic thin plate spline (\eqn{m = 3}). \cr
 }
 
-For details on the spline kernel functions, see \code{\link{basis.nom}} (nominal), \code{\link{basis.ord}} (ordinal), \code{\link{basis.poly}} (polynomial), \code{\link{basis.sph}} (spherical), and \code{\link{basis.tps}} (thin-plate).
+For details on the spline kernel functions, see \code{\link{basis.nom}} (nominal), \code{\link{basis.ord}} (ordinal), \code{\link{basis.poly}} (polynomial), \code{\link{basis.sph}} (spherical), and \code{\link{basis.tps}} (thin plate).
 
 }
 

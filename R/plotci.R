@@ -2,10 +2,10 @@ plotci <-
   function(x, y, se, level = 0.95, crit.val = NULL, 
            add = FALSE, col = NULL, col.ci = NULL, 
            alpha = NULL, bars = NULL, bw = 0.05, 
-           linkinv = NULL, ...){
+           linkinv = NULL, ci = NULL, ...){
     # generic x-y plotting with confidence intervals
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2021-02-26
+    # Updated: 2021-08-05
   
     ### INITIAL CHECKS
     
@@ -111,11 +111,22 @@ plotci <-
       if(length(ylink) != n) stop("Input 'linkinv' function produced 'y' of incorrect length.\nThe function results must satisfy:  length(y) = length(linkinv(y))")
     } 
     
+    # check ci
+    if(is.null(ci)){
+      if(!missing.se) ci <- cbind(lwr = y - crit.val * se, upr = y + crit.val * se)
+    } else {
+      ci <- as.matrix(ci)
+      if(ncol(ci) != 2) stop("Input 'ci' must be a matrix with two columns [lwr, upr]")
+      if(nrow(ci) != n) stop("Inputs 'x' and 'ci' must satisfy length(x) == nrow(ci)")
+      if(any(apply(ci, 1, function(x) diff(range(x))) <= 0)) stop("Input 'ci' must satisfy c[i,1] < c[i,2] for all i")
+    } 
+    
     # sort data
     ix <- order(x)
     y <- y[ix]
     if(link) ylink <- ylink[ix]
     if(!missing.se) se <- se[ix]
+    if(!is.null(ci)) ci <- ci[ix,]
     x <- x[ix]
     
     
@@ -147,9 +158,9 @@ plotci <-
     # missing y limits?
     if(is.null(args$ylim) && !missing.se) {
       if(link){
-        fitrng <- range(linkinv(c(y - crit.val * se, y + crit.val * se)))
+        fitrng <- range(linkinv(c(ci)))
       } else {
-        fitrng <- range(c(y - crit.val * se, y + crit.val * se))
+        fitrng <- range(c(ci))
       }
       rngdif <- fitrng[2] - fitrng[1]
       args$ylim <- c(fitrng[1] - 0.05 * rngdif, fitrng[2] + 0.05 * rngdif)
@@ -178,11 +189,11 @@ plotci <-
     }
     
     # add se
-    if(!missing.se){
+    if(!missing.se | !is.null(ci)){
       col <- rgb(t(col2rgb(col.ci) / 255), alpha = alpha)
       if(!bars){
         xpoly <- c(x, rev(x))
-        ypoly <- c(y - crit.val * se, rev(y + crit.val * se))
+        ypoly <- c(ci[,1], rev(ci[,2]))
         if(link) ypoly <- linkinv(ypoly)
         polygon(x = xpoly, y = ypoly, col = col, border = col)
         do.call(lines, args)
@@ -192,7 +203,8 @@ plotci <-
           iargs$col <- col
           iargs$type <- "l"
           iargs$x <- rep(iargs$x[i], 2)
-          iargs$y <- c(y[i] - crit.val * se[i], y[i] + crit.val * se[i])
+          #iargs$y <- c(y[i] - crit.val * se[i], y[i] + crit.val * se[i])
+          iargs$y <- ci[i,]
           if(link) iargs$y <- linkinv(iargs$y)
           do.call(lines, iargs)
           if(bw > 0){

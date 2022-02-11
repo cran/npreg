@@ -2,7 +2,7 @@ check_type2 <-
   function(mf, type, xdim, xrng, xlev){
     # check predictor types for new data
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: Mar 31, 2019
+    # last updated: 2021-07-15
     
     # predictor types
     # par = parameteric (unpenalized)
@@ -14,9 +14,9 @@ check_type2 <-
     # per.lin = periodic linear smoothing spline
     # per.cub = periodic cubic smoothing spline
     # per.qui = periodic quintic smoothing spline
-    # sph.lin = spherical spline (m = 1)
-    # sph.cub = spherical spline (m = 2)
-    # sph.qui = spherical spline (m = 3)
+    # sph.2 = spherical spline (m = 2)
+    # sph.3 = spherical spline (m = 3)
+    # sph.4 = spherical spline (m = 4)
     # tps.lin = thin plate linear spline
     # tps.cub = thin plate cubic spline
     # tps.qui = thin plate quintic spline
@@ -36,9 +36,9 @@ check_type2 <-
     
     # all possible types
     alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui",
-                  "sph.lin", "sph.cub", "sph.qui", "tps.lin", "tps.cub", "tps.qui", "sph", "per", "tps")
+                  "sph.2", "sph.3", "sph.4", "tps.lin", "tps.cub", "tps.qui", "sph", "per", "tps")
     ss.types <- c("lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "per")
-    sp.types <- c("sph.lin", "sph.cub", "sph.qui", "sph")
+    sp.types <- c("sph.2", "sph.3", "sph.4", "sph")
     
     # check types
     for(k in 1:nxvar){
@@ -116,9 +116,9 @@ check_type2 <-
       } else if(any(type[[k]] == sp.types)){
         
         # spherical spline
-        if(xc != "matrix") stop(paste("Input 'type' for",xynames[kp1],"is '",type[[k]],"' but",xynames[kp1],"is not of class 'matrix'.\n  Spherical splines require a 3-dimensional predictor (i.e., n x 3 matrix)."))
-        if(ncol(mf[,kp1]) != 3L) stop(paste("Input 'type' for",xynames[kp1],"is '",type[[k]],"' but",xynames[kp1],"is not a matrix with 3 columns.\n  Spherical splines require a 3-dimensional predictor (i.e., n x 3 matrix)."))
-        for(d in 1:3){
+        if(xc != "matrix") stop(paste("Input 'type' for",xynames[kp1],"is '",type[[k]],"' but",xynames[kp1],"is not of class 'matrix'.\n  Spherical splines require a 2-dimensional predictor (i.e., n x 2 matrix) containing lat/long."))
+        if(ncol(mf[,kp1]) != 2L) stop(paste("Input 'type' for",xynames[kp1],"is '",type[[k]],"' but",xynames[kp1],"is not a matrix with 2 columns.\n  Spherical splines require a 2-dimensional predictor (i.e., n x 2 matrix) containing lat/long."))
+        for(d in 1:2){
           newrng <- range(mf[,kp1][,d])
           if(newrng[1] < xrng[[k]][1,d] | newrng[2] > xrng[[k]][2,d]) warning(paste("Input 'newdata' for",xynames[kp1],"is out of the range of the observed data."))
         }

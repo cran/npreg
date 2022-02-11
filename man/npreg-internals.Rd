@@ -20,13 +20,13 @@
 %\alias{fit_smnet}
 \alias{knot1samp}
 \alias{linkinvd}
-\alias{plot.ss}
 \alias{pred_depe}
 \alias{pred_rkhs}
 \alias{print.gsm}
 \alias{print.sm}
 %\alias{print.smnet}
 \alias{print.ss}
+\alias{print.boot.ss}
 %\alias{print.ssnet}
 \alias{rowkro}
 \alias{theta.grad}
@@ -58,9 +58,9 @@
 \alias{.quikern0}
 \alias{.quikern1}
 \alias{.quikern2}
-\alias{s2fun}
-\alias{s4fun}
-\alias{s6fun}
+\alias{q2fun}
+\alias{q4fun}
+\alias{q6fun}
 
 \description{
   Internal functions for "npreg" package.

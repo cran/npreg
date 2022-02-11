@@ -6,10 +6,10 @@
 \alias{penalty_tps}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Thin-Plate Spline Basis and Penalty
+Thin Plate Spline Basis and Penalty
 }
 \description{
-Generate the smoothing spline basis and penalty matrix for a thin-plate spline.
+Generate the smoothing spline basis and penalty matrix for a thin plate spline.
 }
 \usage{
 basis.tps(x, knots, m = 2, rk = TRUE, intercept = FALSE, ridge = FALSE)
@@ -25,10 +25,10 @@ Predictor variables (basis) or spline knots (penalty). Numeric or integer vector
 Spline knots. Numeric or integer vector of length \eqn{r}, or matrix of dimension \eqn{r} by \eqn{p}.
 }
   \item{m}{
-Penalty order. "m=1" for linear thin-plate spline, "m=2" for cubic, and "m=3" for quintic. Must satisfy \eqn{2m > p}.
+Penalty order. "m=1" for linear thin plate spline, "m=2" for cubic, and "m=3" for quintic. Must satisfy \eqn{2m > p}.
 }
   \item{rk}{
-If true (default), the reproducing kernel parameterization is used. Otherwise, the standard thin-plate basis is returned.  
+If true (default), the reproducing kernel parameterization is used. Otherwise, the classic thin plate basis is returned.  
 }
   \item{intercept}{
 If \code{TRUE}, the first column of the basis will be a column of ones. 
@@ -38,7 +38,7 @@ If \code{TRUE}, the basis matrix is post-multiplied by the inverse square root o
 }
 }
 \details{
-Generates a basis function or penalty matrix used to fit linear, cubic, and quintic thin-plate splines. 
+Generates a basis function or penalty matrix used to fit linear, cubic, and quintic thin plate splines. 
 
 The basis function matrix has the form 
 \deqn{X = [X_0,  X_1]}
@@ -101,10 +101,10 @@ knots <- seq(0, 0.95, by = 0.05)
 eta <- 1 + 2 * x + sin(2 * pi * x)
 y <- eta + rnorm(n, sd = 0.5)
 
-# cubic thin-plate spline basis
+# cubic thin plate spline basis
 X <- basis.tps(x, knots, intercept = TRUE)
 
-# cubic thin-plate spline penalty
+# cubic thin plate spline penalty
 Q <- penalty.tps(knots)
 
 # pad Q with zeros (for intercept and linear effect)
@@ -138,10 +138,10 @@ knots <- seq(0, 0.95, by = 0.05)
 eta <- 1 + 2 * x + sin(2 * pi * x)
 y <- eta + rnorm(n, sd = 0.5)
 
-# cubic thin-plate spline basis
+# cubic thin plate spline basis
 X <- basis.tps(x, knots, intercept = TRUE, ridge = TRUE)
 
-# cubic thin-plate spline penalty (ridge)
+# cubic thin plate spline penalty (ridge)
 Q <- diag(rep(c(0, 1), times = c(2, ncol(X) - 2)))
 
 # define smoothing parameter

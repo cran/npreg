@@ -12,7 +12,8 @@ ss(x, y = NULL, w = NULL, df, spar = NULL, lambda = NULL,
    method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"), 
    m = 2L, periodic = FALSE, all.knots = FALSE, nknots = .nknots.smspl, 
    knots = NULL, keep.data = TRUE, df.offset = 0, penalty = 1, 
-   control.spar = list(), tol = 1e-6 * IQR(x), bernoulli = TRUE)
+   control.spar = list(), tol = 1e-6 * IQR(x), bernoulli = TRUE,
+   xmin = NULL, xmax = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -83,6 +84,12 @@ Tolerance for same-ness or uniqueness of the x values. The values are binned int
   \item{bernoulli}{
 If \code{TRUE}, scaled Bernoulli polynomials are used for the basis and penalty functions. If \code{FALSE}, produces the "classic" definition of a smoothing spline, where the function estimate is a piecewise polynomial function with pieces of degree \eqn{2m - 1}. See \code{\link{polynomial}} for details.  
 }
+\item{xmin}{
+Minimum x value used to transform predictor scores to [0,1]. If NULL,  \code{xmin = min(x)}.
+}
+\item{xmax}{
+Maximum x value used to transform predictor scores to [0,1]. If NULL,  \code{xmax = max(x)}.
+}
 
 }
 \details{
@@ -134,6 +141,9 @@ An object of class "ss" with components:
     \item{periodic:}{is spline periodic?}
     \item{cov.sqrt}{square root of covariance matrix of \code{coef} such that \code{tcrossprod(coef)} reconstructs the covariance matrix.}
     \item{weighted}{were weights \code{w} used in fitting?}
+    \item{df.offset}{same as input}
+    \item{penalty}{same as input}
+    \item{control.spar}{control parameters for smoothing parameter selection}
     \item{bernoulli}{were Bernoulli polynomials used in fitting?}
   }
   }
@@ -148,13 +158,15 @@ An object of class "ss" with components:
 \references{
 https://stat.ethz.ch/R-manual/R-devel/library/stats/html/smooth.spline.html
 
+Berry, L. N., & Helwig, N. E. (2021). Cross-validation, information theory, or maximum likelihood? A comparison of tuning methods for penalized splines. \emph{Stats, 4}(3), 701-724. \doi{10.3390/stats4030042}
+
 Craven, P. and Wahba, G. (1979). Smoothing noisy data with spline functions: Estimating the correct degree of smoothing by the method of generalized cross-validation. \emph{Numerische Mathematik, 31}, 377-403. \doi{10.1007/BF01404567}
 
 Gu, C. (2013). Smoothing spline ANOVA models, 2nd edition. New York: Springer. \doi{10.1007/978-1-4614-5369-7}
 
 Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), \emph{SAGE Research Methods Foundations.} \doi{10.4135/9781526421036885885}
 
-Helwig, N. E. (2020+). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics}. \doi{10.1080/10618600.2020.1806855}
+Helwig, N. E. (2021). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics, 30}(1), 182-191. \doi{10.1080/10618600.2020.1806855}
 
 Wahba, G. (1985). A comparison of {GCV} and {GML} for choosing the smoothing parameters in the generalized spline smoothing problem. \emph{The Annals of Statistics, 4}, 1378-1402. \doi{10.1214/aos/1176349743}
 }

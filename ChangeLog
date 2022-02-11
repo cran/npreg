@@ -1,4 +1,52 @@
 
+Changes:  ver 1.0-7  (2022-02-11)
+
+0) Updated and added some references
+	* Open source paper on tuning penalized splines
+	* https://doi.org/10.3390/stats4030042
+
+1) Bug fix in sm() standard errors (se.fit) when using weights
+	* The se.fit are now correctly divided by sqrt(weights)
+	* Only affected se.fit from fit model (not predictions)
+
+2) Bug fix in basis.tps with m = 1
+	* Previously could result in an error when calling diag()
+	* Now ensures that diag() creates 1 x 1 matrix when m = 1
+
+3) Bug fix in basis.sph and penalty.sph
+	* Previously used Euclidean inner product to define angle
+	* Now uses correct inner product to define angle
+
+4) New function: boot.ss() for bootstrapping a fit smoothing spline
+	* Default usage calculates bootstrap SEs and BCa CIs
+	* Plotting method exists for plotting the estimate w/ CIs
+
+5) Major changes to spherical smoothing spline functionality
+	* Inputs changed from Euclidean to spherical coordinates
+	* Penalty order changed from non-standard to conventional
+	* Changes affect basis.sph, penalty.sph, sm, and gsm
+
+6) Internal improvements to the ss() function
+	* Added xmin and xmax arguments to ss() function
+	* Previously required length(unique(x)) >= length(knots)
+
+7) Added argument "ci" to the plotci() function
+	* Allows user to input matrix of CI bounds for plotting
+	* Used by plot.boot.ss() to plot bootstrap CI estimates
+
+8) Added documentation for the plot.ss() and plot.boot.ss() functions
+	* Can be used to plot a smoothing spline fit with CI
+	* plot.ss() uses Bayesian CI, and plot.boot.ss() uses bootstrap CI
+
+9) Added functions for computing weighted means, variance, and quantiles
+	* wtd.mean() computes the weighted (and trimmed) mean
+	* wtd.var() computes weighted variance (wtd.sd() is weighted SD)
+	* wtd.quantile() computes weighted sample quantiles
+
+
+
+
+
 Changes:  ver 1.0-6  (2021-04-22)
 
 1) varimp: new function for variable importance indices

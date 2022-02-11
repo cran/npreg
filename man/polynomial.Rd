@@ -108,7 +108,7 @@ If \code{ridge = TRUE}, the penalty matrix is the identity matrix.
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-See \code{\link{thinplate}} for a thin-plate spline basis and penalty.
+See \code{\link{thinplate}} for a thin plate spline basis and penalty.
 
 See \code{\link{ordinal}} for a basis and penalty for ordered factors.
 }

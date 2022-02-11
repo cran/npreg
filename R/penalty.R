@@ -15,8 +15,8 @@ penalty_poly <-
   }
 
 penalty_sph <-
-  function(x, m = 2, rescale = TRUE){
-    penalty.sph(x, m, rescale)
+  function(x, m = 2){
+    penalty.sph(x, m)
   }
 
 penalty_tps <-

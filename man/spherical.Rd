@@ -9,26 +9,23 @@
 Spherical Spline Basis and Penalty
 }
 \description{
-Generate the smoothing spline basis and penalty matrix for a spherical spline. This basis is designed for a 3D predictor where the values are points on a sphere.
+Generate the smoothing spline basis and penalty matrix for a spherical spline. This basis is designed for predictors where the values are points on a sphere.
 }
 \usage{
-basis.sph(x, knots, m = 2, rescale = TRUE, intercept = FALSE, ridge = FALSE)
+basis.sph(x, knots, m = 2, intercept = FALSE, ridge = FALSE)
 
-penalty.sph(x, m = 2, rescale = TRUE)
+penalty.sph(x, m = 2)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-Predictor variables (basis) or spline knots (penalty). Matrix of dimension \eqn{n} by \eqn{3}.
+Predictor variables (basis) or spline knots (penalty). Matrix of dimension \eqn{n} by \eqn{2}. Column 1 is latitude (-90 to 90 deg) and column 2 is longitude (-180 to 180 deg).
 }
   \item{knots}{
-Spline knots. Matrix of dimension \eqn{r} by \eqn{3}.
+Spline knots. Matrix of dimension \eqn{r} by \eqn{2}. Column 1 is latitude (-90 to 90 deg) and column 2 is longitude (-180 to 180 deg).
 }
   \item{m}{
-Penalty order. "m=1" for linear spherical spline, "m=2" for cubic, and "m=3" for quintic.
-}
-  \item{rescale}{
-If \code{TRUE}, the nonparametric part of the basis is divided by the average of the reproducing kernel function evaluated at the \code{knots}.
+Penalty order. "m=2" for 2nd order spherical spline, "m=3" for 3rd order, and "m=4" for 4th order.
 }
   \item{intercept}{
 If \code{TRUE}, the first column of the basis will be a column of ones. 
@@ -38,7 +35,7 @@ If \code{TRUE}, the basis matrix is post-multiplied by the inverse square root o
 }
 }
 \details{
-Generates a basis function or penalty matrix used to fit linear, cubic, and spherical splines. 
+Generates a basis function or penalty matrix used to fit spherical splines of order 2, 3, or 4.
 
 With an intercept included, the basis function matrix has the form 
 \deqn{X = [X_0,  X_1]}
@@ -47,11 +44,11 @@ where matrix \code{X_0} is an \eqn{n} by 1 matrix of ones, and \code{X_1} is a m
 The \code{X_0} matrix contains the "parametric part" of the basis (i.e., the intercept). 
 
 The matrix \code{X_1} contains the "nonparametric part" of the basis, which consists of the \emph{reproducing kernel} function
-\deqn{\rho(x, y) = 1 + [s_{2m}(x.y) - \alpha_m] / \beta_m  }
-evaluated at all combinations of \code{x} and \code{knots}. Note that \eqn{\alpha_m = 1/(2m + 1)} and \eqn{\beta_m = 2\pi(2m)!} are constants, \eqn{s_{2m}(.)} is the spherical spline semi-kernel function, and \eqn{x.y} denote the inner product between \eqn{x} and \eqn{y} (see References).
+\deqn{\rho(x, y) = [q_{2m-2}(x.y) - \alpha] / \beta  }
+evaluated at all combinations of \code{x} and \code{knots}. Note that \eqn{\alpha = 1/(2m - 1)} and \eqn{\beta = 2\pi(2m-2)!} are constants, \eqn{q_{2m-2}(.)} is the spherical spline semi-kernel function, and \eqn{x.y} denotes the cosine of the angle between \eqn{x} and \eqn{y} (see References).
 
 The penalty matrix consists of the \emph{reproducing kernel} function
-\deqn{\rho(x, y) = 1 + [s_{2m}(x.y) - \alpha_m] / \beta_m  }
+\deqn{\rho(x, y) = [q_{2m-2}(x.y) - \alpha] / \beta  }
 evaluated at all combinations of \code{x}.
 }
 \value{
@@ -76,21 +73,27 @@ If \code{ridge = TRUE}, the penalty matrix is the identity matrix.
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-See \code{\link{thinplate}} for a thin-plate spline basis and penalty.
+See \code{\link{thinplate}} for a thin plate spline basis and penalty.
 }
 \examples{
 ######***######   standard parameterization   ######***######
 
-# function with three spherical predictors
+# function with spherical predictors
 set.seed(0)
 n <- 1000
 myfun <- function(x){
   sin(pi*x[,1]) + cos(2*pi*x[,2]) + cos(pi*x[,3])
   }
-x <- cbind(runif(n), runif(n), runif(n)) - 0.5
-x <- t(apply(x, 1, function(x) x / sqrt(sum(x^2))))
-eta <- myfun(x)
+x3d <- cbind(runif(n), runif(n), runif(n)) - 0.5
+x3d <- t(apply(x3d, 1, function(x) x / sqrt(sum(x^2))))
+eta <- myfun(x3d)
 y <- eta + rnorm(n, sd = 0.5)
+
+# convert x latitude and longitude
+x <- cbind(latitude = acos(x3d[,3]) - pi/2,
+           longitude = atan2(x3d[,2], x3d[,1])) * (180 / pi)
+
+# select first 100 points as knots
 knots <- x[1:100,]
 
 # cubic spherical spline basis
@@ -118,16 +121,22 @@ sqrt(mean((eta - yhat)^2))
 
 ######***######   ridge parameterization   ######***######
 
-# function with three spherical predictors
+# function with spherical predictors
 set.seed(0)
 n <- 1000
 myfun <- function(x){
   sin(pi*x[,1]) + cos(2*pi*x[,2]) + cos(pi*x[,3])
   }
-x <- cbind(runif(n), runif(n), runif(n)) - 0.5
-x <- t(apply(x, 1, function(x) x / sqrt(sum(x^2))))
-eta <- myfun(x)
+x3d <- cbind(runif(n), runif(n), runif(n)) - 0.5
+x3d <- t(apply(x3d, 1, function(x) x / sqrt(sum(x^2))))
+eta <- myfun(x3d)
 y <- eta + rnorm(n, sd = 0.5)
+
+# convert x latitude and longitude
+x <- cbind(latitude = acos(x3d[,3]) - pi/2,
+           longitude = atan2(x3d[,2], x3d[,1])) * (180 / pi)
+
+# select first 100 points as knots
 knots <- x[1:100,]
 
 # cubic spherical spline basis

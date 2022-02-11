@@ -11,7 +11,7 @@ Modification to the \code{\link{plot}} function that adds confidence intervals. 
 plotci(x, y, se, level = 0.95, crit.val = NULL, 
        add = FALSE, col = NULL, col.ci = NULL, 
        alpha = NULL, bars = NULL, bw = 0.05, 
-       linkinv = NULL, ...)
+       linkinv = NULL, ci = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -51,13 +51,16 @@ a positive scalar controlling the bar width. Ignored if \code{bars = FALSE}.
   \item{linkinv}{
 an inverse link function for the plotting. If provided, the function plots \code{x} versus \code{linkinv(y)} and the intervals are similarly transformed. 
 }
+  \item{ci}{
+an optional matrix if dimension \eqn{n x 2} giving the confidence interval lower and upper bounds: \code{ci = cbind(lwr, upr)}
+}
   \item{...}{
 extra arguments passed to the \code{plot} or \code{lines} function.
 }
 
 }
 \details{
-This function plots \code{x} versus \code{y} with confidence intervals. The CIs have the form \cr \code{lwr = y - crit.val * se}\cr \code{upr = y + crit.val * se}\cr where \code{crit.val} is the critical value.
+This function plots \code{x} versus \code{y} with confidence intervals. Unless \code{ci} is provided, the CIs have the form \cr \code{lwr = y - crit.val * se}\cr \code{upr = y + crit.val * se}\cr where \code{crit.val} is the critical value.
 
 If \code{crit.val = NULL}, the critival value is determined from the \code{level} input as\cr \code{crit.val <- qnorm(1-(1-level)/2)}\cr where \code{\link{qnorm}} is the quantile function for the standard normal distribution.
 }

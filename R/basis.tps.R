@@ -2,7 +2,7 @@ basis.tps <-
   function(x, knots, m = 2, rk = TRUE, intercept = FALSE, ridge = FALSE){
     # Thin-Plate Spline Basis
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2021-04-09
+    # Update: 2021-04-23
     
     # initializations
     m <- as.integer(m)
@@ -124,7 +124,8 @@ basis.tps <-
     Ksvd <- svd(Knull)
     
     # define reproducing kernel
-    KinvR <-  Ksvd$v %*% diag(1/Ksvd$d) %*% crossprod(Ksvd$u, RkernK)
+    Drnk <- length(Ksvd$d)
+    KinvR <-  Ksvd$v %*% diag(1/Ksvd$d, nrow = Drnk, ncol = Drnk) %*% crossprod(Ksvd$u, RkernK)
     Rkern <- Rkern - cbind(matrix(1, nx), Xnull) %*% KinvR
     Rkern <- Rkern - tcrossprod(Rkern %*% Ksvd$u, Ksvd$u)
     

@@ -10,17 +10,23 @@ S3method(summary, sm)
 S3method(print, sm)
 S3method(print, summary.sm)
 
+S3method(boot, ss)
 S3method(plot, ss)
 S3method(predict, ss)
 S3method(summary, ss)
 S3method(print, ss)
 S3method(print, summary.ss)
 
+S3method(plot, boot.ss)
+S3method(print, boot.ss)
+
 importFrom("grDevices", "col2rgb", "rgb")
 importFrom("graphics", "axis", "box", "lines", "lines.default", 
              "plot.default", "polygon")
-importFrom("stats", ".nknots.smspl", "dbinom", "dgamma", "dnorm", "dpois", 
-           "fitted", "gaussian", "IQR", "as.formula", "cor", "dist", 
+importFrom("stats", ".nknots.smspl", "approx", "cov", "dbinom", "dgamma", "dnorm", 
+           "dpois", "fitted", "gaussian", "IQR", "as.formula", "cor", "dist", 
            "make.link", "model.frame", "model.matrix", "model.response", 
            "na.pass", "nlm", "optimize", "pchisq", "pf", "pnorm", "poisson", 
-           "predict", "pt", "qnorm", "quantile",  "rgamma", "rpois", "symnum", "var")
+           "predict", "pt", "qnorm", "quantile",  "rgamma", "rpois", "rnorm",
+           "sd", "symnum", "var")
+importFrom("utils", "head", "setTxtProgressBar", "txtProgressBar")

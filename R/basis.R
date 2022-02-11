@@ -18,8 +18,8 @@ basis_poly <-
   }
 
 basis_sph <- 
-  function(x, knots, m = 2, rescale = TRUE, intercept = FALSE, ridge = FALSE){
-    basis.sph(x, knots, m, rescale, intercept, ridge)
+  function(x, knots, m = 2, intercept = FALSE, ridge = FALSE){
+    basis.sph(x, knots, m, intercept, ridge)
   }
 
 basis_tps <- 

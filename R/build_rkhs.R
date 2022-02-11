@@ -2,7 +2,7 @@ build_rkhs <-
   function(x, type, knots, xrng){
     # build reproducing kernel Hilbert space components
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: 2021-04-09
+    # last updated: 2021-07-15
     
     ### initializations
     nxvar <- length(x)
@@ -10,9 +10,9 @@ build_rkhs <-
     
     ### kernel types
     alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui",
-                  "sph.lin", "sph.cub", "sph.qui", "tps.lin", "tps.cub", "tps.qui", "sph", "per", "tps")
+                  "sph.2", "sph.3", "sph.4", "tps.lin", "tps.cub", "tps.qui", "sph", "per", "tps")
     ss.types <- c("lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "per")
-    sp.types <- c("sph.lin", "sph.cub", "sph.qui", "sph")
+    sp.types <- c("sph.2", "sph.3", "sph.4", "sph")
     
     ### initialize components
     Xnull <- Xcont <- Qnull <- Qcont <- vector("list", nxvar)
@@ -74,7 +74,7 @@ build_rkhs <-
       } else if(any(tj == sp.types)){
         
         # spherical spline
-        m <- ifelse(tj == "sph.lin", 1L, ifelse(tj == "sph.cub" | tj == "sph", 2L, 3L))
+        m <- ifelse(tj == "sph.2" | tj == "sph", 2L, ifelse(tj == "sph.3", 3L, 4L))
         Xcont[[j]] <- basis.sph(x = x[[j]], knots = knots[[j]], m = m)
         Qcont[[j]] <- penalty.sph(x = knots[[j]], m = m)
         

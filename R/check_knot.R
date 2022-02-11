@@ -2,7 +2,7 @@ check_knot <-
   function(mf, type, xrng, xlev, tprk, knots = NULL){
     # check and/or sample spline knots
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: 2021-04-20
+    # last updated: 2021-07-15
     
     ### initializations
     mt <- attr(mf, "terms")                 # mt contains model info and terms 
@@ -17,7 +17,7 @@ check_knot <-
     
     ### initialize types
     ss.types <- c("lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "per")
-    sp.types <- c("sph1", "sph2", "sph3", "sph")
+    sp.types <- c("sph.2", "sph.3", "sph.4", "sph")
     tp.types <- c("tps.lin", "tps.cub", "tps.qui", "tps")
     
     
@@ -123,9 +123,9 @@ check_knot <-
               if(!any(kclass == c("integer", "numeric"))) stop(paste("Input 'type' for",xnames[j],"is '",type[j],"' but input knots for",xnames[j],"are not of class 'integer' or 'numeric'.\n  Polynomial smoothing splines require numeric predictors and knots."))
               if(min(knotsj) < xrng[[j]][1] | max(knotsj) > xrng[[j]][2]) warning(paste("Input 'knots' for",xnames[j],"are outside of the range of the data."))
             } else if(any(type[j] == sp.types)){
-              if(kclass != "matrix") stop(paste("Input 'type' for",xnames[j],"is '",type[j],"' but input knots for",xnames[j],"are not of class 'matrix'.\n  Spherical splines require a 3-dimensional predictor and knots (i.e., n x 3 matrix)."))
-              if(ncol(knotsj) != 3L) stop(paste("Input 'type' for",xnames[j],"is '",type[j],"' but input knots for",xnames[j],"are not a matrix with 3 columns.\n  Spherical splines require a 3-dimensional predictor and knots (i.e., n x 3 matrix)."))
-              for(k in 1:3) if(min(knotsj[,k]) < xrng[[j]][1,k] | max(knotsj[,k]) > xrng[[j]][2,k]) warning(paste("Input 'knots' for",xnames[j],"are outside of the range of the data for dimension",k))
+              if(kclass != "matrix") stop(paste("Input 'type' for",xnames[j],"is '",type[j],"' but input knots for",xnames[j],"are not of class 'matrix'.\n  Spherical splines require a 2-dimensional predictor and knots (i.e., n x 2 matrix) containing lat/long."))
+              if(ncol(knotsj) != 2L) stop(paste("Input 'type' for",xnames[j],"is '",type[j],"' but input knots for",xnames[j],"are not a matrix with 2 columns.\n  Spherical splines require a 2-dimensional predictor and knots (i.e., n x 2 matrix) containing lat/long."))
+              for(k in 1:2) if(min(knotsj[,k]) < xrng[[j]][1,k] | max(knotsj[,k]) > xrng[[j]][2,k]) warning(paste("Input 'knots' for",xnames[j],"are outside of the range of the data for dimension",k))
             } else if(any(type[j] == tp.types)){
               if(class(mf[,j+1])[1] == "matrix"){
                 if(ncol(mf[,j+1]) != ncol(knotsj)) stop(paste("Input knots 'type' for",xnames[j],"do not have the same number of columns as input variable."))
@@ -263,9 +263,9 @@ check_knot <-
                 knotsj <- sort(unique(knotsj))
                 if(min(knotsj) < xrng[[j]][1] | max(knotsj) > xrng[[j]][2]) warning(paste("Input 'knots' for",xnames[j],"are outside of the range of the data."))
               } else if(any(type[j] == sp.types)){
-                if(kclass != "matrix") stop(paste("Input 'type' for",xnames[j],"is '",type[j],"' but input knots for",xnames[j],"are not of class 'matrix'.\n  Spherical splines require a 3-dimensional predictor and knots (i.e., n x 3 matrix)."))
-                if(ncol(knotsj) != 3L) stop(paste("Input 'type' for",xnames[j],"is '",type[j],"' but input knots for",xnames[j],"are not a matrix with 3 columns.\n  Spherical splines require a 3-dimensional predictor and knots (i.e., n x 3 matrix)."))
-                for(k in 1:3) if(min(knotsj[,k]) < xrng[[j]][1,k] | max(knotsj[,k]) > xrng[[j]][2,k]) warning(paste("Input 'knots' for",xnames[j],"are outside of the range of the data for dimension",k))
+                if(kclass != "matrix") stop(paste("Input 'type' for",xnames[j],"is '",type[j],"' but input knots for",xnames[j],"are not of class 'matrix'.\n  Spherical splines require a 2-dimensional predictor and knots (i.e., n x 2 matrix) containing lat/long."))
+                if(ncol(knotsj) != 2L) stop(paste("Input 'type' for",xnames[j],"is '",type[j],"' but input knots for",xnames[j],"are not a matrix with 2 columns.\n  Spherical splines require a 2-dimensional predictor and knots (i.e., n x 2 matrix) containing lat/long."))
+                for(k in 1:2) if(min(knotsj[,k]) < xrng[[j]][1,k] | max(knotsj[,k]) > xrng[[j]][2,k]) warning(paste("Input 'knots' for",xnames[j],"are outside of the range of the data for dimension",k))
               } else if(any(type[j] == tp.types)){
                 if(class(mf[,j+1])[1] == "matrix"){
                   if(ncol(mf[,j+1]) != ncol(knotsj)) stop(paste("Input knots 'type' for",xnames[j],"do not have the same number of columns as input variable."))

@@ -3,7 +3,7 @@ fit_sm <-
            tprk = TRUE, control = list(), method = "GCV"){
     # fit semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-10-21
+    # Updated: 2021-10-21
     
     
     #########***#########   REPARAMETERIZATION   #########***#########
@@ -134,7 +134,7 @@ fit_sm <-
         sse <- cv.crit * n * (1 - (df.offset + penalty * df) / n)^2
         sigma <- sqrt(sse / (n - df))
         fit <- as.numeric(fit0 + XsvdC$u %*% beta) / wsqrt
-        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2))
+        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2)) / wsqrt
         beta <- c(beta0, beta)
         shrink <- c(rep(1, nsdim), shrink)
         n2LL <- NULL
@@ -154,7 +154,7 @@ fit_sm <-
         df <- sum(shrink) + nsdim
         sse <- sse0 - 2 * sum(bvec * beta) + sum(beta^2)
         sigma <- sqrt(sse / (n - df))
-        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2))
+        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2)) / wsqrt
         beta <- c(beta0, beta)
         shrink <- c(rep(1, nsdim), shrink)
         n2LL <- NULL
@@ -173,7 +173,7 @@ fit_sm <-
         df <- sum(shrink) + nsdim
         sse <- sse0 - 2 * sum(bvec * beta) + sum(beta^2)
         sigma <- sqrt(sse / (n - df))
-        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2))
+        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2)) / wsqrt
         n2LL <- NULL
         beta <- c(beta0, beta)
         shrink <- c(rep(1, nsdim), shrink)
@@ -193,7 +193,7 @@ fit_sm <-
         df <- sum(shrink) + nsdim
         sse <- sse0 - 2 * sum(bvec * beta) + sum(beta^2)
         sigma <- sqrt(sse / (n - df))
-        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2))
+        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2)) / wsqrt
         n2LL <- NULL
         beta <- c(beta0, beta)
         shrink <- c(rep(1, nsdim), shrink)
@@ -216,7 +216,7 @@ fit_sm <-
         df <- sum(shrink) + nsdim
         cv.crit <- (sse / n) / (1 - (df.offset + penalty * df) / n)^2
         fit <- as.numeric(fit0 + XsvdC$u %*% beta) / wsqrt
-        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2))
+        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2)) / wsqrt
         beta <- c(beta0, beta)
         shrink <- c(rep(1, nsdim), shrink)
         
@@ -238,7 +238,7 @@ fit_sm <-
         fit <- as.numeric(fit0 + XsvdC$u %*% beta) / wsqrt
         n2LL <- ic - const * df
         sigma <- sqrt(sse / (n - df))
-        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2))
+        se.fit <- sigma * sqrt(lev0 + rowSums((XsvdC$u %*% diag(sqrt(shrink)))^2)) / wsqrt
         beta <- c(beta0, beta)
         shrink <- c(rep(1, nsdim), shrink)
         
@@ -291,7 +291,7 @@ fit_sm <-
         ic <- n2LL + const * df
       }
       if(is.null(sigma)) sigma <- sqrt(sse / (n - df))
-      se.fit <- sigma * sqrt(lev)
+      se.fit <- sigma * sqrt(lev) / wsqrt
       beta <- c(beta0, beta)
       shrink <- c(rep(1, nsdim), shrink)
       
