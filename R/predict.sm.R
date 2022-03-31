@@ -7,7 +7,7 @@ predict.sm <-
            check.newdata = TRUE, ...){
     # predict method for class "sm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-06-27
+    # Updated: 2022-03-23
     
     
     #########***#########   CHECKS   #########***#########
@@ -152,7 +152,7 @@ predict.sm <-
     
     ### check formula
     spform <- strsplit(as.character(object$formula), split = " ~ ")
-    if(length(spform) == 3L && spform[[3]] == "."){
+    if(length(spform) == 3L && any(gsub(" ", "", spform[[3]]) == c(".", ".*.", ".*.*.") )){
       object$formula <- as.formula(paste0(spform[[2]], " ~ ", paste0(object$terms, collapse = " + ")))
     }
     

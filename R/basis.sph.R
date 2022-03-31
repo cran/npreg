@@ -2,7 +2,7 @@ basis.sph <-
   function(x, knots, m = 2, intercept = FALSE, ridge = FALSE){
     # Spherical Smoothing Spline Basis
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2021-07-14
+    # Update: 2022-03-22
     
     # initializations
     m <- as.integer(m)
@@ -47,10 +47,7 @@ basis.sph <-
     # check ridge
     if(ridge){
       Q <- penalty.sph(knots * (180 / pi), m = m)
-      Qeig <- eigen(Q, symmetric = TRUE)
-      Qrnk <- sum(Qeig$values > Qeig$values[1] * ncol(Q) * .Machine$double.eps)
-      Qisqrt <- Qeig$vectors[,1:Qrnk,drop=FALSE] %*% diag(1/sqrt(Qeig$values[1:Qrnk]), nrow = Qrnk, ncol = Qrnk)
-      X <- X %*% Qisqrt
+      X <- X %*% msqrt(Q, inverse = TRUE, checkx = FALSE)
       knot.names <- knot.names[1:ncol(X)]
     }
     

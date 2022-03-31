@@ -68,10 +68,10 @@ Optional list with named components controlling the root finding when the smooth
 \bold{Note} that spar is only searched for in the interval \eqn{[lower, upper]}.
   \describe{
   \item{lower:}{
-  lower bound for spar; defaults to 0.
+  lower bound for spar; defaults to -1.5
   }
   \item{upper:}{
-  upper bound for spar; defaults to 1.
+  upper bound for spar; defaults to 1.5
   }
   \item{tol:}{
   the absolute precision (\bold{tol}erance) used by \code{\link{optimize}}; defaults to 1e-8.
@@ -197,7 +197,17 @@ Bayesian Information Criterion (BIC)
 }
 
 \seealso{
+\code{\link{boot.ss}} for bootstrapping \code{ss} objects.
+
+\code{\link{fitted.ss}} for extracting fitted values from \code{ss} objects.
+
+\code{\link{model.matrix.ss}} for constructing model matrix from \code{ss} objects.
+
+\code{\link{resid.ss}} for extracting residuals from \code{ss} objects.
+
 \code{\link{summary.ss}} for summarizing \code{ss} objects.
+
+\code{\link{plot.ss}} for plotting predictions from \code{ss} objects.
 
 \code{\link{predict.ss}} for predicting from \code{ss} objects.
 

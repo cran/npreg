@@ -2,7 +2,7 @@ basis.ord <-
   function(x, knots, K = NULL, intercept = FALSE, ridge = FALSE){
     # Ordinal Smoothing Spline Basis
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2021-04-09
+    # Update: 2022-03-22
     
     if(is.null(K)) K <- length(unique(x))
     x <- as.ordered(x)
@@ -14,10 +14,7 @@ basis.ord <-
     X <- outer(X = x, Y = knots, FUN = "ordkern", K = K, const = const) / K
     if(ridge){
       Q <- penalty.ord(knots, K = K, xlev = 1:length(xlev))
-      Qeig <- eigen(Q, symmetric = TRUE)
-      Qrnk <- sum(Qeig$values > Qeig$values[1] * ncol(Q) * .Machine$double.eps)
-      Qisqrt <- Qeig$vectors[,1:Qrnk,drop=FALSE] %*% diag(1/sqrt(Qeig$values[1:Qrnk]), nrow = Qrnk, ncol = Qrnk)
-      X <- X %*% Qisqrt
+      X <- X %*% msqrt(Q, inverse = TRUE, checkx = FALSE)
     }
     knot.names <- paste("knot", 1:ncol(X), sep = ".")
     if(intercept) {

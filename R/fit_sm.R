@@ -3,7 +3,7 @@ fit_sm <-
            tprk = TRUE, control = list(), method = "GCV"){
     # fit semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2021-10-21
+    # Updated: 2022-03-22
     
     
     #########***#########   REPARAMETERIZATION   #########***#########
@@ -26,33 +26,20 @@ fit_sm <-
     depe$J <- depe$J * wsqrt
     
     # reparameterize contrast space
-    eps <- .Machine$double.eps
     if(tprk){
       
-      Qeig <- eigen(depe$Q, symmetric = TRUE)
-      Qrnk <- sum(Qeig$values > nknots * eps * Qeig$values[1])
-      if(Qrnk == 1L){
-        Qprj <- matrix(Qeig$vectors[,1] / sqrt(Qeig$values[1]), nrow = nknots, ncol = 1)
-      } else{
-        Qprj <- Qeig$vectors[,1:Qrnk] %*% diag(1 / sqrt(Qeig$values[1:Qrnk]))
-      }
-      R.w <- depe$J %*% Qprj
+      Qisqrt <- msqrt(depe$Q, inverse = TRUE, checkx = FALSE)
+      R.w <- depe$J %*% Qisqrt
+      Qrnk <- ncol(Qisqrt)
       
     } else {
       
       cknots <- c(0, cumsum(Nknots))
-      R.w <- Qprj <- vector("list", length(depe$Q))
+      R.w <- Qisqrt <- vector("list", length(depe$Q))
       for(k in 1:length(depe$Q)){
         indx <- seq(cknots[k] + 1, cknots[k+1])
-        ntemp <- length(indx)
-        Qeig <- eigen(depe$Q[[k]], symmetric = TRUE)
-        Qrnk <- sum(Qeig$values > ntemp * eps * Qeig$values[1])
-        if(Qrnk == 1L){
-          Qprj[[k]] <- matrix(Qeig$vectors[,1] / sqrt(Qeig$values[1]), nrow = ntemp, ncol = 1)
-        } else{
-          Qprj[[k]] <- Qeig$vectors[,1:Qrnk] %*% diag(1 / sqrt(Qeig$values[1:Qrnk]))
-        }
-        R.w[[k]] <- depe$J[,indx] %*% Qprj[[k]]
+        Qisqrt[[k]] <- msqrt(depe$Q[[k]], inverse = TRUE, checkx = FALSE)
+        R.w[[k]] <- depe$J[,indx] %*% Qisqrt[[k]]
       }
       R.w <- do.call("cbind", R.w)
       Qrnk <- ncol(R.w)
@@ -91,26 +78,27 @@ fit_sm <-
     Tmat[nullindx,nullindx] <- diag(nsdim)
     Tmat[nullindx,-nullindx] <- (-1) * solve(crossprod(X.w[,nullindx])) %*% crossprod(X.w[,nullindx], R.w)
     if(tprk){
-      Tmat[-nullindx,-nullindx] <- Qprj
+      Tmat[-nullindx,-nullindx] <- Qisqrt
     } else {
       row.offset <- col.offset <- nsdim
-      for(k in 1:length(Qprj)){
-        nrowk <- nrow(Qprj[[k]])
-        ncolk <- ncol(Qprj[[k]])
-        Tmat[row.offset + 1:nrowk, col.offset + 1:ncolk] <- Qprj[[k]]
+      for(k in 1:length(Qisqrt)){
+        nrowk <- nrow(Qisqrt[[k]])
+        ncolk <- ncol(Qisqrt[[k]])
+        Tmat[row.offset + 1:nrowk, col.offset + 1:ncolk] <- Qisqrt[[k]]
         row.offset <- row.offset + nrowk
         col.offset <- col.offset + ncolk
       }
     }
     Tmat[,nullindx] <- Tmat[,nullindx] %*% XsvdN$v %*% diag(1 / XsvdN$d, nrow = nsdim, ncol = nsdim)
-    Tmat[,-nullindx] <- Tmat[,-nullindx] %*% XsvdC$v %*% diag(1 / XsvdC$d)
+    #Tmat[,-nullindx] <- Tmat[,-nullindx] %*% XsvdC$v %*% diag(1 / XsvdC$d)
+    Tmat <- cbind(Tmat[,nullindx], Tmat[,-nullindx] %*% XsvdC$v %*% diag(1 / XsvdC$d))
     
     # get coefficient names
     coefnames <- c(colnames(depe$K), colnames(depe$J))
     
     # remove junk
     Q <- depe$Q
-    rm(depe, Qeig, Qprj, Qrnk, X.w, R.w)
+    rm(depe, Qisqrt, X.w, R.w)
     
     
     #########***#########   ESTIMATE COEFS   #########***#########

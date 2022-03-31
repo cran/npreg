@@ -1,11 +1,11 @@
 check_type <- 
-  function(mf, type = NULL){
+  function(mf, type = NULL, xrange = NULL){
     # check and/or guess predictor type
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: 2021-07-15
+    # last updated: 2022-03-09
     
     # predictor types
-    # par = parameteric (unpenalized)
+    # par = parametric (unpenalized)
     # nom = nominal (unordered factor)
     # ord = ordinal (ordered factor)
     # lin = linear smoothing spline
@@ -152,6 +152,29 @@ check_type <-
       } # end if(is.na(nm[k]))
     } # for(k in 1:length(nm))
     
+    # given xrange?
+    if(!is.null(xrange)){
+      xrange <- as.list(xrange)
+      xrange.names <- names(xrange)
+      if(is.null(xrange.names)) stop("Input 'xrange' must be a named list")
+      for(k in 1:nxvar){
+        kid <- match(xnames[k], xrange.names)
+        if(!is.na(kid)){
+          obs.range <- xrng[[k]]
+          if(obs.range[1] < xrange[[kid]][1]){
+            warning("\nxrange$", xrange.names[kid], "[1] = ", xrange[[kid]][1], " > min(data$", xrange.names[kid],") = ", obs.range[1], "\n Redefining to minimum observed data value")
+            xrange[[kid]][1] <- obs.range[1]
+          }
+          if(obs.range[2] > xrange[[kid]][2]){
+            warning("\nxrange$", xrange.names[kid], "[2] = ", xrange[[kid]][2], " < max(data$", xrange.names[kid],") = ", obs.range[2], "\n Redefining to maximum observed data value")
+            xrange[[kid]][2] <- obs.range[2]
+          }
+          xrng[[k]] <- xrange[[kid]][1:2]
+        } # end if(!is.na(kid))
+      } # end for(k in 1:nxvar)
+    } # end if(!is.null(xrange))
+    
+    # return results
     return(list(type = rktype, xrng = xrng, xlev = xlev))
     
   }

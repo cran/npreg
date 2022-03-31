@@ -1,10 +1,11 @@
 sm <- 
   function(formula, data, weights, types = NULL, tprk = TRUE, knots = NULL, 
-           update = TRUE, df, spar = NULL, lambda = NULL, control = list(),
-           method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC")){
-    # semiparametric model
+           skip.iter = TRUE, df, spar = NULL, lambda = NULL, control = list(),
+           method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"),
+           xrange = NULL, thetas = NULL, mf = NULL){
+    # smooth model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-10-21
+    # Updated: 2022-03-30
     
     
     #########***#########   CHECKS   #########***#########
@@ -39,6 +40,18 @@ sm <-
       control$tol <- as.numeric(control$tol[1])
       if(control$tol <= 0) stop("Input 'control$tol' must be a positive scalar.")
     }
+    if(is.null(control$iterlim)){
+      control$iterlim <- 5000L
+    } else {
+      control$iterlim <- as.integer(control$iterlim[1])
+      if(control$iterlim < 1L) stop("Input 'control$iterlim' must be a positive integer.")
+    }
+    if(is.null(control$print.level)){
+      control$print.level <- 0L
+    } else {
+      control$print.level <- as.integer(control$print.level[1])
+      if(!any(control$print.level == c(0L, 1L, 2L))) stop("Input 'control$print.level' must be either:\n0 (no printing), 1 (minimal printing), or 2 (full printing).")
+    }
     
     # check 'method'
     methods <- c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC")
@@ -47,14 +60,17 @@ sm <-
     if(is.na(method)) stop("Invalid 'method' input.")
     method <- methods[method]
     
+    
     #########***#########   FORMULA   #########***#########
     
     # create model frame
-    mf <- match.call()
-    m <- match(c("formula","data","weights"),names(mf),0L)
-    mf <- mf[c(1L, m)]
-    mf[[1L]] <- as.name("model.frame")
-    mf <- eval(mf, parent.frame())
+    if(is.null(mf)){
+      mf <- match.call()
+      m <- match(c("formula","data","weights"),names(mf),0L)
+      mf <- mf[c(1L, m)]
+      mf[[1L]] <- as.name("model.frame")
+      mf <- eval(mf, parent.frame())
+    }
     mt <- attr(mf, "terms")                 # mt contains model info and terms 
     et <- attr(mt,"factors")                # et is effects table
     mfdim <- dim(et)                        # dim of effects table
@@ -72,8 +88,22 @@ sm <-
     }
     
     
+    #########***#########   WEIGHTS   #########***#########
+    xlist <- as.list(mf[,-1,drop=FALSE])
+    if(any(names(xlist) == "(weights)")) {
+      no.weights <- FALSE
+      xlist <- xlist[-which(names(xlist) == "(weights)")]
+      weights <- as.numeric(mf[,"(weights)"])
+      if(any(weights < 0)) stop("Input 'weights' must be non-negative.")
+      weights <- weights * sum(weights > 0) / sum(weights)
+    } else {
+      no.weights <- TRUE
+      weights <- rep(1, nobs)
+    }
+    
+    
     #########***#########   GET TYPES   #########***#########
-    chty <- check_type(mf, types)
+    chty <- check_type(mf, types, xrange)
     
     
     #########***#########   GET KNOTS   #########***#########
@@ -82,24 +112,13 @@ sm <-
     
     
     #########***#########   GET RKHS   #########***#########
-    xlist <- as.list(mf[,-1,drop=FALSE])
-    if(any(names(xlist) == "(weights)")) {
-      xlist <- xlist[-which(names(xlist) == "(weights)")]
-    }
-    rkhs <- build_rkhs(x = xlist, type = chty$type, knots = knot, xrng = chty$xrng)
+    rkhs <- build_rkhs(x = xlist, type = chty$type, knots = knot, 
+                       xrng = chty$xrng, xlev = chty$xlev)
     
     
     #########***#########   DESIGN & PENALTY   #########***#########
-    depe <- build_depe(Etab = et, rkhs = rkhs, tprk = tprk)
-    if(missing(weights)){
-      no.weights <- TRUE
-      depe$weights <- rep(1, nobs)
-    } else {
-      no.weights <- FALSE
-      depe$weights <- as.numeric(mf[,"(weights)"])
-      if(any(depe$weights < 0)) stop("Input 'weights' must be non-negative.")
-      depe$weights <- depe$weights * sum(depe$weights > 0) / sum(depe$weights)
-    }
+    depe <- build_depe(Etab = et, rkhs = rkhs, tprk = tprk, thetas = thetas)
+    depe$weights <- weights
     
     
     #########***#########   FIT MODEL   #########***#########
@@ -108,6 +127,7 @@ sm <-
     if(!missing(df)){
       df <- as.numeric(df[1])
       if(df < ncol(depe$K) | df > nobs) stop("'df' must satisfy:  m < df < n")
+      if(!skip.iter) warning("Input 'df' will be inexact when 'skip.iter = FALSE'")
     } else {
       df <- NULL
     }
@@ -119,7 +139,7 @@ sm <-
     # use Algorithm 3.2 from Gu and Wahba (1991)
     nullindx <- 1:fit$nsdf
     allzero <- (sum(abs(fit$coefficients[-nullindx])) == 0)
-    if(update && (length(depe$thetas) > 1L) && !allzero){
+    if((length(depe$thetas) > 1L) && is.null(thetas) && !allzero){
       
       # rebuild design and penalty
       if(tprk){
@@ -131,15 +151,27 @@ sm <-
                             Jcoef = fit$coef[-nullindx],
                             depe = depe, tprk = FALSE)
       }
-      if(missing(weights)){
-        depe$weights <- rep(1, nobs)
-      } else {
-        depe$weights <- as.numeric(mf[,"(weights)"])
-      }
+      depe$weights <- weights
       
       # refit model
       fit <- fit_sm(y = yvar, depe = depe, df = df, lambda = lambda,
                     tprk = tprk, control = control, method = method)
+      
+      # deep tuning?
+      if(!skip.iter){
+        opt <- nlm(f = tune.deep.sm, p = log(depe$thetas),
+                   spar = fit$spar, y = yvar, Etab = et, rkhs = rkhs, 
+                   weights = depe$weights, tprk = tprk, method = method, 
+                   gradtol = control$tol, iterlim = control$iterlim,
+                   print.level = control$print.level)
+        thetas <- exp(opt$estimate)
+        names(thetas) <- names(depe$thetas)
+        depe <- build_depe(Etab = et, rkhs = rkhs, tprk = tprk, thetas = thetas)
+        depe$weights <- weights
+        fit <- fit_sm(y = yvar, depe = depe, df = df, lambda = fit$lambda,
+                      tprk = tprk, control = control, method = method)
+        fit$iter <- opt$iter
+      }
       
     } # end if(update && (length(depe$thetas) > 1L) && !allzero)
     
@@ -149,7 +181,8 @@ sm <-
     # fit specs
     specs <- list(knots = knot, thetas = depe$thetas, 
                   xrng = chty$xrng, xlev = chty$xlev,
-                  tprk = tprk)
+                  tprk = tprk, skip.iter = skip.iter,
+                  control = control)
     
     # collect results
     fit$specs <- specs
@@ -158,6 +191,7 @@ sm <-
     fit$terms <- colnames(et)
     fit$method <- method
     fit$formula <- formula
+    fit$weights <- if(!no.weights) weights
     fit$call <- match.call()
     
     # class and return

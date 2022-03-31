@@ -4,7 +4,7 @@ fit_gsm <-
            family = check_family(gaussian)){
     # fit generalized semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-08-23
+    # Updated: 2022-03-22
     
     
     #########***#########   INITIALIZATIONS   #########***#########
@@ -23,30 +23,18 @@ fit_gsm <-
     eps <- .Machine$double.eps
     if(tprk){
       
-      Qeig <- eigen(depe$Q, symmetric = TRUE)
-      Qrnk <- sum(Qeig$values > nknots * eps * Qeig$values[1])
-      if(Qrnk == 1L){
-        Qprj <- matrix(Qeig$vectors[,1] / sqrt(Qeig$values[1]), nrow = nknots, ncol = 1)
-      } else{
-        Qprj <- Qeig$vectors[,1:Qrnk] %*% diag(1 / sqrt(Qeig$values[1:Qrnk]))
-      }
-      Rmat <- depe$J %*% Qprj
+      Qisqrt <- msqrt(depe$Q, inverse = TRUE, checkx = FALSE)
+      Rmat <- depe$J %*% Qisqrt
+      Qrnk <- ncol(Qisqrt)
       
     } else {
       
       cknots <- c(0, cumsum(Nknots))
-      Rmat <- Qprj <- vector("list", length(depe$Q))
+      Rmat <- Qisqrt <- vector("list", length(depe$Q))
       for(k in 1:length(depe$Q)){
         indx <- seq(cknots[k] + 1, cknots[k+1])
-        ntemp <- length(indx)
-        Qeig <- eigen(depe$Q[[k]], symmetric = TRUE)
-        Qrnk <- sum(Qeig$values > ntemp * eps * Qeig$values[1])
-        if(Qrnk == 1L){
-          Qprj[[k]] <- matrix(Qeig$vectors[,1] / sqrt(Qeig$values[1]), nrow = ntemp, ncol = 1)
-        } else{
-          Qprj[[k]] <- Qeig$vectors[,1:Qrnk] %*% diag(1 / sqrt(Qeig$values[1:Qrnk]))
-        }
-        Rmat[[k]] <- depe$J[,indx] %*% Qprj[[k]]
+        Qisqrt[[k]] <- msqrt(depe$Q[[k]], inverse = TRUE, checkx = FALSE)
+        Rmat[[k]] <- depe$J[,indx] %*% Qisqrt[[k]]
       }
       Rmat <- do.call("cbind", Rmat)
       Qrnk <- ncol(Rmat)
@@ -57,17 +45,21 @@ fit_gsm <-
     Tmat <- matrix(0, nsdim + nknots, nsdim + Qrnk)
     Tmat[nullindx,nullindx] <- diag(nsdim)
     if(tprk){
-      Tmat[-nullindx,-nullindx] <- Qprj
+      Tmat[-nullindx,-nullindx] <- Qisqrt
     } else {
       row.offset <- col.offset <- nsdim
-      for(k in 1:length(Qprj)){
-        nrowk <- nrow(Qprj[[k]])
-        ncolk <- ncol(Qprj[[k]])
-        Tmat[row.offset + 1:nrowk, col.offset + 1:ncolk] <- Qprj[[k]]
+      for(k in 1:length(Qisqrt)){
+        nrowk <- nrow(Qisqrt[[k]])
+        ncolk <- ncol(Qisqrt[[k]])
+        Tmat[row.offset + 1:nrowk, col.offset + 1:ncolk] <- Qisqrt[[k]]
         row.offset <- row.offset + nrowk
         col.offset <- col.offset + ncolk
       }
     }
+    
+    # remove junk
+    rm(Qisqrt)
+    
     
     #########***#########   ESTIMATE COEFS   #########***#########
     
@@ -100,7 +92,7 @@ fit_gsm <-
         
         ##*## iterative update of theta and eta ##*##
         iter.out <- 0L
-        vtol.out <- control$epsilon + 1
+        vtol.out <- control$epsilon.out + 1
         obj.old <- as.numeric(opt$objective)
         while(iter.out < control$maxit.out & vtol.out > control$epsilon.out){
           
@@ -127,7 +119,7 @@ fit_gsm <-
           obj.old <- obj.new
           
           # step 4: update mu (if needed)
-          if(vtol.out > control$epsilon && iter.out < control$maxit){
+          if(vtol.out > control$epsilon.out && iter.out < control$maxit.out){
             coef <- attr(opt$objective, "coef")
             mu <- family$linkinv(cbind(depe$K, Rmat) %*% coef)
           }
@@ -291,8 +283,7 @@ fit_gsm <-
 tune.gsm <-
   function(spar, y, Kmat, Rmat, weights, beta0,
            tprk = TRUE, control = check_control(),
-           family = check_family(gaussian), 
-           method = "GCV"){
+           family = check_family(gaussian), method = "GCV"){
     
     # initialize parameters for IRLS
     lambda <- 256^(3*(spar-1))
@@ -342,9 +333,7 @@ tune.gsm <-
       Xty <- rbind(Kty, Rty)
       
       # update coefficients and eta
-      XtXeig <- eigen(XtX + Pmat, symmetric = TRUE)
-      nze <- sum(XtXeig$values > XtXeig$values[1] * .Machine$double.eps)
-      XtXisqrt <- XtXeig$vectors[,1:nze] %*% diag(1/sqrt(XtXeig$values[1:nze]))
+      XtXisqrt <- msqrt(XtX + Pmat, inverse = TRUE, checkx = FALSE)
       XtXi <- tcrossprod(XtXisqrt)
       coef <- XtXi %*% Xty
       eta <- Xmat %*% coef
@@ -375,7 +364,7 @@ tune.gsm <-
     if(family$family == "gaussian"){
       disp <- dev / (nobs - df)
     } else if(family$family == "binomial"){
-      disp <- 1 / mean(weights)
+      disp <- 1
     } else if(family$family == "poisson"){
       disp <- 1
     } else if(family$family == "Gamma"){
@@ -434,7 +423,7 @@ tune.gsm <-
     attr(val, "coef") <- as.numeric(coef)
     attr(val, "cov.sqrt") <- sqrt(disp) * XtXisqrt
     attr(val, "disp") <- disp
-    attr(val, "resid") <- as.numeric(yp / vsqrt - mu)
+    attr(val, "resid") <- as.numeric((y - mu) / mueta)
     
     # return results
     return(val)

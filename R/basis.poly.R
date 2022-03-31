@@ -4,7 +4,7 @@ basis.poly <-
            bernoulli = TRUE, ridge = FALSE){
     # Polynomial Smoothing Spline Basis
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2021-04-09
+    # Update: 2022-03-22
     
     ### check x and k
     x <- as.numeric(x)
@@ -93,10 +93,7 @@ basis.poly <-
     if(ridge){
       Q <- penalty.poly(knots, m = m, xmin = xmin, xmax = xmax,
                         periodic = periodic, bernoulli = bernoulli)
-      Qeig <- eigen(Q, symmetric = TRUE)
-      Qrnk <- sum(Qeig$values > Qeig$values[1] * ncol(Q) * .Machine$double.eps)
-      Qisqrt <- Qeig$vectors[,1:Qrnk,drop=FALSE] %*% diag(1/sqrt(Qeig$values[1:Qrnk]), nrow = Qrnk, ncol = Qrnk)
-      Xs <- Xs %*% Qisqrt
+      Xs <- Xs %*% msqrt(Q, inverse = TRUE, checkx = FALSE)
       colnames(Xs) <- paste("knot", 1:ncol(Xs), sep = ".")
     }
     

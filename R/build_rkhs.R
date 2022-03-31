@@ -1,8 +1,8 @@
 build_rkhs <-
-  function(x, type, knots, xrng){
+  function(x, type, knots, xrng, xlev){
     # build reproducing kernel Hilbert space components
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: 2021-07-15
+    # last updated: 2022-03-15
     
     ### initializations
     nxvar <- length(x)
@@ -46,7 +46,7 @@ build_rkhs <-
         
         # ordinal smoothing spline
         Xcont[[j]] <- basis.ord(x = x[[j]], knots = knots[[j]], K = xrng[[j]][2])
-        Qcont[[j]] <- penalty.ord(x = knots[[j]], K = xrng[[j]][2])
+        Qcont[[j]] <- penalty.ord(x = knots[[j]], K = xrng[[j]][2], xlev = xlev[[j]])
         
       } else if(any(tj == ss.types)){
         

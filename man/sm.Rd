@@ -5,12 +5,13 @@
 Fit a Smooth Model
 }
 \description{
-Fits a semi- or nonparametric regression model with the smoothing parameter selected via one of eight methods: GCV, OCV, GACV, ACV, REML, ML, AIC, or BIC.
+Fits a semi- or nonparametric regression model with the smoothing parameter(s) selected via one of eight methods: GCV, OCV, GACV, ACV, REML, ML, AIC, or BIC.
 }
 \usage{
 sm(formula, data, weights, types = NULL, tprk = TRUE, knots = NULL,
-   update = TRUE, df, spar = NULL, lambda = NULL, control = list(),
-   method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"))
+   skip.iter = TRUE, df, spar = NULL, lambda = NULL, control = list(),
+   method = c("GCV", "OCV", "GACV", "ACV", "REML", "ML", "AIC", "BIC"),
+   xrange = NULL, thetas = NULL, mf = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,11 +33,11 @@ Logical specifying how to parameterize smooth models with multiple predictors. I
   \item{knots}{
 Spline knots for the estimation of the nonparametric effects. For models with multiple predictors, the knot specification will depend on the \code{tprk} input. See the "Choosing Knots" section for details
 }
-  \item{update}{
-If \code{TRUE}, steps 1-2 of Gu and Wahba's (1991) algorithm 3.2 are used to update the "extra" smoothing parameters. If \code{FALSE}, only step 1 of algorithm 3.2 is used, so each effect is given equal influence on the penalty. Only applicable when multiple smooth terms are included. 
+  \item{skip.iter}{
+Set to \code{FALSE} for deep tuning of the hyperparameters. Only applicable when multiple smooth terms are included. See the "Parameter Tuning" section for details.
 }
   \item{df}{
-Equivalent degrees of freedom (trace of the smoother matrix). Must be in \eqn{[m,n]} where \eqn{m} is the number of columns of the null space basis function matrix \eqn{X}, and \eqn{n} is the number of observations.
+Equivalent degrees of freedom (trace of the smoother matrix). Must be in \eqn{[m,n]} where \eqn{m} is the number of columns of the null space basis function matrix \eqn{X}, and \eqn{n} is the number of observations. Will be approximate if \code{skip.iter = FALSE}.
 }
   \item{spar}{
 Smoothing parameter. Typically (but not always) in the range \eqn{(0,1]}. If specified \code{lambda = 256^(3*(spar-1))}.
@@ -45,24 +46,30 @@ Smoothing parameter. Typically (but not always) in the range \eqn{(0,1]}. If spe
 Computational smoothing parameter. This value is weighted by \eqn{n} to form the penalty coefficient (see Details). Ignored if \code{spar} is provided.
 }
   \item{control}{
-Optional list with named components controlling the root finding when the smoothing parameter spar is computed, i.e., missing or NULL, see below.  
+Optional list with named components that control the optimization specs for the smoothing parameter selection routine.
 
 \bold{Note} that spar is only searched for in the interval \eqn{[lower, upper]}.
   \describe{
-  \item{lower:}{
-  lower bound for spar; defaults to 0.
-  }
-  \item{upper:}{
-  upper bound for spar; defaults to 1.
-  }
-  \item{tol:}{
-  the absolute precision (\bold{tol}erance) used by \code{\link{optimize}}; defaults to 1e-8.
-  }
+    \item{lower:}{lower bound for spar; defaults to -1.5}
+    \item{upper:}{upper bound for spar; defaults to 1.5}
+    \item{tol:}{the absolute precision (\bold{tol}erance) used by \code{\link{optimize}} and \code{\link{nlm}}; defaults to 1e-8.}
+    \item{iterlim:}{the iteration limit used by \code{\link{nlm}}; defaults to 5000.}
+    \item{print.level:}{the print level used by \code{\link{nlm}}; defaults to 0 (no printing).}
   }
 }
   \item{method}{
-Method for selecting the smoothing parameter. Ignored if \code{lambda} is provided.
+Method for selecting the smoothing parameter. Ignored if \code{lambda} is provided and \code{skip.iter = TRUE}.
 }
+  \item{xrange}{
+Optional named list containing the range of each predictor. If \code{NULL}, the ranges are calculated from the input \code{data}.
+}
+  \item{thetas}{
+Optional vector of hyperparameters to use for smoothing. If \code{NULL}, these are tuned using the requested \code{method}.
+}
+\item{mf}{
+Optional model frame constructed from \code{formula} and \code{data} (and potentially \code{weights}).
+}
+Note: the last two arguments are not intended to be called by the typical user of this function. These arguments are included primarily for internal usage by the \code{\link{boot.sm}} function.
 }
 \details{
 Letting \eqn{f_i = f(x_i)} with \eqn{x_i = (x_{i1}, \ldots, x_{ip})}, the function is represented as \deqn{f = X \beta + Z \gamma} where the basis functions in \eqn{X} span the null space (i.e., parametric effects), and \eqn{Z} contains the kernel function(s) of the contrast space (i.e., nonparametric effects) evaluated at all combinations of observed data points and knots. The vectors \eqn{\beta} and \eqn{\gamma} contain unknown basis function coefficients.
@@ -95,6 +102,7 @@ An object of class "sm" with components:
   \item{penalty}{the smoothness penalty \eqn{\gamma' Q \gamma}.}
   \item{coefficients}{the basis function coefficients used for the fit model.}
   \item{cov.sqrt}{the square-root of the covariance matrix of \code{coefficients}. Note: \code{tcrossprod(cov.sqrt)} reconstructs the covariance matrix. }
+  \item{iter}{the number of iterations used by \code{nlm} (if applicable).}
   \item{specs}{a list with information used for prediction purposes:
     \describe{
       \item{knots}{the spline knots used for each predictor.}
@@ -102,6 +110,8 @@ An object of class "sm" with components:
       \item{xrng}{the ranges of the predictor variables.}
       \item{xlev}{the factor levels of the predictor variables (if applicable).}
       \item{tprk}{logical controlling the formation of tensor product smooths.}
+      \item{skip.iter}{logical controlling the parameter tuning (same as input).}
+      \item{control}{the \code{control} options use for tuning.}
     }
   }
   \item{data}{the data used to fit the model.}
@@ -109,6 +119,7 @@ An object of class "sm" with components:
   \item{terms}{the terms included in the fit model.}
   \item{method}{the \code{method} used for smoothing parameter selection. Will be \code{NULL} if \code{lambda} was provided.}
   \item{formula}{the formula specifying the fit model.}
+  \item{weights}{the weights used for fitting (if applicable)}
   \item{call}{the matched call.}
 }
 \references{
@@ -208,8 +219,24 @@ If \code{tprk = TRUE}, the null space basis function matrix has the form \eqn{X 
 If \code{tprk = FALSE}, the null space basis function matrix has the form \eqn{X = [1, X_1, X_2]}, and the contrast space basis function matrix has the form \deqn{Z = [\theta_1 Z_1, \theta_2 Z_2]} where the \eqn{\theta_k} are the "extra" smoothing parameters. Note that \eqn{Z} is of dimension \eqn{n} by \eqn{r = r_1 + r_2}.
 }
 
+\section{Parameter Tuning }{
+When multiple smooth terms are included in the model, there are smoothing (hyper)parameters that weight the contribution of each combination of smooth terms. These hyperparameters are distinct from the overall smoothing parameter \code{lambda} that weights the contribution of the penalty. 
+
+\code{skip.iter = TRUE} (default) estimates the smoothing hyperparameters using Algorithm 3.2 of Gu and Wahba (1991), which typically provides adequate results when the model form is correctly specified. The \code{lambda} parameter is tuned via the specified smoothing parameter selection \code{method}.
+
+\code{skip.iter = FALSE} uses Algorithm 3.2 as an initialization, and then the \code{\link{nlm}} function is used to tune the hyperparameters via the specified smoothing parameter selection \code{method}. Setting \code{skip.iter = FALSE} can (substantially) increase the model fitting time, but should produce better results---particularly if the model \code{formula} is misspecified.
+}
+
 
 \seealso{
+\code{\link{boot.sm}} for bootstrapping \code{sm} objects.
+
+\code{\link{fitted.sm}} for extracting fitted values from \code{sm} objects.
+
+\code{\link{model.matrix.sm}} for constructing model matrix from \code{sm} objects.
+
+\code{\link{resid.sm}} for extracting residuals from \code{sm} objects.
+
 \code{\link{summary.sm}} for summarizing \code{sm} objects.
 
 \code{\link{predict.sm}} for predicting from \code{sm} objects.

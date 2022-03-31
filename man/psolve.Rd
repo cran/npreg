@@ -43,7 +43,7 @@ The pseudo-inverse is calculated by inverting the eigen/singular values that are
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{solve}}
+\code{\link{msqrt}}
 }
 \examples{
 # generate X
@@ -51,10 +51,10 @@ set.seed(0)
 X <- matrix(rnorm(100), 20, 5)
 X <- cbind(X, rowSums(X))
 
-# pseudo-inverse of X  (dim = 5 by 20)
+# pseudo-inverse of X  (dim = 6 by 20)
 Xinv <- psolve(X)
 
-# pseudo-inverse of crossprod(X)  (dim = 5 by 5)
+# pseudo-inverse of crossprod(X)  (dim = 6 by 6)
 XtXinv <- psolve(crossprod(X))
 
 }

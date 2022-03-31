@@ -9,8 +9,9 @@ Fits a generalized semi- or nonparametric regression model with the smoothing pa
 }
 \usage{
 gsm(formula, family = gaussian, data, weights, types = NULL, tprk = TRUE, 
-    knots = NULL, update = TRUE, spar = NULL, lambda = NULL, control = list(),
-    method = c("GCV", "OCV", "GACV", "ACV", "PQL", "AIC", "BIC"))
+    knots = NULL, skip.iter = TRUE, spar = NULL, lambda = NULL, control = list(),
+    method = c("GCV", "OCV", "GACV", "ACV", "PQL", "AIC", "BIC"),
+    xrange = NULL, thetas = NULL, mf = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -35,8 +36,8 @@ Logical specifying how to parameterize smooth models with multiple predictors. I
   \item{knots}{
 Spline knots for the estimation of the nonparametric effects. For models with multiple predictors, the knot specification will depend on the \code{tprk} input. See the "Choosing Knots" section for details
 }
-  \item{update}{
-If \code{TRUE}, steps 1-2 of Gu and Wahba's (1991) algorithm 3.2 are used to update the "extra" smoothing parameters. If \code{FALSE}, only step 1 of algorithm 3.2 is used, so each effect is given equal influence on the penalty. Only applicable when multiple smooth terms are included. 
+  \item{skip.iter}{
+Set to \code{FALSE} for deep tuning of the hyperparameters. Only applicable when multiple smooth terms are included. See the "Parameter Tuning" section for details.
 }
 \item{spar}{
 Smoothing parameter. Typically (but not always) in the range \eqn{(0,1]}. If specified \code{lambda = 256^(3*(spar-1))}.
@@ -45,25 +46,34 @@ Smoothing parameter. Typically (but not always) in the range \eqn{(0,1]}. If spe
 Computational smoothing parameter. This value is weighted by \eqn{n} to form the penalty coefficient (see Details). Ignored if \code{spar} is provided.
 }
   \item{control}{
-Optional list with named components controlling the root finding when the smoothing parameter spar is computed, i.e., missing or NULL, see below.  
+Optional list with named components that control the optimization specs for the smoothing parameter selection routine.
 
 \bold{Note} that spar is only searched for in the interval \eqn{[lower, upper]}.
   \describe{
-  \item{lower:}{
-  lower bound for spar; defaults to 0.
-  }
-  \item{upper:}{
-  upper bound for spar; defaults to 1.
-  }
-  \item{tol:}{
-  the absolute precision (\bold{tol}erance) used by \code{\link{optimize}}; defaults to 1e-8.
-  }
+    \item{lower:}{lower bound for spar; defaults to 0.}
+    \item{upper:}{upper bound for spar; defaults to 1.}
+    \item{tol:}{the absolute precision (\bold{tol}erance) used by \code{\link{optimize}}; defaults to 1e-8.}
+    \item{iterlim:}{the iteration limit used by \code{\link{nlm}}; defaults to 5000.}
+    \item{print.level:}{the print level used by \code{\link{nlm}}; defaults to 0 (no printing).}
+    \item{epsilon:}{relative convergence tolerance for IRPLS algorithm; defaults to 1e-8}
+    \item{maxit:}{maximum number of iterations for IRPLS algorithm; defaults to 25}
+    \item{epsilon.out:}{relative convergence tolerance for iterative NegBin update; defaults to 1e-6}
+    \item{maxit.out:}{maximum number of iterations for iterative NegBin update; defaults to 10}
   }
 }
   \item{method}{
 Method for selecting the smoothing parameter. Ignored if \code{lambda} is provided.
 }
-
+\item{xrange}{
+Optional named list containing the range of each predictor. If \code{NULL}, the ranges are calculated from the input \code{data}.
+}
+  \item{thetas}{
+Optional vector of hyperparameters to use for smoothing. If \code{NULL}, these are tuned using the requested \code{method}.
+}
+\item{mf}{
+Optional model frame constructed from \code{formula} and \code{data} (and potentially \code{weights}).
+}
+Note: the last two arguments are not intended to be called by the typical user of this function. These arguments are included primarily for internal usage by the \code{\link{boot.gsm}} function.
 }
 \details{
 Letting \eqn{\eta_i = \eta(x_i)} with \eqn{x_i = (x_{i1}, \ldots, x_{ip})}, the function is represented as \deqn{\eta = X \beta + Z \gamma} where the basis functions in \eqn{X} span the null space (i.e., parametric effects), and \eqn{Z} contains the kernel function(s) of the contrast space (i.e., nonparametric effects) evaluated at all combinations of observed data points and knots. The vectors \eqn{\beta} and \eqn{\gamma} contain unknown basis function coefficients.
@@ -79,7 +89,7 @@ where \eqn{\theta_i} is the canonical parameter, \eqn{b()} is a known function t
 \value{
 An object of class "gsm" with components:
   %\item{fitted.values}{the fitted values, obtained by transforming the linear predictors by the inverse of the link function.}
-  \item{linear.predictors}{the linear fit on link scale. See the Note for obtaining the fitted values on the response scale.}
+  \item{linear.predictors}{the linear fit on link scale. Use \code{\link{fitted.gsm}} to obtain the fitted values on the response scale.}
   \item{se.lp}{the standard errors of the linear predictors.}
   \item{deviance}{up to a constant, minus twice the maximized log-likelihood. Where sensible, the constant is chosen so that a saturated model has deviance zero.}
   \item{cv.crit}{the cross-validation criterion.}
@@ -109,6 +119,7 @@ An object of class "gsm" with components:
   \item{terms}{the terms included in the fit model.}
   \item{method}{the \code{method} used for smoothing parameter selection. Will be \code{NULL} if \code{lambda} was provided.}
   \item{formula}{the formula specifying the fit model.}
+  \item{weights}{the weights used for fitting (if applicable)}
   \item{call}{the matched call.}
   \item{family}{the input family evaluated as a function using .}
   \item{iter}{the number of iterations of IRPLS used.}
@@ -130,14 +141,6 @@ Helwig, N. E. (2021). Spectrally sparse nonparametric regression via elastic net
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>
-}
-\note{
-The fitted values on the response scale can be obtained using \cr
-\code{ginv <- object$family$linkinv} \cr
-\code{fit <- ginv(object$linear.predictors)} \cr
-where \code{object} is the fit "gsm" object. 
-
-For models with multiple predictors, the \code{\link{predict.gsm}} function may be more useful.
 }
 
 \section{Family Objects }{
@@ -226,14 +229,32 @@ If \code{tprk = TRUE}, the null space basis function matrix has the form \eqn{X 
 If \code{tprk = FALSE}, the null space basis function matrix has the form \eqn{X = [1, X_1, X_2]}, and the contrast space basis function matrix has the form \deqn{Z = [\theta_1 Z_1, \theta_2 Z_2]} where the \eqn{\theta_k} are the "extra" smoothing parameters. Note that \eqn{Z} is of dimension \eqn{n} by \eqn{r = r_1 + r_2}.
 }
 
+\section{Parameter Tuning }{
+When multiple smooth terms are included in the model, there are smoothing (hyper)parameters that weight the contribution of each combination of smooth terms. These hyperparameters are distinct from the overall smoothing parameter \code{lambda} that weights the contribution of the penalty. 
+
+\code{skip.iter = TRUE} (default) estimates the smoothing hyperparameters using Algorithm 3.2 of Gu and Wahba (1991), which typically provides adequate results when the model form is correctly specified. The \code{lambda} parameter is tuned via the specified smoothing parameter selection \code{method}.
+
+\code{skip.iter = FALSE} uses Algorithm 3.2 as an initialization, and then the \code{\link{nlm}} function is used to tune the hyperparameters via the specified smoothing parameter selection \code{method}. Setting \code{skip.iter = FALSE} can (substantially) increase the model fitting time, but should produce better results---particularly if the model \code{formula} is misspecified.
+}
+
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
+\code{\link{boot.gsm}} for bootstrapping \code{gsm} objects.
+
+\code{\link{fitted.gsm}} for extracting fitted values from \code{gsm} objects.
+
+\code{\link{model.matrix.gsm}} for constructing model matrix from \code{gsm} objects.
+
+\code{\link{resid.gsm}} for extracting residuals from \code{gsm} objects.
+
 \code{\link{summary.gsm}} for summarizing \code{gsm} objects.
 
 \code{\link{predict.gsm}} for predicting from \code{gsm} objects.
 
-\code{\link{sm}} for fitting smooth models to Gaussian data.
+\code{\link{ss}} for fitting a smoothing spline with a single predictor (Gaussian response).
+
+\code{\link{sm}} for fitting smooth models with multiple predictors of mixed types (Gaussian response).
 }
 \examples{
 ##########   EXAMPLE 1   ##########

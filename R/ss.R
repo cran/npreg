@@ -7,7 +7,7 @@ ss <-
            xmin = NULL, xmax = NULL){
     # smoothing spline in R
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2021-10-29
+    # Updated: 2022-03-22
     
     
     #########***#########   INITIAL CHECKS   #########***#########
@@ -217,19 +217,13 @@ ss <-
                       periodic = periodic, bernoulli = bernoulli)
     
     # EVD of Q
-    eps <- .Machine$double.eps
-    Qeig <- eigen(Q, symmetric = TRUE)
-    Qrnk <- sum(Qeig$values > nknots * eps * Qeig$values[1])
-    if(Qrnk == 1L){
-      Qprj <- matrix(Qeig$vectors[,1] / sqrt(Qeig$values[1]), nrow = nknots, ncol = 1)
-    } else{
-      Qprj <- Qeig$vectors[,1:Qrnk] %*% diag(1 / sqrt(Qeig$values[1:Qrnk]))
-    }
+    Qisqrt <- msqrt(Q, inverse = TRUE, checkx = FALSE)
+    Qrnk <- ncol(Qisqrt)
     
     # reparameterize X
     nullindx <- 1:nsdim
     X.w <- sqrt(data$w) * X
-    R.w <- X.w[,-nullindx,drop=FALSE] %*% Qprj
+    R.w <- X.w[,-nullindx,drop=FALSE] %*% Qisqrt
     XsvdN <- svd(X.w[,nullindx,drop=FALSE])
     X.w <- cbind(X.w[,nullindx], R.w - XsvdN$u %*% crossprod(XsvdN$u, R.w))
     
@@ -243,7 +237,7 @@ ss <-
     # SVD of weighted X
     XsvdC <- svd(X.w[,-nullindx,drop=FALSE])
     #Xrnk <- length(XsvdC$d)
-    Xrnk <- sum(XsvdC$d > sqrt(nknots * eps) * XsvdC$d[1])
+    Xrnk <- sum(XsvdC$d > sqrt(nknots * .Machine$double.eps) * XsvdC$d[1])
     if(Xrnk < length(XsvdC$d)){
       XsvdC$d <- XsvdC$d[1:Xrnk]
       XsvdC$u <- XsvdC$u[,1:Xrnk,drop=FALSE]
@@ -268,17 +262,17 @@ ss <-
     Tmat <- matrix(0, nsdim + nknots, nsdim + min(Qrnk, Xrnk))
     Tmat[nullindx,nullindx] <- VDi.x
     Tmat[nullindx,-nullindx] <- 0 - VDi.x %*% crossprod(XsvdN$u, R.w) %*% VDi.z
-    Tmat[-nullindx,-nullindx] <- Qprj %*% VDi.z
+    Tmat[-nullindx,-nullindx] <- Qisqrt %*% VDi.z
     
     # Tmat <- matrix(0, nsdim + nknots, nsdim + Qrnk)
     # Tmat[nullindx,nullindx] <- diag(nsdim)
     # Tmat[nullindx,-nullindx] <- (-1) * solve(crossprod(X.w[,nullindx])) %*% crossprod(X.w[,nullindx], R.w)
-    # Tmat[-nullindx,-nullindx] <- Qprj
+    # Tmat[-nullindx,-nullindx] <- Qisqrt
     # Tmat[,nullindx] <- Tmat[,nullindx,drop=FALSE] %*% XsvdN$v %*% diag(1 / XsvdN$d, nrow = nsdim, ncol = nsdim)
     # Tmat[,-nullindx] <- Tmat[,-nullindx] %*% XsvdC$v %*% diag(1 / XsvdC$d)
     
     # remove junk
-    rm(X, Qeig, Qprj, Qrnk, X.w, R.w)
+    rm(X, Qisqrt, Qrnk, X.w, R.w)
     
     
     #########***#########   ESTIMATE COEFS   #########***#########

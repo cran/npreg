@@ -2,7 +2,7 @@ basis.tps <-
   function(x, knots, m = 2, rk = TRUE, intercept = FALSE, ridge = FALSE){
     # Thin-Plate Spline Basis
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2021-04-23
+    # Update: 2022-03-22
     
     # initializations
     m <- as.integer(m)
@@ -132,10 +132,7 @@ basis.tps <-
     # check ridge
     if(ridge){
       Q <- penalty.tps(knots, m = m)
-      Qeig <- eigen(Q, symmetric = TRUE)
-      Qrnk <- sum(Qeig$values > Qeig$values[1] * ncol(Q) * .Machine$double.eps)
-      Qisqrt <- Qeig$vectors[,1:Qrnk,drop=FALSE] %*% diag(1/sqrt(Qeig$values[1:Qrnk]), nrow = Qrnk, ncol = Qrnk)
-      Rkern <- Rkern %*% Qisqrt
+      Rkern <- Rkern %*% msqrt(Q, inverse = TRUE, checkx = FALSE)
       knot.names <- knot.names[1:ncol(Rkern)]
     }
     

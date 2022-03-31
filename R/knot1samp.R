@@ -20,7 +20,8 @@ knot1samp <-
       xlev <- levels(x)
       nlev <- length(xlev)
       if(nlev == 1L) stop("Input 'x' is a factor with 1 level.")
-      return(factor(xlev[-1], levels = xlev))
+      ordered <- ifelse(xc == "ordered", TRUE, FALSE)
+      return(factor(xlev[-1], levels = xlev, ordered = ordered))
     }
     
     # check 'n'

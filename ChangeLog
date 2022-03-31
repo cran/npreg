@@ -1,3 +1,58 @@
+Changes:  ver 1.0-8  (2022-03-30)
+
+
+1) Bug fix in gsm() function: working (IRPLS) residuals
+	* Previously residuals were incorrectly centered at mu instead of eta
+	* Now residuals satisfy:   z = linear.predictors + residuals
+	* Note that z is pseudo-response at convergence of IRPLS
+
+2) Bug fix in gsm() function: standard errors for binomial with weights
+	* Dispersion parameter was incorrectly divided by mean(weights)
+	* Previous standard error estimates were too small 
+	* Corrected version uses a dispersion of 1 for SE calculations
+
+3) Bug fix in sm() function: tprk = FALSE and n < length(coefficients)
+	* Previous code assumed that n >= length(coefficients)
+	* This assumption could be wrong for tprk = FALSE with small n 
+	* Corrected version does not require n >= length(coefficients)
+
+4) boot.sm and boot.gsm
+	* New functions for bootstrapping "sm" objects
+	* Two nonparametric options (cases and residuals) and parametric option
+	* Computes SE and BCa CIs for any user-specified statistic
+
+5) fitted.ss, fitted.sm, fitted.gsm, resid.ss, resid.sm, resid.gsm
+	* New functions for extracting/computing fitted values and residuals
+	* For ss objects, predicts from original data (if keep.data = TRUE)
+	* For sm and gsm objects, fitted values are extracted from fit model
+
+6) model.matrix.ss, model.matrix.sm, model.matrix.gsm
+	* New functions for extracting/computing design matrices
+	* For ss objects, the basis.poly function is called
+	* For sm and gsm objects, predict function (w/ design = TRUE) is used
+
+7) msqrt
+	* New function for stable computation of matrix square roots
+	* Allows for computation of standard or inverse square root
+	* Allows for computation of asymmetric or symmetric sqrt
+
+8) Improvements to function internals for matrix (inverse) square roots
+	* msqrt is now used to compute matrix (inverse) sqrt
+	* Used in all basis.x functions when ridge = TRUE
+	* Used in all modeling functions (ss, sm, gsm)
+
+9) Major improvements to hyperparameter tuning for sm() and gsm()
+	* Removed "update" argument (update = FALSE no longer available)
+	* Added "skip.iter" argument (skip.iter = FALSE for deep tuning)
+	* No changes to the default functionality of either function
+
+10) number2color
+	* New function for mapping numbers to colors (useful for plotting)
+	* Uses .bincode to bin data equidistantly or via sample quantiles
+	* Each bin is assigned a unique color from user-specified palette
+
+
+
 
 Changes:  ver 1.0-7  (2022-02-11)
 
