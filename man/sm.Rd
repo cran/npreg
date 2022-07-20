@@ -72,17 +72,17 @@ Optional model frame constructed from \code{formula} and \code{data} (and potent
 Note: the last two arguments are not intended to be called by the typical user of this function. These arguments are included primarily for internal usage by the \code{\link{boot.sm}} function.
 }
 \details{
-Letting \eqn{f_i = f(x_i)} with \eqn{x_i = (x_{i1}, \ldots, x_{ip})}, the function is represented as \deqn{f = X \beta + Z \gamma} where the basis functions in \eqn{X} span the null space (i.e., parametric effects), and \eqn{Z} contains the kernel function(s) of the contrast space (i.e., nonparametric effects) evaluated at all combinations of observed data points and knots. The vectors \eqn{\beta} and \eqn{\gamma} contain unknown basis function coefficients.
+Letting \eqn{f_i = f(x_i)} with \eqn{x_i = (x_{i1}, \ldots, x_{ip})}, the function is represented as \deqn{f = X \beta + Z \alpha} where the basis functions in \eqn{X} span the null space (i.e., parametric effects), and \eqn{Z} contains the kernel function(s) of the contrast space (i.e., nonparametric effects) evaluated at all combinations of observed data points and knots. The vectors \eqn{\beta} and \eqn{\alpha} contain unknown basis function coefficients.
 
-Letting \eqn{M =  (X, Z)} and \eqn{\theta = (\beta', \gamma')'}, the penalized least squares problem has the form
+Letting \eqn{M =  (X, Z)} and \eqn{\gamma = (\beta', \alpha')'}, the penalized least squares problem has the form
 \deqn{
-(y - M \theta)' W (y - M \theta) + n \lambda \gamma' Q \gamma
+(y - M \gamma)' W (y - M \gamma) + n \lambda \alpha' Q \alpha
 }
 where \eqn{W} is a diagonal matrix containg the weights, and \eqn{Q} is the penalty matrix. The optimal coefficients are the solution to 
 \deqn{
-(M' W M + n \lambda P) \theta = M' W y
+(M' W M + n \lambda P) \gamma = M' W y
 }
-where \eqn{P} is the penalty matrix \eqn{Q} augmented with zeros corresponding to the \eqn{\beta} in \eqn{\theta}.
+where \eqn{P} is the penalty matrix \eqn{Q} augmented with zeros corresponding to the \eqn{\beta} in \eqn{\gamma}.
 }
 \value{
 An object of class "sm" with components:
@@ -90,16 +90,17 @@ An object of class "sm" with components:
   \item{se.fit}{the standard errors of the fitted values.}
   \item{sse}{the sum-of-squared errors.}
   \item{cv.crit}{the cross-validation criterion.}
-  \item{df}{the estimated degrees of freedom (Df) for the fit model.}
   \item{nsdf}{the degrees of freedom (Df) for the null space.}
+  \item{df}{the estimated degrees of freedom (Df) for the fit model.}
+  \item{df.residual}{the residual degrees of freedom = \code{nobs - df}}
   \item{r.squared}{the observed coefficient of multiple determination.}
   \item{sigma}{the estimate of the error standard deviation.}
   \item{logLik}{the log-likelihood (if \code{method} is REML or ML).}
   \item{aic}{Akaike's Information Criterion (if \code{method} is AIC).}
   \item{bic}{Bayesian Information Criterion (if \code{method} is BIC).}
   \item{spar}{the value of \code{spar} computed or given, i.e., \eqn{s = 1 + \log_{256}(\lambda)/3}}
-  \item{lambda}{the value of \eqn{\lambda} corresponding to \code{spar}, i.e., \eqn{\lambda = 256^{3*(s-1)}}.}
-  \item{penalty}{the smoothness penalty \eqn{\gamma' Q \gamma}.}
+  \item{lambda}{the value of \eqn{\lambda} corresponding to \code{spar}, i.e., \eqn{\lambda = 256^{3(s-1)}}.}
+  \item{penalty}{the smoothness penalty \eqn{\alpha' Q \alpha}.}
   \item{coefficients}{the basis function coefficients used for the fit model.}
   \item{cov.sqrt}{the square-root of the covariance matrix of \code{coefficients}. Note: \code{tcrossprod(cov.sqrt)} reconstructs the covariance matrix. }
   \item{iter}{the number of iterations used by \code{nlm} (if applicable).}
@@ -212,7 +213,7 @@ If \code{tprk = FALSE}, the three options for the \code{knots} input include:
 \section{Multiple Smooths }{
 Suppose \code{formula = y ~ x1 + x2} so that the model contains additive effects of two predictor variables. 
 
-The \eqn{k}-th predictor's marginal effect can be denoted as \deqn{f_k = X_k \beta_k + Z_k \gamma_k} where \eqn{X_k} is the \eqn{n} by \eqn{m_k} null space basis function matrix, and \eqn{Z_k} is the \eqn{n} by \eqn{r_k} contrast space basis function matrix. 
+The \eqn{k}-th predictor's marginal effect can be denoted as \deqn{f_k = X_k \beta_k + Z_k \alpha_k} where \eqn{X_k} is the \eqn{n} by \eqn{m_k} null space basis function matrix, and \eqn{Z_k} is the \eqn{n} by \eqn{r_k} contrast space basis function matrix. 
 
 If \code{tprk = TRUE}, the null space basis function matrix has the form \eqn{X = [1, X_1, X_2]} and the contrast space basis function matrix has the form \deqn{Z = \theta_1 Z_1 + \theta_2 Z_2} where the \eqn{\theta_k} are the "extra" smoothing parameters. Note that \eqn{Z} is of dimension \eqn{n} by \eqn{r = r_1 = r_2}.
 
@@ -229,21 +230,53 @@ When multiple smooth terms are included in the model, there are smoothing (hyper
 
 
 \seealso{
-\code{\link{boot.sm}} for bootstrapping \code{sm} objects.
-
-\code{\link{fitted.sm}} for extracting fitted values from \code{sm} objects.
-
-\code{\link{model.matrix.sm}} for constructing model matrix from \code{sm} objects.
-
-\code{\link{resid.sm}} for extracting residuals from \code{sm} objects.
-
-\code{\link{summary.sm}} for summarizing \code{sm} objects.
-
-\code{\link{predict.sm}} for predicting from \code{sm} objects.
+\bold{Related Modeling Functions}: 
 
 \code{\link{ss}} for fitting a smoothing spline with a single predictor (Gaussian response).
 
-\code{\link{gsm}} for fitting generalized smooth models with multiple predictors of mixed types (non-Gaussian response).
+\code{\link{gsm}} for fitting generalized smooth models with multiple predictors of mixed types (non-Gaussian response). \cr
+
+\bold{S3 Methods and Related Functions for "sm" Objects}:
+
+\code{\link{boot.sm}} for bootstrapping \code{sm} objects.
+
+\code{\link{coef.sm}} for extracting coefficients from \code{sm} objects.
+
+\code{\link{cooks.distance.sm}} for calculating Cook's distances from \code{sm} objects.
+
+\code{\link{cov.ratio}} for computing covariance ratio from \code{sm} objects.
+
+\code{\link{deviance.sm}} for extracting deviance from \code{sm} objects.
+
+\code{\link{dfbeta.sm}} for calculating DFBETA from \code{sm} objects.
+
+\code{\link{dfbetas.sm}} for calculating DFBETAS from \code{sm} objects.
+
+\code{\link{diagnostic.plots}} for plotting regression diagnostics from \code{sm} objects.
+
+\code{\link{fitted.sm}} for extracting fitted values from \code{sm} objects.
+
+\code{\link{hatvalues.sm}} for extracting leverages from \code{sm} objects.
+
+\code{\link{model.matrix.sm}} for constructing model matrix from \code{sm} objects.
+
+\code{\link{predict.sm}} for predicting from \code{sm} objects.
+
+\code{\link{residuals.sm}} for extracting residuals from \code{sm} objects.
+
+\code{\link{rstandard.sm}} for computing standardized residuals from \code{sm} objects.
+
+\code{\link{rstudent.sm}} for computing studentized residuals from \code{sm} objects.
+
+\code{\link{smooth.influence}} for calculating basic influence information from \code{sm} objects.
+
+\code{\link{smooth.influence.measures}} for convenient display of influential observations from \code{sm} objects.
+
+\code{\link{summary.sm}} for summarizing \code{sm} objects.
+
+\code{\link{vcov.sm}} for extracting coefficient covariance matrix from \code{sm} objects.
+
+\code{\link{weights.sm}} for extracting prior weights from \code{sm} objects.
 }
 \examples{
 ##########   EXAMPLE 1   ##########

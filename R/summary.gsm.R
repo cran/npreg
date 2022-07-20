@@ -2,7 +2,7 @@ summary.gsm <-
   function(object, ...){
     # summary method for class "gsm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-10-22
+    # Updated: 2022-05-25
     
     # convert binomial (if response is a factor)
     if(object$family$family == "binomial" && any(class(object$data[,1])[1] == c("factor", "ordered"))){
@@ -21,12 +21,7 @@ summary.gsm <-
     # get diagnostics
     fit.terms <- scale(predict(object, type = "terms"), scale = FALSE)
     nterms <- ncol(fit.terms)
-    Cmat <- matrix(0, nrow = nterms, ncol = nterms)
-    for(i in 1:nterms){
-      for(j in 1:i){
-        Cmat[i,j] <- Cmat[j,i] <- sum(fit.terms[,i] * fit.terms[,j]) / sqrt(sum(fit.terms[,i]^2) * sum(fit.terms[,j]^2))
-      }
-    }
+    Cmat <- crossprod(fit.terms) / tcrossprod(sqrt(colSums(fit.terms^2)))
     kappa <- sqrt(diag(psolve(Cmat)))
     fitc <- rowSums(fit.terms)
     pi <- as.numeric(crossprod(fit.terms, fitc) / sum(fitc^2))

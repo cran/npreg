@@ -4,10 +4,11 @@ ss <-
            m = 2L, periodic = FALSE, all.knots = FALSE, nknots = .nknots.smspl, 
            knots = NULL, keep.data = TRUE, df.offset = 0, penalty = 1, 
            control.spar = list(), tol = 1e-6 * IQR(x), bernoulli = TRUE,
-           xmin = NULL, xmax = NULL){
+           xmin = NULL, xmax = NULL, homosced = TRUE, iter.max = 1){
     # smoothing spline in R
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2022-03-22
+    # Updated: 2022-07-20
+    
     
     
     #########***#########   INITIAL CHECKS   #########***#########
@@ -62,6 +63,20 @@ ss <-
     method <- pmatch(toupper(method), methods)
     if(is.na(method)) stop("Invalid 'method' input.")
     method <- methods[method]
+    
+    # check homosced
+    if(!homosced){
+      iter.max <- as.integer(iter.max[1])
+      if(iter.max < 1L) stop("Input 'iter.max' must be a positive integer.")
+      m0 <- fit_ssi(x = x, y = y, w = w, df = df, spar = spar, lambda = lambda,
+                    method = method, m = m, periodic = periodic, all.knots = all.knots,
+                    nknots = .nknots.smspl, knots = knots, keep.data = keep.data,
+                    df.offset = df.offset, penalty = penalty, control.spar = control.spar,
+                    tol = tol, bernoulli = bernoulli, xmin = xmin, xmax = xmax,
+                    homosced = homosced, iter.max = iter.max)
+      m0$call <- match.call()
+      return(m0)
+    }
     
     # check w
     if(is.null(w)){
@@ -491,8 +506,8 @@ ss <-
     ss <- list(x = data$x, y = fit, w = data$w, yin = data$wy / ifelse(data$w > 0, data$w, 1),
                tol = tol, data = if(keep.data) data.orig, lev = lev, 
                cv.crit = cv.crit, pen.crit = sse, crit = crit, df = df, 
-               spar = spar, lambda = lambda, fit = fitinfo, call = match.call(),
-               sigma = sigma, logLik = if(!is.null(n2LL)) (-1/2) * n2LL,
+               df.residual = n - df, spar = spar, lambda = lambda, fit = fitinfo, 
+               call = match.call(), sigma = sigma, logLik = if(!is.null(n2LL)) (-1/2) * n2LL,
                aic = if(method == "AIC") ic, bic = if(method == "BIC") ic,
                penalty = penalty, method = method)
     class(ss) <- "ss"
@@ -528,6 +543,14 @@ print.ss <-
       cat("\nAkaike's Information Criterion (AIC)", x$aic,"\n\n")
     } else if(x$method == "BIC"){
       cat("\nBayesian Information Criterion (BIC)", x$bic,"\n\n")
+    }
+    if(!is.null(x$delta)){
+      if(x$delta <= x$fit$control.spar$tol){
+        cat("Iterative weight estimation converged after", x$iter, "iterations\n\n")
+      } else {
+        cat("Iterative weight estimation FAILED to converge after", x$iter, "iterations\n")
+        cat("Relative mean squared difference =", x$delta, ">", x$fit$control.spar$tol, "\n\n")
+      }
     }
     
   } # end print.ss

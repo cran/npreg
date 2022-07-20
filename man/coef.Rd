@@ -1,20 +1,20 @@
-\name{fitted}
-\alias{fitted.ss}
-\alias{fitted.sm}
-\alias{fitted.gsm}
+\name{coef}
+\alias{coef.ss}
+\alias{coef.sm}
+\alias{coef.gsm}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Extract Smooth Model Fitted Values
+Extract Smooth Model Coefficients
 }
 \description{
-Extracts the fitted values from a fit smoothing spline (fit by \code{\link{ss}}), smooth model (fit by \code{\link{sm}}), or generalized smooth model (fit by \code{\link{gsm}}).
+Extracts basis function coefficients from a fit smoothing spline (fit by \code{\link{ss}}), smooth model (fit by \code{\link{sm}}), or generalized smooth model (fit by \code{\link{gsm}}).
 }
 \usage{
-\method{fitted}{ss}(object, ...)
+\method{coef}{gsm}(object, ...)
 
-\method{fitted}{sm}(object, ...)
+\method{coef}{sm}(object, ...)
 
-\method{fitted}{gsm}(object, ...)
+\method{coef}{ss}(object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,14 +26,12 @@ other arugments (currently ignored)
 }
 }
 \details{
-For objects of class \code{\link{ss}}, fitted values are predicted via \code{predict(object, object$data$x)$y}
+For "ss" objects, the coefficient vector will be of length \eqn{m + q} where \code{m} is the dimension of the null space and \eqn{q} is the number of knots used for the fit.
 
-For objects of class \code{\link{sm}}, fitted values are extracted via \code{object$fitted.values}
-
-For objects of class \code{\link{gsm}}, fitted values are computed via \code{ginv(object$linear.predictors)} where \code{ginv = object$family$linkinv}
+For "sm" and "gsm" objects, the coefficient vector will be of length \eqn{m + q} if the \code{tprk = TRUE} (default). Otherwise the length will depend on the model formula and marginal knot placements. 
 }
 \value{
-Fitted values extracted (or predicted) from \code{object}
+Coefficients extracted from the model \code{object}.
 }
 \references{
 Chambers, J. M. and Hastie, T. J. (1992) \emph{Statistical Models in S}. Wadsworth & Brooks/Cole.
@@ -48,6 +46,8 @@ Nathaniel E. Helwig <helwig@umn.edu>
 
 \seealso{
 \code{\link{ss}}, \code{\link{sm}}, \code{\link{gsm}}
+
+\code{\link{model.matrix}}, \code{\link{fitted.values}}, \code{\link{residuals}}
 }
 \examples{
 # generate data
@@ -60,19 +60,24 @@ y <- fx + rnorm(n, sd = 0.5)
 # smoothing spline
 mod.ss <- ss(x, y, nknots = 10)
 fit.ss <- fitted(mod.ss)
+coef.ss <- coef(mod.ss)
+X.ss <- model.matrix(mod.ss)
+mean((fit.ss - X.ss \%*\% coef.ss)^2)
 
 # smooth model
 mod.sm <- sm(y ~ x, knots = 10)
 fit.sm <- fitted(mod.sm)
+coef.sm <- coef(mod.sm)
+X.sm <- model.matrix(mod.sm)
+mean((fit.sm - X.sm \%*\% coef.sm)^2)
 
 # generalized smooth model (family = gaussian)
 mod.gsm <- gsm(y ~ x, knots = 10)
 fit.gsm <- fitted(mod.gsm)
+coef.gsm <- coef(mod.gsm)
+X.gsm <- model.matrix(mod.gsm)
+mean((fit.gsm - X.gsm \%*\% coef.gsm)^2)
 
-# compare fitted values
-mean((fit.ss - fit.sm)^2)
-mean((fit.ss - fit.gsm)^2)
-mean((fit.sm - fit.gsm)^2)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):

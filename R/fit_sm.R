@@ -3,7 +3,7 @@ fit_sm <-
            tprk = TRUE, control = list(), method = "GCV"){
     # fit semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2022-03-22
+    # Updated: 2022-04-27
     
     
     #########***#########   REPARAMETERIZATION   #########***#########
@@ -312,7 +312,7 @@ fit_sm <-
     
     res <- list(fitted.values = fit, se.fit = se.fit,
                 sse = sse, cv.crit = cv.crit, 
-                df = df, nsdf = nsdim, 
+                nsdf = nsdim, df = df, df.residual = n - df,
                 r.squared = r.squared, sigma = sigma, 
                 logLik = if(!is.null(n2LL)) (-1/2) * n2LL,
                 aic = if(method == "AIC") ic, bic = if(method == "BIC") ic,

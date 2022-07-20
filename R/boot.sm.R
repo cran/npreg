@@ -5,14 +5,15 @@ boot.sm <-
            verbose = TRUE, parallel = FALSE, cl = NULL){
     # Bootstrap a fit Smooth Model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2022-03-15
+    # Update: 2022-07-15
     
     
     
     #########***#########   INITIAL CHECKS   #########***#########
     
     # check 'object'
-    if(class(object) != "sm") stop("Input 'object' must be of class 'sm'")
+    #if(class(object) != "sm") stop("Input 'object' must be of class 'sm'")
+    if(!inherits(object, "sm")) stop("Input 'object' must be of class 'sm'")
     if(is.null(object$data)) stop("Input 'object' has no data. Need to refit model with data.")
     n <- nrow(object$data)
     
@@ -266,12 +267,13 @@ boot.sm <-
       meanjack <- colMeans(jackstat)
       z0 <- acc <- rep(0, nstat)
       for(j in 1:nstat){
-        z0[j] <- qnorm(mean(bootdist[,j] < t0[j]))
+        pj <- min(max(mean(bootdist[,j] < t0[j]), 1 / nboot), R / nboot)
+        z0[j] <- qnorm(pj)
         acc[j] <- sum((meanjack[j] - jackstat[,j])^3) / (6 * sum((meanjack[j] - jackstat[,j])^2)^(3/2))
         alphas1 <- pnorm(z0[j] + (z0[j] + z1) / (1 - acc[j]*(z0[j] + z1)))
         alphas2 <- pnorm(z0[j] + (z0[j] + z2) / (1 - acc[j]*(z0[j] + z2)))
         probs <- c(alphas1, alphas2)
-        confint[j,] <- quantile(bootdist[,j], probs = probs)
+        confint[j,] <- quantile(bootdist[,j], probs = probs, na.rm = TRUE)
       }
       colnames(confint) <- c("lwr", "upr")
       attr(confint, "level") <- level
@@ -279,7 +281,7 @@ boot.sm <-
     } else {
       
       z0 <- acc <- rep(0, nstat)
-      confint <- t(apply(bootdist, 2, quantile, probs = c(alpha/2, 1 - alpha/2)))
+      confint <- t(apply(bootdist, 2, quantile, probs = c(alpha/2, 1 - alpha/2), na.rm = TRUE))
       colnames(confint) <- c("lwr", "upr")
       attr(confint, "level") <- level
       

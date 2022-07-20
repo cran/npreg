@@ -68,7 +68,7 @@ In all cases, the inferential results are based on a (pseudo) F or chi-square st
   \item{dispersion }{the estimate of the dispersion parameter.}
   \item{r.squared }{the observed coefficient of multiple determination.}
   \item{adj.r.squared }{the adjusted coefficient of multiple determination.}
-  \item{kappa }{the collinearity indices. A value of 1 indicates no collinearity, and higher values indicate more collinearity of a given term with other model terms.}
+  \item{kappa }{the collinearity indices, i.e., square-roots of the variance inflation factors (see \code{varinf}). A value of 1 indicates no collinearity, and higher values indicate more collinearity of a given term with other model terms.}
   \item{pi }{the importance indices. Larger values indicate more importance, and the values satisfy \code{sum(pi) = 1}. Note that elements of \code{pi} can be negative.}
   \item{call }{the original function call.}
   \item{family }{the specified family (for gsm objects).}

@@ -2,7 +2,7 @@ summary.sm <-
   function(object, ...){
     # summary method for class "sm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2020-08-30
+    # Updated: 2022-05-25
     
     # get residuals
     resid <- object$data[,1] - object$fitted.values
@@ -10,12 +10,7 @@ summary.sm <-
     # get diagnostics
     fit.terms <- scale(predict(object, type = "terms"), scale = FALSE)
     nterms <- ncol(fit.terms)
-    Cmat <- matrix(0, nrow = nterms, ncol = nterms)
-    for(i in 1:nterms){
-      for(j in 1:i){
-        Cmat[i,j] <- Cmat[j,i] <- sum(fit.terms[,i] * fit.terms[,j]) / sqrt(sum(fit.terms[,i]^2) * sum(fit.terms[,j]^2))
-      }
-    }
+    Cmat <- crossprod(fit.terms) / tcrossprod(sqrt(colSums(fit.terms^2)))
     kappa <- sqrt(diag(psolve(Cmat)))
     fitc <- rowSums(fit.terms)
     pi <- as.numeric(crossprod(fit.terms, fitc) / sum(fitc^2))
@@ -74,9 +69,9 @@ summary.sm <-
       nsdf <- object$nsdf
       for(i in 1:nterms){
         sindx <- which(snames == object$terms[i])
-        X <- Xmats$X$s[,sindx]
-        ss[i] <- sum((psolve(X %*% object$cov.sqrt[nsdf + sindx,]) %*% (X %*% s.coef[sindx]))^2) * object$sigma^2
-        s.df[i] <- sum(rowSums((X %*% object$cov.sqrt[nsdf + sindx,] / object$sigma)^2))
+        X <- Xmats$X$s[,sindx,drop=FALSE]
+        ss[i] <- sum((psolve(X %*% object$cov.sqrt[nsdf + sindx,,drop=FALSE]) %*% (X %*% s.coef[sindx]))^2) * object$sigma^2
+        s.df[i] <- sum(rowSums((X %*% object$cov.sqrt[nsdf + sindx,,drop=FALSE] / object$sigma)^2))
       }
       
     } # end if(object$specs$tprk)

@@ -1,7 +1,4 @@
-\name{resid}
-\alias{resid.ss}
-\alias{resid.sm}
-\alias{resid.gsm}
+\name{residuals}
 \alias{residuals.ss}
 \alias{residuals.sm}
 \alias{residuals.gsm}
@@ -13,14 +10,12 @@ Extract Model Residuals
 Extracts the residuals from a fit smoothing spline ("ss"), smooth model ("sm"), or generalized smooth model ("gsm") object. 
 }
 \usage{
-\method{resid}{ss}(object, ...)
-\method{residuals}{ss}(object, ...)
+\method{residuals}{ss}(object, type = c("working", "response", "deviance", 
+                           "pearson", "partial"), ...)
 
-\method{resid}{sm}(object, ...)
-\method{residuals}{sm}(object, ...)
-
-\method{resid}{gsm}(object, type = c("deviance", "pearson", "working", 
-                       "response", "partial"), ...)
+\method{residuals}{sm}(object, type = c("working", "response", "deviance", 
+                           "pearson", "partial"), ...)
+                           
 \method{residuals}{gsm}(object, type = c("deviance", "pearson", "working", 
                            "response", "partial"), ...)
 }
@@ -30,14 +25,16 @@ Extracts the residuals from a fit smoothing spline ("ss"), smooth model ("sm"), 
 an object of class "ss", "sm", or "gsm"
 }
   \item{type}{
-type of residuals for "gsm" object  
+type of residuals
 }
   \item{...}{
 other arugments (currently ignored)  
 }
 }
 \details{
-For objects of class \code{\link{ss}} and \code{\link{sm}}, residuals are defined as \code{object$data$y - fitted(object)}
+For objects of class \code{\link{ss}} and \code{\link{sm}} \cr
+* the working and response residuals are defined as 'observed - fitted' \cr
+* the deviance and Pearson residuals multiply the working residuals by \code{sqrt(weights(object))}
 
 For objects of class \code{\link{gsm}}, the residual types are the same as those produced by the \code{\link{residuals.glm}} function
 }
@@ -68,15 +65,15 @@ y <- fx + rnorm(n, sd = 0.5)
 
 # smoothing spline
 mod.ss <- ss(x, y, nknots = 10)
-res.ss <- resid(mod.ss)
+res.ss <- residuals(mod.ss)
 
 # smooth model
 mod.sm <- sm(y ~ x, knots = 10)
-res.sm <- resid(mod.sm)
+res.sm <- residuals(mod.sm)
 
 # generalized smooth model (family = gaussian)
 mod.gsm <- gsm(y ~ x, knots = 10)
-res.gsm <- resid(mod.gsm)
+res.gsm <- residuals(mod.gsm)
 
 # y = fitted + residuals
 mean((y - fitted(mod.ss) - res.ss)^2)

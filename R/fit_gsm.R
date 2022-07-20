@@ -4,7 +4,7 @@ fit_gsm <-
            family = check_family(gaussian)){
     # fit generalized semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2022-03-22
+    # Updated: 2022-05-03
     
     
     #########***#########   INITIALIZATIONS   #########***#########
@@ -229,7 +229,7 @@ fit_gsm <-
     se.lp <- sqrt(rowSums((cbind(depe$K, Rmat) %*% cov.sqrt)^2))
     
     # retransform coefficients and cov.sqrt
-    coef <- Tmat %*% coef
+    coef <- as.numeric(Tmat %*% coef)
     cov.sqrt <- Tmat %*% cov.sqrt
     
     # name coefficients
@@ -263,8 +263,9 @@ fit_gsm <-
                 se.lp = se.lp,
                 deviance = dev,
                 cv.crit = crit,
-                df = df, 
                 nsdf = nsdim,
+                df = df, 
+                df.residual = nobs - df,
                 r.squared = r.squared,
                 dispersion = attr(opt$objective, "disp"),
                 logLik = famLL, 

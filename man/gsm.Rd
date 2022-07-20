@@ -1,5 +1,6 @@
 \name{gsm}
 \alias{gsm}
+\alias{family.gsm}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Fit a Generalized Smooth Model
@@ -12,9 +13,12 @@ gsm(formula, family = gaussian, data, weights, types = NULL, tprk = TRUE,
     knots = NULL, skip.iter = TRUE, spar = NULL, lambda = NULL, control = list(),
     method = c("GCV", "OCV", "GACV", "ACV", "PQL", "AIC", "BIC"),
     xrange = NULL, thetas = NULL, mf = NULL)
+    
+\method{family}{gsm}(object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+Arguments for \code{gsm}:
   \item{formula}{
 Object of class "formula" (or one that can be coerced to that class): a symbolic description of the model to be fitted. Uses the same syntax as \code{\link{lm}} and \code{\link{glm}}.
 }
@@ -74,17 +78,21 @@ Optional vector of hyperparameters to use for smoothing. If \code{NULL}, these a
 Optional model frame constructed from \code{formula} and \code{data} (and potentially \code{weights}).
 }
 Note: the last two arguments are not intended to be called by the typical user of this function. These arguments are included primarily for internal usage by the \code{\link{boot.gsm}} function.
+
+Arguments for \code{family.gsm}:
+\item{object}{an object of class "gsm"}
+\item{...}{additional arguments (currently ignored)}
 }
 \details{
-Letting \eqn{\eta_i = \eta(x_i)} with \eqn{x_i = (x_{i1}, \ldots, x_{ip})}, the function is represented as \deqn{\eta = X \beta + Z \gamma} where the basis functions in \eqn{X} span the null space (i.e., parametric effects), and \eqn{Z} contains the kernel function(s) of the contrast space (i.e., nonparametric effects) evaluated at all combinations of observed data points and knots. The vectors \eqn{\beta} and \eqn{\gamma} contain unknown basis function coefficients.
+Letting \eqn{\eta_i = \eta(x_i)} with \eqn{x_i = (x_{i1}, \ldots, x_{ip})}, the function is represented as \deqn{\eta = X \beta + Z \alpha} where the basis functions in \eqn{X} span the null space (i.e., parametric effects), and \eqn{Z} contains the kernel function(s) of the contrast space (i.e., nonparametric effects) evaluated at all combinations of observed data points and knots. The vectors \eqn{\beta} and \eqn{\alpha} contain unknown basis function coefficients.
 
 Let \eqn{\mu_i = E(y_i)} denote the mean of the \eqn{i}-th response. The unknown function is related to the mean \eqn{\mu_i} such as \deqn{g(\mu_i) = \eta_i} where \eqn{g()} is a known link function. Note that this implies that \eqn{\mu_i = g^{-1}(\eta_i)} given that the link function is assumed to be invertible. 
 
 The penalized likelihood estimation problem has the form
 \deqn{
-- \sum_{i = 1}^n [y_i \theta_i - b(\theta_i)] + n \lambda \gamma' Q \gamma
+- \sum_{i = 1}^n [y_i \xi_i - b(\xi_i)] + n \lambda \alpha' Q \alpha
 }
-where \eqn{\theta_i} is the canonical parameter, \eqn{b()} is a known function that depends on the chosen family, and \eqn{Q} is the penalty matrix. Note that \eqn{\theta_i = g_0(\mu_i)} where \eqn{g_0} is the canonical link function. This implies that \eqn{\theta_i = \eta_i} when the chosen link function is canonical, i.e., when \eqn{g = g_0}.
+where \eqn{\xi_i} is the canonical parameter, \eqn{b()} is a known function that depends on the chosen family, and \eqn{Q} is the penalty matrix. Note that \eqn{\xi_i = g_0(\mu_i)} where \eqn{g_0} is the canonical link function. This implies that \eqn{\xi_i = \eta_i} when the chosen link function is canonical, i.e., when \eqn{g = g_0}.
 }
 \value{
 An object of class "gsm" with components:
@@ -93,8 +101,9 @@ An object of class "gsm" with components:
   \item{se.lp}{the standard errors of the linear predictors.}
   \item{deviance}{up to a constant, minus twice the maximized log-likelihood. Where sensible, the constant is chosen so that a saturated model has deviance zero.}
   \item{cv.crit}{the cross-validation criterion.}
-  \item{df}{the estimated degrees of freedom (Df) for the fit model.}
   \item{nsdf}{the degrees of freedom (Df) for the null space.}
+  \item{df}{the estimated degrees of freedom (Df) for the fit model.}
+  \item{df.residual}{the residual degrees of freedom = \code{nobs - df}}
   \item{r.squared}{the squared correlation between response and fitted values.}
   \item{dispersion}{the estimated dispersion parameter.}
   \item{logLik}{the log-likelihood.}
@@ -102,7 +111,7 @@ An object of class "gsm" with components:
   \item{bic}{Bayesian Information Criterion.}
   \item{spar}{the value of \code{spar} computed or given, i.e., \eqn{s = 1 + \log_{256}(\lambda)/3}}
   \item{lambda}{the value of \eqn{\lambda} corresponding to \code{spar}, i.e., \eqn{\lambda = 256^{3*(s-1)}}.}
-  \item{penalty}{the smoothness penalty \eqn{\gamma' Q \gamma}.}
+  \item{penalty}{the smoothness penalty \eqn{\alpha' Q \alpha}.}
   \item{coefficients}{the basis function coefficients used for the fit model.}
   \item{cov.sqrt}{the square-root of the covariance matrix of \code{coefficients}. Note: \code{tcrossprod(cov.sqrt)} reconstructs the covariance matrix. }
   \item{specs}{a list with information used for prediction purposes:
@@ -222,7 +231,7 @@ If \code{tprk = FALSE}, the three options for the \code{knots} input include:
 \section{Multiple Smooths }{
 Suppose \code{formula = y ~ x1 + x2} so that the model contains additive effects of two predictor variables. 
 
-The \eqn{k}-th predictor's marginal effect can be denoted as \deqn{f_k = X_k \beta_k + Z_k \gamma_k} where \eqn{X_k} is the \eqn{n} by \eqn{m_k} null space basis function matrix, and \eqn{Z_k} is the \eqn{n} by \eqn{r_k} contrast space basis function matrix. 
+The \eqn{k}-th predictor's marginal effect can be denoted as \deqn{f_k = X_k \beta_k + Z_k \alpha_k} where \eqn{X_k} is the \eqn{n} by \eqn{m_k} null space basis function matrix, and \eqn{Z_k} is the \eqn{n} by \eqn{r_k} contrast space basis function matrix. 
 
 If \code{tprk = TRUE}, the null space basis function matrix has the form \eqn{X = [1, X_1, X_2]} and the contrast space basis function matrix has the form \deqn{Z = \theta_1 Z_1 + \theta_2 Z_2} where the \eqn{\theta_k} are the "extra" smoothing parameters. Note that \eqn{Z} is of dimension \eqn{n} by \eqn{r = r_1 = r_2}.
 
@@ -240,21 +249,55 @@ When multiple smooth terms are included in the model, there are smoothing (hyper
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{boot.gsm}} for bootstrapping \code{gsm} objects.
-
-\code{\link{fitted.gsm}} for extracting fitted values from \code{gsm} objects.
-
-\code{\link{model.matrix.gsm}} for constructing model matrix from \code{gsm} objects.
-
-\code{\link{resid.gsm}} for extracting residuals from \code{gsm} objects.
-
-\code{\link{summary.gsm}} for summarizing \code{gsm} objects.
-
-\code{\link{predict.gsm}} for predicting from \code{gsm} objects.
+\bold{Related Modeling Functions}: 
 
 \code{\link{ss}} for fitting a smoothing spline with a single predictor (Gaussian response).
 
-\code{\link{sm}} for fitting smooth models with multiple predictors of mixed types (Gaussian response).
+\code{\link{sm}} for fitting smooth models with multiple predictors of mixed types (Gaussian response). \cr
+
+\bold{S3 Methods and Related Functions for "gsm" Objects}:
+
+\code{\link{boot.gsm}} for bootstrapping \code{gsm} objects.
+
+\code{\link{coef.gsm}} for extracting coefficients from \code{gsm} objects.
+
+\code{\link{cooks.distance.gsm}} for calculating Cook's distances from \code{gsm} objects.
+
+\code{\link{cov.ratio}} for computing covariance ratio from \code{gsm} objects.
+
+\code{\link{deviance.gsm}} for extracting deviance from \code{gsm} objects.
+
+\code{\link{dfbeta.gsm}} for calculating DFBETA from \code{gsm} objects.
+
+\code{\link{dfbetas.gsm}} for calculating DFBETAS from \code{gsm} objects.
+
+\code{\link{diagnostic.plots}} for plotting regression diagnostics from \code{gsm} objects.
+
+\code{\link{family.gsm}} for extracting \code{family} from \code{gsm} objects.
+
+\code{\link{fitted.gsm}} for extracting fitted values from \code{gsm} objects.
+
+\code{\link{hatvalues.gsm}} for extracting leverages from \code{gsm} objects.
+
+\code{\link{model.matrix.gsm}} for constructing model matrix from \code{gsm} objects.
+
+\code{\link{predict.gsm}} for predicting from \code{gsm} objects.
+
+\code{\link{residuals.gsm}} for extracting residuals from \code{gsm} objects.
+
+\code{\link{rstandard.gsm}} for computing standardized residuals from \code{gsm} objects.
+
+\code{\link{rstudent.gsm}} for computing studentized residuals from \code{gsm} objects.
+
+\code{\link{smooth.influence}} for calculating basic influence information from \code{gsm} objects.
+
+\code{\link{smooth.influence.measures}} for convenient display of influential observations from \code{gsm} objects.
+
+\code{\link{summary.gsm}} for summarizing \code{gsm} objects.
+
+\code{\link{vcov.gsm}} for extracting coefficient covariance matrix from \code{gsm} objects.
+
+\code{\link{weights.gsm}} for extracting prior weights from \code{gsm} objects.
 }
 \examples{
 ##########   EXAMPLE 1   ##########

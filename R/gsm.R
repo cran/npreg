@@ -5,7 +5,7 @@ gsm <-
            xrange = NULL, thetas = NULL, mf = NULL){
     # generalized smooth model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2022-03-30
+    # Updated: 2022-04-08
     
     
     #########***#########   CHECKS   #########***#########
@@ -258,3 +258,6 @@ print.gsm <-
       cat("\nBayesian Information Criterion (BIC): ", x$bic,"\n\n")
     }
   } # end print.gsm
+
+# family function
+family.gsm <- function(object, ...) object$family

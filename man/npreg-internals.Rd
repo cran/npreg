@@ -15,8 +15,9 @@
 \alias{check_type}
 \alias{check_type2}
 \alias{df2lambda}
-\alias{fit_sm}
 \alias{fit_gsm}
+\alias{fit_sm}
+\alias{fit_ssi}
 \alias{knot1samp}
 \alias{linkinvd}
 \alias{pred_depe}
@@ -66,6 +67,6 @@
   Internal functions for "npreg" package.
 }
 \details{
-  These functions are not intended to be called by the user.
+  These functions are not necessarily intended to be called by the user.
 }
 \keyword{ internal }

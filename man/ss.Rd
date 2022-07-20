@@ -13,7 +13,7 @@ ss(x, y = NULL, w = NULL, df, spar = NULL, lambda = NULL,
    m = 2L, periodic = FALSE, all.knots = FALSE, nknots = .nknots.smspl, 
    knots = NULL, keep.data = TRUE, df.offset = 0, penalty = 1, 
    control.spar = list(), tol = 1e-6 * IQR(x), bernoulli = TRUE,
-   xmin = NULL, xmax = NULL)
+   xmin = NULL, xmax = NULL, homosced = TRUE, iter.max = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -90,7 +90,12 @@ Minimum x value used to transform predictor scores to [0,1]. If NULL,  \code{xmi
 \item{xmax}{
 Maximum x value used to transform predictor scores to [0,1]. If NULL,  \code{xmax = max(x)}.
 }
-
+\item{homosced}{
+Are error variances homoscedastic? If \code{FALSE}, variance weights are (iteratively?) estimated from the data.
+}
+\item{iter.max}{
+Maximum number of iterations for variance weight estimation. Ignored if \code{homosced = TRUE}.
+}
 }
 \details{
 Inspired by the \code{\link{smooth.spline}} function in R's \bold{stats} package.
@@ -99,20 +104,20 @@ Neither \code{x} nor \code{y} are allowed to containing missing or infinite valu
 
 The \code{x} vector should contain at least \eqn{2m} distinct values. 'Distinct' here is controlled by \code{tol}: values which are regarded as the same are replaced by the first of their values and the corresponding \code{y} and \code{w} are pooled accordingly.
 
-Unless \code{lambda} has been specified instead of \code{spar}, the computational \eqn{\lambda} used (as a function of \code{spar}) is \eqn{\lambda = 256^(3*(spar - 1))}. 
+Unless \code{lambda} has been specified instead of \code{spar}, the computational \eqn{\lambda} used (as a function of \code{spar}) is \eqn{\lambda = 256^{3(s - 1)}}, where \eqn{s = } \code{spar}.
 
 If \code{spar} and \code{lambda} are missing or \code{NULL}, the value of \code{df} is used to determine the degree of smoothing. If \code{df} is missing as well, the specified \code{method} is used to determine \eqn{\lambda}. 
 
-Letting \eqn{f_i = f(x_i)}, the function is represented as \deqn{f = X \beta + Z \gamma} where the basis functions in \eqn{X} span the null space (i.e., functions with \eqn{m}-th derivative of zero), and \eqn{Z} contains the reproducing kernel function of the contrast space evaluated at all combinations of observed data points and knots, i.e., \eqn{Z[i,j] = \rho(x_i, k_j)} where \eqn{\rho} is the kernel function and \eqn{k_j} is the \eqn{j}-th knot. The vectors \eqn{\beta} and \eqn{\gamma} contain unknown basis function coefficients. 
-Letting \eqn{M =  (X, Z)} and \eqn{\theta = (\beta', \gamma')'}, the penalized least squares problem has the form
+Letting \eqn{f_i = f(x_i)}, the function is represented as \deqn{f = X \beta + Z \alpha} where the basis functions in \eqn{X} span the null space (i.e., functions with \eqn{m}-th derivative of zero), and \eqn{Z} contains the reproducing kernel function of the contrast space evaluated at all combinations of observed data points and knots, i.e., \eqn{Z[i,j] = R(x_i, k_j)} where \eqn{R} is the kernel function and \eqn{k_j} is the \eqn{j}-th knot. The vectors \eqn{\beta} and \eqn{\alpha} contain unknown basis function coefficients. 
+Letting \eqn{M =  (X, Z)} and \eqn{\gamma = (\beta', \alpha')'}, the penalized least squares problem has the form
 \deqn{
-(y - M \theta)' W (y - M \theta) + n \lambda \gamma' Q \gamma
+(y - M \gamma)' W (y - M \gamma) + n \lambda \alpha' Q \alpha
 }
-where \eqn{W} is a diagonal matrix containg the weights, and \eqn{Q} is the penalty matrix. Note that \eqn{Q[i,j] = \rho(k_i, k_j)} contains the reproducing kernel function evaluated at all combinations of knots. The optimal coefficients are the solution to 
+where \eqn{W} is a diagonal matrix containg the weights, and \eqn{Q} is the penalty matrix. Note that \eqn{Q[i,j] = R(k_i, k_j)} contains the reproducing kernel function evaluated at all combinations of knots. The optimal coefficients are the solution to 
 \deqn{
-(M' W M + n \lambda P) \theta = M' W y
+(M' W M + n \lambda P) \gamma = M' W y
 }
-where \eqn{P} is the penalty matrix \eqn{Q} augmented with zeros corresponding to the \eqn{\beta} in \eqn{\theta}.
+where \eqn{P} is the penalty matrix \eqn{Q} augmented with zeros corresponding to the \eqn{\beta} in \eqn{\gamma}.
 
 }
 \value{
@@ -128,8 +133,9 @@ An object of class "ss" with components:
   \item{pen.crit}{the penalized criterion, a non-negative number; simply the (weighted) residual sum of squares (RSS).}
   \item{crit}{the criterion value minimized in the underlying \code{df2lambda} function. When \code{df} is provided, the criterion is \eqn{[tr(S_{\lambda}) - df]^2}.}
   \item{df}{equivalent degrees of freedom used.}
+  \item{df.residual}{the residual degrees of freedom = \code{nobs - df}}
   \item{spar}{the value of \code{spar} computed or given, i.e., \eqn{s = 1 + \log_{256}(\lambda)/3}}
-  \item{lambda}{the value of \eqn{\lambda} corresponding to \code{spar}, i.e., \eqn{\lambda = 256^{3*(s-1)}}.}
+  \item{lambda}{the value of \eqn{\lambda} corresponding to \code{spar}, i.e., \eqn{\lambda = 256^{3(s-1)}}.}
   \item{fit}{list for use by \code{\link{predict.ss}}, with components
   \describe{
     \item{n:}{number of observations.}
@@ -152,7 +158,7 @@ An object of class "ss" with components:
   \item{logLik}{log-likelihood (if \code{method} is REML or ML).}
   \item{aic}{Akaike's Information Criterion (if \code{method} is AIC).}
   \item{bic}{Bayesian Information Criterion (if \code{method} is BIC).}
-  \item{penalty}{smoothness penalty \eqn{\gamma' Q \gamma}, which is the integrated squared \eqn{m}-th derivative of the estimated function \eqn{f(x)}.}
+  \item{penalty}{smoothness penalty \eqn{\alpha' Q \alpha}, which is the integrated squared \eqn{m}-th derivative of the estimated function \eqn{f(x)}.}
   \item{method}{smoothing parameter selection method. Will be \code{NULL} if \code{df}, \code{spar}, or \code{lambda} is provided.}
 }
 \references{
@@ -197,23 +203,57 @@ Bayesian Information Criterion (BIC)
 }
 
 \seealso{
+\bold{Related Modeling Functions}: 
+
+\code{\link{sm}} for fitting smooth models with multiple predictors of mixed types (Gaussian response). 
+
+\code{\link{gsm}} for fitting generalized smooth models with multiple predictors of mixed types (non-Gaussian response). \cr
+
+\bold{S3 Methods and Related Functions for "ss" Objects}:
+
 \code{\link{boot.ss}} for bootstrapping \code{ss} objects.
+
+\code{\link{coef.ss}} for extracting coefficients from \code{ss} objects.
+
+\code{\link{cooks.distance.ss}} for calculating Cook's distances from \code{ss} objects.
+
+\code{\link{cov.ratio}} for computing covariance ratio from \code{ss} objects.
+
+\code{\link{deviance.ss}} for extracting deviance from \code{ss} objects.
+
+\code{\link{dfbeta.ss}} for calculating DFBETA from \code{ss} objects.
+
+\code{\link{dfbetas.ss}} for calculating DFBETAS from \code{ss} objects.
+
+\code{\link{diagnostic.plots}} for plotting regression diagnostics from \code{ss} objects.
 
 \code{\link{fitted.ss}} for extracting fitted values from \code{ss} objects.
 
+\code{\link{hatvalues.ss}} for extracting leverages from \code{ss} objects.
+
 \code{\link{model.matrix.ss}} for constructing model matrix from \code{ss} objects.
-
-\code{\link{resid.ss}} for extracting residuals from \code{ss} objects.
-
-\code{\link{summary.ss}} for summarizing \code{ss} objects.
 
 \code{\link{plot.ss}} for plotting predictions from \code{ss} objects.
 
+\code{\link{plot.boot.ss}} for plotting \code{boot.ss} objects.
+
 \code{\link{predict.ss}} for predicting from \code{ss} objects.
 
-\code{\link{sm}} for fitting smooth models with multiple predictors of mixed types (Gaussian response).
+\code{\link{residuals.ss}} for extracting residuals from \code{ss} objects.
 
-\code{\link{gsm}} for fitting generalized smooth models with multiple predictors of mixed types (non-Gaussian response).
+\code{\link{rstandard.ss}} for computing standardized residuals from \code{ss} objects.
+
+\code{\link{rstudent.ss}} for computing studentized residuals from \code{ss} objects.
+
+\code{\link{smooth.influence}} for calculating basic influence information from \code{ss} objects.
+
+\code{\link{smooth.influence.measures}} for convenient display of influential observations from \code{ss} objects.
+
+\code{\link{summary.ss}} for summarizing \code{ss} objects.
+
+\code{\link{vcov.ss}} for extracting coefficient covariance matrix from \code{ss} objects.
+
+\code{\link{weights.ss}} for extracting prior weights from \code{ss} objects.
 }
 \examples{
 # generate data

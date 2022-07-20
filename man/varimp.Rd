@@ -2,18 +2,21 @@
 \alias{varimp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Variable Importance
+Variable Importance Indices
 }
 \description{
 Computes variable importance indices for terms of a smooth model.
 }
 \usage{
-varimp(object, combine = TRUE)
+varimp(object, newdata = NULL, combine = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{
 an object of class "sm" output by the \code{\link{sm}} function or an object of class "gsm" output by the \code{\link{gsm}} function.
+}
+  \item{newdata}{
+the data used for variable importance calculation (if \code{NULL} training data are used).  
 }
   \item{combine}{
 a switch indicating if the parametric and smooth components of the importance should be combined (default) or returned separately.  

@@ -7,14 +7,15 @@ boot.ss <-
            parallel = FALSE, cl = NULL){
     # Bootstrap a fit Smoothing Spline
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Update: 2021-10-29
+    # Update: 2022-07-15
     
     
     
     #########***#########   INITIAL CHECKS   #########***#########
     
     # check 'object'
-    if(class(object) != "ss") stop("Input 'object' must be of class 'ss'")
+    #if(class(object) != "ss") stop("Input 'object' must be of class 'ss'")
+    if(!inherits(object, "ss")) stop("Input 'object' must be of class 'ss'")
     if(is.null(object$data)) stop("Input 'object' has no data: object$data is NULL\n Need to refit model with 'keep.data = TRUE'")
     n <- nrow(object$data)
     xmax <- object$fit$min + object$fit$range
@@ -91,6 +92,12 @@ boot.ss <-
       pbar <- txtProgressBar(min = 1, max = nboot + ifelse(bca, n, 0), style = 3)
     }
     
+    # homosced
+    if(is.null(object$homosced)) object$homosced = TRUE
+    
+    # iter.max
+    if(is.null(object$iter.max)) object$iter.max = 1L
+    
     # create bootstrap distribution
     if(method == "cases"){
       
@@ -114,7 +121,9 @@ boot.ss <-
                  tol = object$tol,
                  bernoulli = object$fit$bernoulli,
                  xmin = object$fit$min,
-                 xmax = xmax)
+                 xmax = xmax,
+                 homosced = object$homosced,
+                 iter.max = object$iter.max)
             }
           )
           statistic(temp.object, ...)
@@ -142,7 +151,9 @@ boot.ss <-
                  tol = object$tol,
                  bernoulli = object$fit$bernoulli,
                  xmin = object$fit$min,
-                 xmax = xmax)
+                 xmax = xmax,
+                 homosced = object$homosced,
+                 iter.max = object$iter.max)
             }
           )
           bootdist[i,] <- statistic(temp.object, ...)
@@ -177,7 +188,9 @@ boot.ss <-
                  tol = object$tol,
                  bernoulli = object$fit$bernoulli,
                  xmin = object$fit$min,
-                 xmax = xmax)
+                 xmax = xmax,
+                 homosced = object$homosced,
+                 iter.max = object$iter.max)
             }
           )
           statistic(temp.object, ...)
@@ -205,7 +218,9 @@ boot.ss <-
                  tol = object$tol,
                  bernoulli = object$fit$bernoulli,
                  xmin = object$fit$min,
-                 xmax = xmax)
+                 xmax = xmax,
+                 homosced = object$homosced,
+                 iter.max = object$iter.max)
             }
           )
           bootdist[i,] <- statistic(temp.object, ...)
@@ -238,7 +253,9 @@ boot.ss <-
                  tol = object$tol,
                  bernoulli = object$fit$bernoulli,
                  xmin = object$fit$min,
-                 xmax = xmax)
+                 xmax = xmax,
+                 homosced = object$homosced,
+                 iter.max = object$iter.max)
             }
           )
           statistic(temp.object, ...)
@@ -265,7 +282,9 @@ boot.ss <-
                  tol = object$tol,
                  bernoulli = object$fit$bernoulli,
                  xmin = object$fit$min,
-                 xmax = xmax)
+                 xmax = xmax,
+                 homosced = object$homosced,
+                 iter.max = object$iter.max)
             }
           )
           bootdist[i,] <- statistic(temp.object, ...)
@@ -309,7 +328,9 @@ boot.ss <-
                  tol = object$tol,
                  bernoulli = object$fit$bernoulli,
                  xmin = object$fit$min,
-                 xmax = xmax)
+                 xmax = xmax,
+                 homosced = object$homosced,
+                 iter.max = object$iter.max)
             }
           )
           statistic(temp.object, ...)
@@ -336,7 +357,9 @@ boot.ss <-
                  tol = object$tol,
                  bernoulli = object$fit$bernoulli,
                  xmin = object$fit$min,
-                 xmax = xmax)
+                 xmax = xmax,
+                 homosced = object$homosced,
+                 iter.max = object$iter.max)
             }
           )
           jackstat[i,] <- statistic(temp.object, ...)
@@ -355,12 +378,13 @@ boot.ss <-
       meanjack <- colMeans(jackstat)
       z0 <- acc <- rep(0, nstat)
       for(j in 1:nstat){
-        z0[j] <- qnorm(mean(bootdist[,j] < t0[j]))
+        pj <- min(max(mean(bootdist[,j] < t0[j]), 1 / nboot), R / nboot)
+        z0[j] <- qnorm(pj)
         acc[j] <- sum((meanjack[j] - jackstat[,j])^3) / (6 * sum((meanjack[j] - jackstat[,j])^2)^(3/2))
         alphas1 <- pnorm(z0[j] + (z0[j] + z1) / (1 - acc[j]*(z0[j] + z1)))
         alphas2 <- pnorm(z0[j] + (z0[j] + z2) / (1 - acc[j]*(z0[j] + z2)))
         probs <- c(alphas1, alphas2)
-        confint[j,] <- quantile(bootdist[,j], probs = probs)
+        confint[j,] <- quantile(bootdist[,j], probs = probs, na.rm = TRUE)
       }
       colnames(confint) <- c("lwr", "upr")
       attr(confint, "level") <- level
@@ -368,7 +392,7 @@ boot.ss <-
     } else {
       
       z0 <- acc <-rep(0, nstat)
-      confint <- t(apply(bootdist, 2, quantile, probs = c(alpha/2, 1 - alpha/2)))
+      confint <- t(apply(bootdist, 2, quantile, probs = c(alpha/2, 1 - alpha/2), na.rm = TRUE))
       colnames(confint) <- c("lwr", "upr")
       attr(confint, "level") <- level
       

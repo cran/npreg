@@ -1,20 +1,20 @@
-\name{fitted}
-\alias{fitted.ss}
-\alias{fitted.sm}
-\alias{fitted.gsm}
+\name{deviance}
+\alias{deviance.gsm}
+\alias{deviance.sm}
+\alias{deviance.ss}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Extract Smooth Model Fitted Values
+Smooth Model Deviance
 }
 \description{
-Extracts the fitted values from a fit smoothing spline (fit by \code{\link{ss}}), smooth model (fit by \code{\link{sm}}), or generalized smooth model (fit by \code{\link{gsm}}).
+Returns the deviance from a fit smoothing spline (fit by \code{\link{ss}}), smooth model (fit by \code{\link{sm}}), or generalized smooth model (fit by \code{\link{gsm}}).
 }
 \usage{
-\method{fitted}{ss}(object, ...)
+\method{deviance}{gsm}(object, ...)
 
-\method{fitted}{sm}(object, ...)
+\method{deviance}{sm}(object, ...)
 
-\method{fitted}{gsm}(object, ...)
+\method{deviance}{ss}(object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,14 +26,12 @@ other arugments (currently ignored)
 }
 }
 \details{
-For objects of class \code{\link{ss}}, fitted values are predicted via \code{predict(object, object$data$x)$y}
+For \code{ss} and \code{sm} objects, the deviance is caculated assuming iid Gaussian errors. 
 
-For objects of class \code{\link{sm}}, fitted values are extracted via \code{object$fitted.values}
-
-For objects of class \code{\link{gsm}}, fitted values are computed via \code{ginv(object$linear.predictors)} where \code{ginv = object$family$linkinv}
+For \code{gsm} objects, the deviance is calculated by summing the squared deviance residuals, which are calculated using \code{family(object)$dev.resid}
 }
 \value{
-Fitted values extracted (or predicted) from \code{object}
+Deviance of the model \code{object}.
 }
 \references{
 Chambers, J. M. and Hastie, T. J. (1992) \emph{Statistical Models in S}. Wadsworth & Brooks/Cole.
@@ -48,31 +46,19 @@ Nathaniel E. Helwig <helwig@umn.edu>
 
 \seealso{
 \code{\link{ss}}, \code{\link{sm}}, \code{\link{gsm}}
+
+\code{\link{fitted.values}} and \code{\link{residuals}}
 }
 \examples{
-# generate data
-set.seed(1)
-n <- 100
-x <- seq(0, 1, length.out = n)
-fx <- 2 + 3 * x + sin(2 * pi * x)
-y <- fx + rnorm(n, sd = 0.5)
-
-# smoothing spline
-mod.ss <- ss(x, y, nknots = 10)
-fit.ss <- fitted(mod.ss)
-
-# smooth model
-mod.sm <- sm(y ~ x, knots = 10)
-fit.sm <- fitted(mod.sm)
-
-# generalized smooth model (family = gaussian)
-mod.gsm <- gsm(y ~ x, knots = 10)
-fit.gsm <- fitted(mod.gsm)
-
-# compare fitted values
-mean((fit.ss - fit.sm)^2)
-mean((fit.ss - fit.gsm)^2)
-mean((fit.sm - fit.gsm)^2)
+## for 'ss' and 'sm' objects, this function is defined as
+function(object, ...){
+    sum(weighted.residuals(object)^2, na.rm = TRUE)
+  }
+  
+## for 'gsm' objects, this function is defined as
+function(object, ...){
+    object$deviance
+  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):

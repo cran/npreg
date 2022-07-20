@@ -1,3 +1,55 @@
+Changes:  ver 1.0-9  (2022-07-20)
+
+
+1) Expanded functionality of residuals.ss and residuals.sm functions
+	* Previously these functions only returned working residuals
+	* Now produces all 5 residuals produced by residuals.lm
+	* The 'working' residuals are still the default type
+
+2) Added df.residual to output of "ss", "sm" and "gsm" functions
+	* df.residual = nobs - df
+	* nsdf = null space df
+	* df = trace of smoothing matrix = nsdf + csdf (contrast space df)
+
+3) Added many standard S3 methods for "ss", "sm" and "gsm" objects
+	* extraction: coef, deviance, fitted, model.matrix, residuals, vcov, weights
+	* inference: boot, predict, and summary
+	* printing methods are also available
+
+4) Added regression diagnostic tools and plotting functions
+	* specific: cooks.distance, covratio, dfbeta, dfbetas, hatvalues
+	* residual: rstandard and rstudent
+	* generics: influence, smooth.influence, smooth.influence.measures
+	* diagnostic.plots() is a analogue of the plot.lm function
+
+5) Iterative estimation of variance weights for ss() objects
+	* homosced = FALSE estimates variance weights from data
+	* iter.max controls maximum number of iteration (default = 1)
+	* variance weights are assumed to be a (smooth) function of x
+
+6) Added "newdata" argument to varimp() function
+	* Previously VARIMP indices were calculated using training data
+	* "newdata" argument can be used to evaluate prediction VARIMP
+	* Default still computes VARIMP using the training data
+
+7) Bug fix for summary.sm() when using tprk = FALSE
+	* Previously resulted in error when testing significance of factor with 2 levels
+	* Error was caused because the design matrix was being treated as a vector
+	* Now uses drop=FALSE to ensure that design matrix is a matrix with 1 column
+
+8) Computational stability improvements for bootstrap functions
+	* Previously could obtain infinite bias correction factors
+	* Now qnorm(0.0001) <= z0 <= qnorm(0.9999) to avoid -Inf/Inf
+	* na.rm is used for all sample quantile evaluations
+
+9) varinf(): variance inflation factors (new function)
+	* Directly computes VIF from fit sm() or gsm() objects
+	* Previously (sqrt of) VIF was only obtainable from summary()
+	* varinf() provides direct access to VIF w/o need to use summary()
+
+
+
+
 Changes:  ver 1.0-8  (2022-03-30)
 
 

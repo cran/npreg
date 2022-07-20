@@ -1,17 +1,17 @@
 varimp <-
-  function(object, combine = TRUE){
+  function(object, newdata = NULL, combine = TRUE){
     # variable importance for class "sm" and "gsm"
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2021-04-13
+    # Updated: 2022-05-24
     
     # calculate variable importance
     if(combine){
-      fit.terms <- scale(predict(object, type = "terms"), scale = FALSE)
+      fit.terms <- scale(predict(object, newdata = newdata, type = "terms"), scale = FALSE)
       fitc <- rowSums(fit.terms)
       pi <- as.numeric(crossprod(fit.terms, fitc) / sum(fitc^2))
       names(pi) <- object$terms
     } else {
-      pred <- predict(object, type = "terms", combine = combine)
+      pred <- predict(object, newdata = newdata, type = "terms", combine = combine)
       fit.terms <- scale(cbind(pred$p, pred$s), scale = FALSE)
       fitc <- rowSums(fit.terms)
       pi <- as.numeric(crossprod(fit.terms, fitc) / sum(fitc^2))
