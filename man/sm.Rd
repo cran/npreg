@@ -165,6 +165,7 @@ Bayesian Information Criterion (BIC)
 The following codes specify the spline types:
 \tabular{ll}{
 par \tab Parametric effect (factor, integer, or numeric). \cr
+ran \tab Random effect/intercept (unordered factor). \cr
 nom \tab Nominal smoothing spline (unordered factor). \cr
 ord \tab Ordinal smoothing spline (ordered factor). \cr
 lin \tab Linear smoothing spline (integer or numeric). \cr
@@ -189,6 +190,8 @@ tps.qui \tab Quintic thin plate spline (\eqn{m = 3}). \cr
 }
 
 For details on the spline kernel functions, see \code{\link{basis.nom}} (nominal), \code{\link{basis.ord}} (ordinal), \code{\link{basis.poly}} (polynomial), \code{\link{basis.sph}} (spherical), and \code{\link{basis.tps}} (thin plate).
+
+Note: "ran" is default for unordered factors when the number of levels is 20 or more, whereas "nom" is the default for unordered factors otherwise. 
 
 }
 
@@ -260,6 +263,8 @@ When multiple smooth terms are included in the model, there are smoothing (hyper
 
 \code{\link{model.matrix.sm}} for constructing model matrix from \code{sm} objects.
 
+\code{\link{plot.sm}} for plotting effects from \code{sm} objects.
+
 \code{\link{predict.sm}} for predicting from \code{sm} objects.
 
 \code{\link{residuals.sm}} for extracting residuals from \code{sm} objects.
@@ -298,6 +303,10 @@ sm.gam <- sm(y ~ x, knots = 10, tprk = FALSE)
 # print both results (note: they are identical)
 sm.ssa
 sm.gam
+
+# plot both results (note: they are identical)
+plot(sm.ssa)
+plot(sm.gam)
 
 # summarize both results (note: they are identical)
 summary(sm.ssa)
@@ -341,6 +350,10 @@ sm.gam <- sm(y ~ x + z, knots = knots, tprk = FALSE)
 sm.ssa
 sm.gam
 
+# plot both results (note: they are identical)
+plot(sm.ssa)
+plot(sm.gam)
+
 # summarize both results (note: they are almost identical)
 summary(sm.ssa)
 summary(sm.gam)
@@ -382,6 +395,10 @@ sm.gam <- sm(y ~ x * z, knots = knots, tprk = FALSE)
 # print both results (note: they are slightly different)
 sm.ssa
 sm.gam
+
+# plot both results (note: they are slightly different)
+plot(sm.ssa)
+plot(sm.gam)
 
 # summarize both results (note: they are slightly different)
 summary(sm.ssa)
@@ -429,6 +446,10 @@ sm.gam <- sm(y ~ x1v + x2v + x3v + x4v, data = data, knots = knots, tprk = FALSE
 # print both results (note: they are slightly different)
 sm.ssa
 sm.gam
+
+# plot both results (note: they are slightly different)
+plot(sm.ssa)
+plot(sm.gam)
 
 # summarize both results (note: they are slightly different)
 summary(sm.ssa)

@@ -2,7 +2,7 @@ check_type <-
   function(mf, type = NULL, xrange = NULL){
     # check and/or guess predictor type
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: 2022-03-09
+    # last updated: 2024-03-27
     
     # predictor types
     # par = parametric (unpenalized)
@@ -11,6 +11,7 @@ check_type <-
     # lin = linear smoothing spline
     # cub = cubic smoothing spline
     # qui = quintic smoothing spline
+    # ran = random intercept (unordered factor)
     # per.lin = periodic linear smoothing spline
     # per.cub = periodic cubic smoothing spline
     # per.qui = periodic quintic smoothing spline
@@ -35,7 +36,7 @@ check_type <-
     xnames <- xynames[2:(nxvar+1L)]
     
     # all possible types
-    alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui",
+    alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "ran",
                   "sph.2", "sph.3", "sph.4", "tps.lin", "tps.cub", "tps.qui", "sph", "per", "tps")
     ss.types <- c("lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "per")
     sp.types <- c("sph.2", "sph.3", "sph.4", "sph")
@@ -62,8 +63,9 @@ check_type <-
         # best guess of rktype
         xc <- class(mf[,kp1])[1]
         if((xc == "factor") | (xc == "character")){
-          rktype[k] <- "nom"
-          xrng[[k]] <- c(1L, nlevels(mf[,kp1]))
+          nlev <- nlevels(mf[,kp1])
+          rktype[k] <- ifelse(nlev < 20, "nom", "ran")
+          xrng[[k]] <- c(1L, nlev)
           xlev[[k]] <- levels(mf[,kp1])
         } else if(xc == "ordered"){
           rktype[k] <- "ord"
@@ -107,6 +109,14 @@ check_type <-
           } else {
             xrng[[k]] <- range(mf[,kp1])
           }
+        } else if(rktype[k] == "ran"){
+          # random intercept
+          if(xc != "factor") {
+            warning(paste("Input 'type' for",xynames[kp1],"is 'ran' but",xynames[kp1],"is not a factor.\n  Using as.factor() to coerce",xynames[kp1],"into a factor."))
+            mf[,kp1] <- as.factor(mf[,kp1])
+          }
+          xrng[[k]] <- c(1L, nlevels(mf[,kp1]))
+          xlev[[k]] <- levels(mf[,kp1])
         } else if(rktype[k] == "nom"){
           # nominal spline requested
           if(xc != "factor") {

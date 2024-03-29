@@ -2,7 +2,7 @@ check_type2 <-
   function(mf, type, xdim, xrng, xlev){
     # check predictor types for new data
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: 2021-07-15
+    # last updated: 2024-03-27
     
     # predictor types
     # par = parameteric (unpenalized)
@@ -11,6 +11,7 @@ check_type2 <-
     # lin = linear smoothing spline
     # cub = cubic smoothing spline
     # qui = quintic smoothing spline
+    # ran = random intercept (unordered factor)
     # per.lin = periodic linear smoothing spline
     # per.cub = periodic cubic smoothing spline
     # per.qui = periodic quintic smoothing spline
@@ -35,7 +36,7 @@ check_type2 <-
     xnames <- xynames[2:(nxvar+1L)]
     
     # all possible types
-    alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui",
+    alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "ran",
                   "sph.2", "sph.3", "sph.4", "tps.lin", "tps.cub", "tps.qui", "sph", "per", "tps")
     ss.types <- c("lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "per")
     sp.types <- c("sph.2", "sph.3", "sph.4", "sph")
@@ -78,6 +79,17 @@ check_type2 <-
           newidx <- match(newlev, xlev[[k]])
           if(any(is.na(newidx))) stop(paste("Input 'newdata' for",xynames[kp1],"contains factor levels not in the observed data."))
         }
+        
+      } else if(type[[k]] == "ran"){
+        
+        # random intercept
+        if(xc != "factor") {
+          warning(paste("Input 'type' for",xynames[kp1],"is 'ran' but",xynames[kp1],"is not a factor.\n  Using as.factor() to coerce",xynames[kp1],"into a factor."))
+          mf[,kp1] <- as.factor(mf[,kp1])
+        }
+        newlev <- levels(mf[,kp1])
+        newidx <- match(newlev, xlev[[k]])
+        if(any(is.na(newidx))) stop(paste("Input 'newdata' for",xynames[kp1],"contains factor levels not in the observed data."))
         
       } else if(type[[k]] == "nom"){
         

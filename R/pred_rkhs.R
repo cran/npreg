@@ -3,14 +3,14 @@ pred_rkhs <-
     # build reproducing kernel Hilbert space components
     # for predicting (i.e., w/o penalty components)
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2021-07-15
+    # Updated: 2023-04-06
     
     ### initializations
     nxvar <- length(x)
     xnames <- names(x)
     
-    ### kernel types
-    alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui",
+    ### kernel types'
+    alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "ran",
                   "sph.2", "sph.3", "sph.4", "tps.lin", "tps.cub", "tps.qui", "sph", "per", "tps")
     ss.types <- c("lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "per")
     sp.types <- c("sph.2", "sph.3", "sph.4", "sph")
@@ -29,12 +29,19 @@ pred_rkhs <-
         # parametric effect
         if(any(class(x[[j]]) == c("factor", "ordered"))){
           jform <- as.formula(paste("~", xnames[j]))
-          Xnull[[j]] <- model.matrix(jform, data = x[[j]])[,-1,drop=FALSE]
-          Qnull[[j]] <- model.matrix(jform, data = knots[[j]])[,-1,drop=FALSE]  
+          Xnull[[j]] <- model.matrix(jform, data = x)[,-1,drop=FALSE]
+          Qnull[[j]] <- model.matrix(jform, data = knots)[,-1,drop=FALSE]  
         } else {
           Xnull[[j]] <- as.matrix(x[[j]])
           Qnull[[j]] <- as.matrix(knots[[j]])
+          colnames(Xnull[[j]]) <- xnames[j]
         }
+        
+      } else if(tj == "ran"){
+        
+        # nominal smoothing spline
+        Xcont[[j]] <- outer(X = factor(x[[j]], levels = xlev[[j]]), Y = knots[[j]], FUN = "==") + 0.0
+        colnames(Xcont[[j]]) <- as.character(knots[[j]])
         
       } else if(tj == "nom"){
         

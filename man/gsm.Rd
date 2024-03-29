@@ -147,6 +147,8 @@ Gu, C. and Wahba, G. (1991). Minimizing GCV/GML scores with multiple smoothing p
 Helwig, N. E. (2020). Multiple and Generalized Nonparametric Regression. In P. Atkinson, S. Delamont, A. Cernat, J. W. Sakshaug, & R. A. Williams (Eds.), SAGE Research Methods Foundations. \doi{10.4135/9781526421036885885}
 
 Helwig, N. E. (2021). Spectrally sparse nonparametric regression via elastic net regularized smoothers. \emph{Journal of Computational and Graphical Statistics, 30}(1), 182-191. \doi{10.1080/10618600.2020.1806855}
+
+Helwig, N. E. (2024). Precise tensor product smoothing via spectral splines. \emph{Stats, }
 }
 \author{
 Nathaniel E. Helwig <helwig@umn.edu>
@@ -183,6 +185,7 @@ Bayesian Information Criterion (BIC)
 The following codes specify the spline types:
 \tabular{ll}{
 par \tab Parametric effect (factor, integer, or numeric). \cr
+ran \tab Random effect/intercept (unordered factor). \cr
 nom \tab Nominal smoothing spline (unordered factor). \cr
 ord \tab Ordinal smoothing spline (ordered factor). \cr
 lin \tab Linear smoothing spline (integer or numeric). \cr
@@ -207,6 +210,8 @@ tps.qui \tab Quintic thin plate spline (\eqn{m = 3}). \cr
 }
 
 For details on the spline kernel functions, see \code{\link{basis.nom}} (nominal), \code{\link{basis.ord}} (ordinal), \code{\link{basis.poly}} (polynomial), \code{\link{basis.sph}} (spherical), and \code{\link{basis.tps}} (thin plate).
+
+Note: "ran" is default for unordered factors when the number of levels is 20 or more, whereas "nom" is the default for unordered factors otherwise. 
 
 }
 
@@ -281,6 +286,8 @@ When multiple smooth terms are included in the model, there are smoothing (hyper
 
 \code{\link{model.matrix.gsm}} for constructing model matrix from \code{gsm} objects.
 
+\code{\link{plot.gsm}} for plotting effects from \code{gsm} objects.
+
 \code{\link{predict.gsm}} for predicting from \code{gsm} objects.
 
 \code{\link{residuals.gsm}} for extracting residuals from \code{gsm} objects.
@@ -312,16 +319,19 @@ fx <- 3 * x + sin(2 * pi * x) - 1.5
 set.seed(1)
 y <- fx + rnorm(n, sd = 1/sqrt(2))
 mod <- gsm(y ~ x, knots = 10)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 
 # compare to result from sm (they are identical)
 mod.sm <- sm(y ~ x, knots = 10)
+plot(mod.sm)
 mean((mod$linear.predictors - mod.sm$fitted.values)^2)
 
 # binomial (no weights)
 set.seed(1)
 y <- rbinom(n = n, size = 1, p = 1 / (1 + exp(-fx)))
 mod <- gsm(y ~ x, family = binomial, knots = 10)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 
 # binomial (w/ weights)
@@ -329,18 +339,21 @@ set.seed(1)
 w <- as.integer(rep(c(10,20,30,40,50), length.out = n))
 y <- rbinom(n = n, size = w, p = 1 / (1 + exp(-fx))) / w
 mod <- gsm(y ~ x, family = binomial, weights = w, knots = 10)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 
 # poisson
 set.seed(1)
 y <- rpois(n = n, lambda = exp(fx))
 mod <- gsm(y ~ x, family = poisson, knots = 10)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 
 # negative binomial (known theta)
 set.seed(1)
 y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
 mod <- gsm(y ~ x, family = NegBin(theta = 1/2), knots = 10)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 mod$family$theta    # fixed theta
 
@@ -348,6 +361,7 @@ mod$family$theta    # fixed theta
 set.seed(1)
 y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
 mod <- gsm(y ~ x, family = NegBin, knots = 10)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 mod$family$theta    # estimated theta
 
@@ -355,12 +369,14 @@ mod$family$theta    # estimated theta
 set.seed(1)
 y <- rgamma(n = n, shape = 2, scale = (1 / (2 + fx)) / 2)
 mod <- gsm(y ~ x, family = Gamma, knots = 10)
+plot(mod)
 mean((mod$linear.predictors - fx - 2)^2)
 
 # inverse.gaussian (not run; requires statmod)
 ##set.seed(1)
 ##y <- statmod::rinvgauss(n = n, mean = sqrt(1 / (2 + fx)), shape = 2)
 ##mod <- gsm(y ~ x, family = inverse.gaussian, knots = 10)
+##plot(mod)
 ##mean((mod$linear.predictors - fx - 2)^2)
 
 
@@ -389,16 +405,19 @@ knots <- list(x = quantile(x, probs = probs),
 set.seed(1)
 y <- fx + rnorm(n, sd = 1/sqrt(2))
 mod <- gsm(y ~ x + z, knots = knots)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 
 # compare to result from sm (they are identical)
 mod.sm <- sm(y ~ x + z, knots = knots)
+plot(mod.sm)
 mean((mod$linear.predictors - mod.sm$fitted.values)^2)
 
 # binomial (no weights)
 set.seed(1)
 y <- rbinom(n = n, size = 1, p = 1 / (1 + exp(-fx)))
 mod <- gsm(y ~ x + z, family = binomial, knots = knots)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 
 # binomial (w/ weights)
@@ -406,18 +425,21 @@ set.seed(1)
 w <- as.integer(rep(c(10,20,30,40,50), length.out = n))
 y <- rbinom(n = n, size = w, p = 1 / (1 + exp(-fx))) / w
 mod <- gsm(y ~ x + z, family = binomial, weights = w, knots = knots)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 
 # poisson
 set.seed(1)
 y <- rpois(n = n, lambda = exp(fx))
 mod <- gsm(y ~ x + z, family = poisson, knots = knots)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 
 # negative binomial (known theta)
 set.seed(1)
 y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
 mod <- gsm(y ~ x + z, family = NegBin(theta = 1/2), knots = knots)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 mod$family$theta    # fixed theta
 
@@ -425,6 +447,7 @@ mod$family$theta    # fixed theta
 set.seed(1)
 y <- rnbinom(n = n, size = 1/2, mu = exp(fx))
 mod <- gsm(y ~ x + z, family = NegBin, knots = knots)
+plot(mod)
 mean((mod$linear.predictors - fx)^2)
 mod$family$theta    # estimated theta
 
@@ -432,12 +455,14 @@ mod$family$theta    # estimated theta
 set.seed(1)
 y <- rgamma(n = n, shape = 2, scale = (1 / (4 + fx)) / 2)
 mod <- gsm(y ~ x + z, family = Gamma, knots = knots)
+plot(mod)
 mean((mod$linear.predictors - fx - 4)^2)
 
 # inverse.gaussian (not run; requires statmod)
 ##set.seed(1)
 ##y <- statmod::rinvgauss(n = n, mean = sqrt(1 / (4 + fx)), shape = 2)
 ##mod <- gsm(y ~ x + z, family = inverse.gaussian, knots = knots)
+##plot(mod)
 ##mean((mod$linear.predictors - fx - 4)^2)
 
 }

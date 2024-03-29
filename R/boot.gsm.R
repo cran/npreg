@@ -348,9 +348,9 @@ rexpfam <- function(object){
     shape <- wts / object$dispersion
     return(rgamma(n = n, shape = shape, rate = shape / mu))
   } else if(object$family$family == "inverse.gaussian"){
-    if (!requireNamespace("SuppDists", quietly = TRUE)) 
-      stop("need the 'SuppDists' package to simulate from 'inverse.gaussian' family")
+    if (!requireNamespace("statmod", quietly = TRUE)) 
+      stop("need the 'statmod' package to simulate from 'inverse.gaussian' family")
     if (any(wts != 1)) message("using weights as inverse variances")
-    return(SuppDists::rinvGauss(n = n, nu = mu, lambda = wts / object$dispersion))
+    return(statmod::rinvgauss(n = n, mean = mu, shape = wts / object$dispersion))
   }
 }

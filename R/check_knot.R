@@ -2,7 +2,7 @@ check_knot <-
   function(mf, type, xrng, xlev, tprk, knots = NULL){
     # check and/or sample spline knots
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: 2021-07-15
+    # last updated: 2023-04-06
     
     ### initializations
     mt <- attr(mf, "terms")                 # mt contains model info and terms 
@@ -100,7 +100,13 @@ check_knot <-
             ncheck <- ifelse(is.matrix(knotsj), nrow(knotsj), length(knotsj))
             if(ncheck != nknots) stop("When 'tprk' is TRUE and a list of knots values is provided,\n the same number of knots is required for each predictor.")
             kclass <- class(knotsj)[1]
-            if(type[j] == "nom"){
+            if(type[j] == "ran"){
+              if(kclass != "factor"){
+                knotsj <- factor(knotsj, levels = xlev[[j]])
+                if(any(is.na(knotsj))) stop(paste("Input knots for",xnames[j],"contain factor levels not present in the data."))
+              }
+              if(!identical(xlev[[j]], levels(knotsj))) stop(paste("Input 'knots' for",xnames[j],"do not match the levels of the corresponding variable."))
+            } else if(type[j] == "nom"){
               if(kclass != "factor"){
                 #warning(paste0("Input 'type' for ",xnames[j]," is 'nom' but input knots for ",xnames[j]," are not a factor.\n  Using factor() to coerce knots$",xnames[j]," into a factor."))
                 knotsj <- factor(knotsj, levels = xlev[[j]])
@@ -239,7 +245,13 @@ check_knot <-
             } else {
               # provided a vector/matrix (giving knots values)
               kclass <- class(knotsj)[1]
-              if(type[j] == "nom"){
+              if(type[j] == "ran"){
+                if(kclass != "factor"){
+                  knotsj <- factor(knotsj, levels = xlev[[j]])
+                  if(any(is.na(knotsj))) stop(paste("Input knots for",xnames[j],"contain factor levels not present in the data."))
+                }
+                if(!identical(xlev[[j]], levels(knotsj))) stop(paste("Input 'knots' for",xnames[j],"do not match the levels of the corresponding variable."))
+              } else if(type[j] == "nom"){
                 if(kclass != "factor"){
                   #warning(paste0("Input 'type' for ",xnames[j]," is 'nom' but input knots for ",xnames[j]," are not a factor.\n  Using factor() to coerce knots$",xnames[j]," into a factor."))
                   knotsj <- factor(knotsj, levels = xlev[[j]])

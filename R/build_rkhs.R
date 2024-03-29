@@ -2,14 +2,14 @@ build_rkhs <-
   function(x, type, knots, xrng, xlev){
     # build reproducing kernel Hilbert space components
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # last updated: 2022-03-15
+    # last updated: 2023-04-06
     
     ### initializations
     nxvar <- length(x)
     xnames <- names(x)
     
     ### kernel types
-    alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui",
+    alltypes <- c("par", "nom", "ord", "lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "ran",
                   "sph.2", "sph.3", "sph.4", "tps.lin", "tps.cub", "tps.qui", "sph", "per", "tps")
     ss.types <- c("lin", "cub", "qui", "per.lin", "per.cub", "per.qui", "per")
     sp.types <- c("sph.2", "sph.3", "sph.4", "sph")
@@ -34,7 +34,15 @@ build_rkhs <-
         } else {
           Xnull[[j]] <- as.matrix(x[[j]])
           Qnull[[j]] <- as.matrix(knots[[j]])
+          colnames(Xnull[[j]]) <- xnames[j]
         }
+        
+      } else if(tj == "ran"){
+        
+        # random intercept
+        Xcont[[j]] <- outer(x[[j]], knots[[j]], FUN = "==") + 0.0
+        colnames(Xcont[[j]]) <- as.character(knots[[j]])
+        Qcont[[j]] <- diag(length(knots[[j]]))
         
       } else if(tj == "nom"){
         
