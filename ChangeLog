@@ -1,3 +1,14 @@
+Changes:  ver 1.1.1  (2026-03-06)
+
+1) Bug fix in gsm() when using GCV (default) or GACV tuning criteria
+	* Previously there was a typo in the GCV and GACV evaluation
+	* Only affected non-Gaussian responses using GCV or GACV tuning
+	* Thanks to Kelly Duffy for helping identify this issue
+
+2) Updates to package documentation
+
+
+
 Changes:  ver 1.1.0  (2024-03-29)
 
 

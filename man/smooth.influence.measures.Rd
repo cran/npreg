@@ -12,6 +12,9 @@
 \alias{dfbetas.ss}
 \alias{dfbetas.sm}
 \alias{dfbetas.gsm}
+\alias{dffits.ss}
+\alias{dffits.sm}
+\alias{dffits.gsm}
 \alias{cov.ratio}
 \alias{cooks.distance.ss}
 \alias{cooks.distance.sm}
@@ -49,6 +52,10 @@ smooth.influence.measures(model, infl = smooth.influence(model))
 \method{dfbetas}{ss}(model, infl = smooth.influence(model, do.coef = TRUE), ...)
 \method{dfbetas}{sm}(model, infl = smooth.influence(model, do.coef = TRUE), ...)
 \method{dfbetas}{gsm}(model, infl = smooth.influence(model, do.coef = TRUE), ...)
+
+\method{dffits}{ss}(model, infl = smooth.influence(model), res = weighted.residuals(model), ...)
+\method{dffits}{sm}(model, infl = smooth.influence(model), res = weighted.residuals(model), ...)
+\method{dffits}{gsm}(model, infl = smooth.influence(model), res = weighted.residuals(model), ...)
 
 cov.ratio(model, infl = smooth.influence(model, do.coef = FALSE),
           res = weighted.residuals(model))

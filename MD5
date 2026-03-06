@@ -1,6 +1,6 @@
-c5d512f92cbed7b1eee498584a264c42 *ChangeLog
-dba357b407eb39ce538e4404348414bd *DESCRIPTION
-7b641bb13a11ffd9eb4711a8fa90b827 *NAMESPACE
+0668f0df0738b8444238621445f89b4b *ChangeLog
+4bbb0b1775f683deda75095e441c4eaf *DESCRIPTION
+4d133a0e54fc21434d5cefc2c40c5d6a *NAMESPACE
 15b50d5904df3e91c1f53f618a415cfb *R/NegBin.R
 47b8761ba31a89edfa08408398ec0dcf *R/basis.R
 b1a424e48b436c489e2a33930858de0b *R/basis.nom.R
@@ -29,8 +29,9 @@ f62044c5ce5188147524c1d68acce00e *R/cov.ratio.R
 13e0bb203bddda4a64f4e3a0be802c89 *R/deviance.R
 a66883441a1f517b784e700eb84fdf5d *R/dfbeta.R
 c3aabbda98df8ba68284304548748e25 *R/dfbetas.R
+98f767165ae6208f283d3fa15cd93eb3 *R/dffits.R
 924dcfbf55eba7d03f5525cfb0cec6b1 *R/diagnostic.plots.R
-e57110afa3de5837567b57811a098e7e *R/fit_gsm.R
+9d718d71614396f39a8797cd2c669f40 *R/fit_gsm.R
 fca29cf5a85fb08a2891952224261004 *R/fit_sm.R
 186838942180eb97a86f0703e6761147 *R/fit_ssi.R
 c6af5a4405fe03e6b437f3fcec8dde1f *R/fitted.R
@@ -80,7 +81,7 @@ b4dd5dafec65d78d8bbc15d529120bfe *R/wtd.quantile.R
 42b082ec27013e5538293582d089ce25 *R/wtd.sd.R
 dcd68488af315b61aaedc75c0e5535f7 *R/wtd.var.R
 affc37f2e9aa5550032e590d8555e9ca *R/zzz.R
-20c8d3f97d93e2e318a22508275b5a02 *build/partial.rdb
+76e123f5dcc8dee07678412adc0a2a84 *build/partial.rdb
 926b9c4ac8058444147bf25dcb55bd15 *man/NegBin.Rd
 4b0685f2badb39ddcfedbeca7999b793 *man/StartupMessage.Rd
 483161330f32528762363a50951c6084 *man/bin.sample.Rd
@@ -109,7 +110,7 @@ f437acd021f2ca4f4e3b2593b7eccdbd *man/plot.sm.Rd
 acc63dbc1809f5f87b188376bab6e0b9 *man/residuals.Rd
 715f0be827a442fee3f48302e17b1314 *man/sm.Rd
 0aab433d70c57286be6da8f4c7f1b0ce *man/smooth.influence.Rd
-b62efa4a5e199f8805d5398d3f1237d0 *man/smooth.influence.measures.Rd
+10179436bb9d525deca2f30e08050c19 *man/smooth.influence.measures.Rd
 1e5a944e4784269abddc58b9c163670a *man/spherical.Rd
 570d02e3e9ed18ad3e9d94fa385444c8 *man/ss.Rd
 edb14a42256722ca1d82a132176eec0b *man/summary.Rd

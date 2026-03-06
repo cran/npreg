@@ -4,7 +4,7 @@ fit_gsm <-
            family = check_family(gaussian)){
     # fit generalized semiparametric model
     # Nathaniel E. Helwig (helwig@umn.edu)
-    # Updated: 2022-05-03
+    # Updated: 2024-04-04
     
     
     #########***#########   INITIALIZATIONS   #########***#########
@@ -378,7 +378,7 @@ tune.gsm <-
     
     # define loss value
     if(method == "GCV"){
-      etacv <- (eta - mean(lev) * yp * vsqrt) / (1 - df/nobs)
+      etacv <- (eta - (df/nobs) * yp / vsqrt) / (1 - df/nobs)
       mucv <- family$linkinv(etacv)
       canpar <- family$canpar(mucv)
       cumfun <- family$cumulant(mucv)
@@ -391,7 +391,7 @@ tune.gsm <-
       cumfun <- family$cumulant(mucv)
       val <- -mean(y * canpar - cumfun)
     } else if(method == "GACV"){
-      etacv <- (eta - mean(lev) * yp * vsqrt) / (1 - df/nobs)
+      etacv <- (eta - (df/nobs) * yp / vsqrt) / (1 - df/nobs)
       mucv <- family$linkinv(etacv)
       canpar <- family$canpar(mucv)
       cumfun <- family$cumulant(mu)
